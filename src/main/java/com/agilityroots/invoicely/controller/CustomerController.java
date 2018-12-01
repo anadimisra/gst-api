@@ -101,21 +101,13 @@ public class CustomerController {
 		future.addCallback(new ListenableFutureCallback<Page<Customer>>() {
 
 			@Override
-			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@SuppressWarnings({ "unchecked" })
 			public void onSuccess(Page<Customer> result) {
 				Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
 						"self");
-				if (result.getContent().isEmpty())
-					response.setResult(ResponseEntity.ok(new Resources(EMPTY_RESOURCE_LIST)));
-				else {
-					LOGGER.debug("Returning page {} of size {}", result.getNumber(), result.getSize());
-					List<Resource<Customer>> customers = new ArrayList<>();
-					for (Customer customer : result) {
-						customers.add(new Resource<Customer>(customer, getEntityLinks(request)));
-					}
-					Resources<Resource<Customer>> resources = (Resources<Resource<Customer>>) entitiesToResources(assembler, result, Optional.of(rootLink));
-					response.setResult(ResponseEntity.ok(resources));
-				}
+				Resources<Resource<Customer>> resources = (Resources<Resource<Customer>>) entitiesToResources(assembler,
+						result, Optional.of(rootLink));
+				response.setResult(ResponseEntity.ok(resources));
 			}
 
 			@Override

@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.springframework.hateoas.Identifiable;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Contact extends AuditableEntity implements Serializable {
+public class Contact extends AuditableEntity implements Identifiable<Long>, Serializable {
 
 	private static final long serialVersionUID = -7756870986677314517L;
 

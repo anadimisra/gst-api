@@ -7,8 +7,9 @@ package com.agilityroots.invoicely.resource.assembler;
 
 import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Component;
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.*;
+
 import com.agilityroots.invoicely.controller.CustomerController;
+import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 
 /**
@@ -16,9 +17,17 @@ import com.agilityroots.invoicely.entity.Customer;
  *
  */
 @Component
-public class CustomerResourceAssember extends SimpleIdentifiableResourceAssembler<Customer>{
+public class CustomerResourceAssember extends SimpleIdentifiableResourceAssembler<Customer> {
 
 	public CustomerResourceAssember() {
 		super(CustomerController.class);
+	}
+
+	@Override
+	protected void addLinks(Resource<Customer> resource) {
+		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
+		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("customer"));
+		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+				.slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
 	}
 }
