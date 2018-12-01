@@ -7,6 +7,7 @@ package com.agilityroots.invoicely.entity;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
+import javax.validation.constraints.NotNull;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,15 +21,17 @@ import lombok.Setter;
 @Setter
 @MappedSuperclass
 @NoArgsConstructor
-public class Organisation extends AuditableModel {
+public abstract class Organisation extends AuditableEntity {
 
-	@Column(unique = true, length = 50)
+	@NotNull(message = "Cannot save customer without registered name")
+	@Column(unique = true, length = 50, nullable = false)
 	private String name;
 
-	@Column(unique = true, length = 10, updatable = false)
+	@NotNull(message = "PAN is mandatory while adding a new Customer")
+	@Column(unique = true, length = 10, updatable = false, nullable = false)
 	private String pan;
 
-	@Column(name = "vat_tin", length = 11)
+	@Column(length = 11)
 	private String vatTin;
 
 }

@@ -39,7 +39,7 @@ import lombok.Setter;
 		@Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
 		@Index(name = "due_date_index", columnList = "dueDate", unique = false),
 		@Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false) })
-public class Invoice extends AuditableModel implements Serializable {
+public class Invoice extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = 1560474818107754225L;
 

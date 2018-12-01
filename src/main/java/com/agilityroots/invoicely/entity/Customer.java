@@ -6,6 +6,7 @@
 package com.agilityroots.invoicely.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -14,14 +15,21 @@ import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
+import org.springframework.hateoas.Identifiable;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
@@ -29,9 +37,14 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Table(indexes = { @Index(name = "customer_name_index", columnList = "name", unique = false) })
-public class Customer extends Organisation implements Serializable {
+@NamedEntityGraphs({
+		@NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
+		@NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")),
+		@NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
+public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
 	private static final long serialVersionUID = 8101819808147191270L;
 
@@ -51,10 +64,6 @@ public class Customer extends Organisation implements Serializable {
 			currecny = "INR";
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "customer_branches", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
-	private List<Branch> branches;
-
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
 	private Contact contact;
@@ -62,5 +71,9 @@ public class Customer extends Organisation implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
 	private List<Invoice> invoices;
+
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumn(name = "customer_id", referencedColumnName = "id")
+	private List<Branch> branches = new ArrayList<Branch>();
 
 }

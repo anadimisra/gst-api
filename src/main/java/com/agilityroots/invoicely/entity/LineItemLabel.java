@@ -26,7 +26,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class LineItemLabel extends AuditableModel implements Serializable {
+public class LineItemLabel extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class PaymentTerm extends AuditableModel implements Serializable {
+public class PaymentTerm extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -9205180346170113156L;
 

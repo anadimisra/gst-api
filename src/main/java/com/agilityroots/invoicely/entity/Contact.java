@@ -10,9 +10,12 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
@@ -20,20 +23,48 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
-public class Contact extends AuditableModel implements Serializable {
+public class Contact extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -7756870986677314517L;
 
-	@Column(nullable = false, length = 50)
+	@Column(nullable = false, length = 50, updatable = false)
 	private String name;
 
-	@Column(unique = true, length = 50)
+	@Column(nullable = false, length = 50, updatable = false)
 	private String email;
 
-	@Column(length = 10)
+	@Column(length = 10, updatable = false)
 	private String phone;
 
-	@Column(unique = true, length = 10)
-	private String mobile;
+	@Override
+	public int hashCode() {
+
+		HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+		hashCodeBuilder.append(name).append(email);
+		return hashCodeBuilder.hashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Contact other = (Contact) obj;
+		if (email == null) {
+			if (other.getEmail() != null)
+				return false;
+		} else if (!email.equals(other.getEmail()))
+			return false;
+		if (name == null) {
+			if (other.getName() != null)
+				return false;
+		} else if (!name.equals(other.getName()))
+			return false;
+		return true;
+	}
 }

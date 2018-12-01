@@ -12,12 +12,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
@@ -26,6 +26,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 public class Company extends Organisation implements Serializable {
 
@@ -38,7 +39,7 @@ public class Company extends Organisation implements Serializable {
 	private String tan;
 
 	@OneToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "company_branches", joinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
+	@JoinColumn(name = "owner_id", referencedColumnName = "id")
 	private List<Branch> branches;
 
 }

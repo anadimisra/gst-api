@@ -26,7 +26,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "line_items", indexes = {
 		@Index(name = "invoice_line_items_item_index", columnList = "item", unique = false) })
-public class LineItem extends AuditableModel implements Serializable {
+public class LineItem extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -977449988990379565L;
 

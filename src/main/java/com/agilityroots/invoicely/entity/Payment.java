@@ -24,12 +24,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class Payment extends AuditableModel implements Serializable {
+public class Payment extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = 3584499907096911054L;
-
-	@Column(name = "invoice_id")
-	private Long invoiceId;
 
 	@Temporal(TemporalType.DATE)
 	@Column(nullable = false)

@@ -1,5 +1,5 @@
 /**
- *  19-Oct-2018 AuditableModel.java
+ *  19-Oct-2018 AuditableEntity.java
  *  data-api
  *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
@@ -29,27 +29,36 @@ import lombok.Setter;
 /**
  * @author anadi
  */
-@MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
 @Setter
 @Getter
-public class AuditableModel {
+@MappedSuperclass
+@EntityListeners(AuditingEntityListener.class)
+public class AuditableEntity {
 
 	@Id
+	@JsonIgnore
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(nullable = false, updatable = false)
-	@JsonIgnore @CreatedDate
+	@JsonIgnore
+	@CreatedDate
 	private Date createdAt;
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(nullable = false)
-	@JsonIgnore @LastModifiedDate
+	@JsonIgnore
+	@LastModifiedDate
 	private Date updatedAt;
 
-	@JsonIgnore @Version
+	@JsonIgnore
+	@Version
 	private Integer version;
-	
+
+	@Override
+	public int hashCode() {
+		return 71;
+	}
+
 }

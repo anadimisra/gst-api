@@ -26,7 +26,7 @@ import lombok.Setter;
 @Table(indexes = { @Index(name = "item_names_index", columnList = "name", unique = false),
 		@Index(name = "item_hsn_index", columnList = "hsn", unique = false),
 		@Index(name = "item_sac_index", columnList = "sac", unique = false) })
-public class Item extends AuditableModel implements Serializable {
+public class Item extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -4121755316741852665L;
 

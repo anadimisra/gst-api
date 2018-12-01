@@ -21,7 +21,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class StateGSTCode extends AuditableModel implements Serializable {
+public class StateGSTCode extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -2862330986413643014L;
 

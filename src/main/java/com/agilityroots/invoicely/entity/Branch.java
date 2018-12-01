@@ -6,6 +6,7 @@
 package com.agilityroots.invoicely.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,9 +17,12 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.NaturalId;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
@@ -27,16 +31,18 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Table(indexes = { @Index(name = "branch_name_index", columnList = "branchName", unique = false) })
-public class Branch extends AuditableModel implements Serializable {
+public class Branch extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -8841725432779534218L;
 
 	@Column(length = 25)
 	private String branchName;
 
-	@Column(length = 15, unique = true)
+	@NaturalId
+	@Column(length = 15)
 	private String gstin;
 
 	@Column(length = 11, nullable = true)
@@ -44,7 +50,8 @@ public class Branch extends AuditableModel implements Serializable {
 
 	private Address address;
 
-	private Boolean sez;
+	@Column(nullable = false, updatable = false)
+	private Boolean sez = Boolean.FALSE;
 
 	public Boolean isSez() {
 		return sez;
@@ -53,5 +60,27 @@ public class Branch extends AuditableModel implements Serializable {
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinTable(name = "branch_contact", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
 	private Contact contact;
+
+	@Override
+	public int hashCode() {
+		return Objects.hashCode(gstin);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Branch other = (Branch) obj;
+		if (gstin == null) {
+			if (other.getGstin() != null)
+				return false;
+		} else if (!gstin.equals(other.getGstin()))
+			return false;
+		return true;
+	}
 
 }
