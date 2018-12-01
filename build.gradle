@@ -19,8 +19,20 @@ group = 'com.agilityroots.invoicely'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 1.8
 
+dependencyManagement {
+     imports {
+          mavenBom "io.projectreactor:reactor-bom:Bismuth-RELEASE"
+     }
+}
+
 repositories {
 	mavenCentral()
+	maven{
+		url "https://repo.spring.io/libs-release"
+	}
+	maven{
+		url "https://repo.spring.io/libs-snapshot"
+	}
 }
 
 eclipse {
@@ -38,6 +50,9 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-data-jpa")
     compile("org.springframework.boot:spring-boot-starter-data-rest")
     compile("org.springframework.data:spring-data-rest-hal-browser")
+    compile("io.projectreactor:reactor-core")
+    compile("org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT")
+    compile("io.r2dbc:r2dbc-postgresql:1.0.0.M5")
 	runtime("com.h2database:h2")
 	runtime("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.7")
 	
@@ -48,6 +63,7 @@ dependencies {
 	testCompile("org.javalite:javalite-common:2.2")
 	testCompile("io.cucumber:cucumber-java8:4.0.0")
     testCompile("io.cucumber:cucumber-junit:4.0.0")
+    testCompile("io.cucumber:cucumber-spring:4.0.0")
     testCompile("io.rest-assured:rest-assured:3.2.0")
     testCompile("com.github.javafaker:javafaker:0.16")
 }

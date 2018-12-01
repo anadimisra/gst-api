@@ -9,6 +9,8 @@ import java.util.List;
 
 import javax.persistence.LockModeType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
@@ -24,7 +26,6 @@ import com.agilityroots.invoicely.entity.Branch;
 /**
  * @author anadi
  */
-
 @RepositoryRestResource(path = "branches", collectionResourceRel = "branches")
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 
@@ -32,7 +33,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@RestResource(path = "name", rel = "findbyname")
-	ListenableFuture<Branch> findByBranchName(@Param("branchName") String branchName);
+	ListenableFuture<Page<Branch>> findByBranchNameLike(@Param("branchName") String branchName, Pageable pageable);
 
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)
@@ -50,7 +51,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@RestResource(path = "gstin", rel = "findbygstin")
-	ListenableFuture<List<Branch>> findByGstinLike(@Param("gstin") String gstin);
+	ListenableFuture<Page<Branch>> findByGstinLike(@Param("gstin") String gstin, Pageable pageable);
 
 	@Override
 	@RestResource(exported = false)

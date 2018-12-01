@@ -5,10 +5,9 @@
  */
 package com.agilityroots.invoicely;
 
-import java.util.concurrent.Executor;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -20,14 +19,14 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 public class DataApiAsyncConfiguration {
 
-	@Bean(name = "taskExecutor")
-	public Executor webAsyncExecutor() {
+	@Bean(name = "webExecutor")
+	public AsyncTaskExecutor webAsyncExecutor() {
 
 		ThreadPoolTaskExecutor webExecutor = new ThreadPoolTaskExecutor();
 		webExecutor.setCorePoolSize(5);
 		webExecutor.setMaxPoolSize(20);
 		webExecutor.setQueueCapacity(100);
-		webExecutor.setThreadNamePrefix("ASThread-");
+		webExecutor.setThreadNamePrefix("ApiPool-");
 		webExecutor.initialize();
 		return webExecutor;
 	}
