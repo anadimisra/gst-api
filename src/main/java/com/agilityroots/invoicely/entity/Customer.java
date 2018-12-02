@@ -21,7 +21,6 @@ import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 
 import org.springframework.hateoas.Identifiable;
@@ -49,20 +48,12 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
 	private static final long serialVersionUID = 8101819808147191270L;
 
 	@Column(nullable = false, length = 3)
-	private String currecny;
+	private String currecny = new String("INR");
 
 	private Double tds = 0.10;
 
 	@Column(updatable = false, length = 3)
-	private String invoicePrefix;
-
-	@PrePersist
-	public void setDefaultValues() {
-		if (null == invoicePrefix)
-			invoicePrefix = "INV";
-		if (null == currecny)
-			currecny = "INR";
-	}
+	private String invoicePrefix = new String("INV");
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
