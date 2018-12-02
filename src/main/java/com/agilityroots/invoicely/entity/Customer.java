@@ -22,6 +22,7 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import org.springframework.hateoas.Identifiable;
 
@@ -47,12 +48,14 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
 
 	private static final long serialVersionUID = 8101819808147191270L;
 
-	@Column(nullable = false, length = 3)
+	@NotEmpty(message = "Cannot save customer without billing currency.")
+	@Column(nullable = false, length = 3, updatable = false)
 	private String currecny = new String("INR");
 
 	private Double tds = 0.10;
 
-	@Column(updatable = false, length = 3)
+	@NotEmpty(message = "Cannot save customer without invoice prefix.")
+	@Column(updatable = false, length = 3, nullable = false)
 	private String invoicePrefix = new String("INV");
 
 	@OneToOne(fetch = FetchType.LAZY)

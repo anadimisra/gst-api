@@ -9,6 +9,7 @@ import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Component;
 
 import com.agilityroots.invoicely.controller.CustomerController;
+import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
@@ -31,7 +32,7 @@ public class CustomerResourceAssember extends SimpleIdentifiableResourceAssemble
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
 				.slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).withRel("branches"));
+				.slash(getRelProvider().getCollectionResourceRelFor(Branch.class)).withRel("branches"));
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
 				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).withRel("invoices"));
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())

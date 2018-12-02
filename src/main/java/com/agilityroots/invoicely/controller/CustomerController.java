@@ -28,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.rest.webmvc.PersistentEntityResourceAssembler;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
@@ -47,8 +46,10 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -56,6 +57,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
@@ -76,6 +78,9 @@ public class CustomerController {
 
 	@Autowired
 	private InvoiceRepository invoiceRepository;
+
+	@Autowired
+	private BranchRepository branchRepository;
 
 	@Autowired
 	private Environment environment;
@@ -164,7 +169,7 @@ public class CustomerController {
 
 	@GetMapping("/customers/{id}")
 	public DeferredResult<ResponseEntity<ResourceSupport>> getCustomer(@PathVariable Long id,
-			HttpServletRequest request, PersistentEntityResourceAssembler assembler) {
+			HttpServletRequest request) {
 
 		DeferredResult<ResponseEntity<ResourceSupport>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
@@ -197,6 +202,12 @@ public class CustomerController {
 		});
 
 		return response;
+	}
+	
+	@DeleteMapping("/customers")
+	public CompletableFuture<ResponseEntity<Object>> delete() {
+		return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+				.header(HttpHeaders.ALLOW, "GET,POST,PUT,PATCH,HEAD").build());
 	}
 
 	@GetMapping("/customers/{id}/invoices")
@@ -397,10 +408,102 @@ public class CustomerController {
 		return response;
 	}
 
-	@DeleteMapping("/customers")
-	public CompletableFuture<ResponseEntity<Object>> delete() {
-		return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-				.header(HttpHeaders.ALLOW, "GET,POST,PUT,PATCH,HEAD").build());
+	@PostMapping("/customers/{id}/branches")
+	public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id, HttpServletRequest request,
+			@Valid @RequestBody Branch branch) {
+		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+		response.onTimeout(() -> response
+				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+		response.onError((Throwable t) -> {
+			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+		});
+
+		ListenableFuture<Customer> future = customerRepository.findEagerFetchBranchesById(id);
+		future.addCallback(new ListenableFutureCallback<Customer>() {
+
+			@Override
+			public void onSuccess(Customer customer) {
+				Branch saved = branchRepository.saveAndFlush(branch);
+				List<Branch> branches = new ArrayList<>();
+				branches.addAll(customer.getBranches());
+				branches.add(saved);
+				customer.setBranches(branches);
+				customerRepository.saveAndFlush(customer);
+				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
+						.buildAndExpand(saved.getId()).toUri();
+				LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
+				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
+				LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
+				LOGGER.debug(
+						"Reponse Data for PUT Request is :: " + responseEntity.getHeaders().getLocation().toString());
+				response.setResult(responseEntity);
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
+				response.setErrorResult(
+						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+			}
+
+		});
+
+		return response;
+	}
+
+	@PatchMapping("/customers/{id}/branches/{branch_id}")
+	public DeferredResult<ResponseEntity<Object>> patchBranch(@PathVariable("id") Long id,
+			@PathVariable("branch_id") Long branch_id, HttpServletRequest request, @Valid @RequestBody Branch branch) {
+		return putOrPatch(id, branch_id, request, branch);
+	}
+
+	@PutMapping("/customers/{id}/branches/{branch_id}")
+	public DeferredResult<ResponseEntity<Object>> updateBranch(@PathVariable("id") Long id,
+			@PathVariable("branch_id") Long branch_id, HttpServletRequest request, @Valid @RequestBody Branch branch) {
+		return putOrPatch(id, branch_id, request, branch);
+	}
+
+	private DeferredResult<ResponseEntity<Object>> putOrPatch(Long id, Long branch_id, HttpServletRequest request,
+			Branch branch) {
+		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+		response.onTimeout(() -> response
+				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+		response.onError((Throwable t) -> {
+			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+		});
+
+		ListenableFuture<Customer> future = customerRepository.findEagerFetchBranchesById(id);
+		future.addCallback(new ListenableFutureCallback<Customer>() {
+
+			@Override
+			public void onSuccess(Customer customer) {
+				Branch saved = branchRepository.saveAndFlush(branch);
+				List<Branch> branches = new ArrayList<>();
+				branches.addAll(customer.getBranches());
+				branches.add(saved);
+				customer.setBranches(branches);
+				customerRepository.saveAndFlush(customer);
+				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
+						.buildAndExpand(saved.getId()).toUri();
+				LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
+				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
+				LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
+				LOGGER.debug(
+						"Reponse Data for PUT Request is :: " + responseEntity.getHeaders().getLocation().toString());
+				response.setResult(responseEntity);
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
+				response.setErrorResult(
+						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+			}
+
+		});
+
+		return response;
+
 	}
 
 	private Date getTodaysDate() {
@@ -416,6 +519,14 @@ public class CustomerController {
 		links.add(new Link(location, "self"));
 		links.add(new Link(location, "customer"));
 		links.add(new Link(new StringBuilder(location).append("/").append("contact").toString(), "contact"));
+		links.add(new Link(new StringBuilder(location).append("/").append("branches").toString(), "branches"));
+		links.add(new Link(new StringBuilder(location).append("/").append("invoices").toString(), "invoices"));
+		links.add(
+				new Link(new StringBuilder(location).append("/").append("invoices/paid").toString(), "paid-invoices"));
+		links.add(new Link(new StringBuilder(location).append("/").append("invoices/pending").toString(),
+				"pending-invoices"));
+		links.add(new Link(new StringBuilder(location).append("/").append("invoices/overdue").toString(),
+				"overdue-invoices"));
 		return links;
 	}
 
