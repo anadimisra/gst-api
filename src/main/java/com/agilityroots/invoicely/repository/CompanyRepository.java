@@ -6,8 +6,7 @@
 package com.agilityroots.invoicely.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
-import org.springframework.data.rest.core.annotation.RestResource;
+import org.springframework.stereotype.Repository;
 
 import com.agilityroots.invoicely.entity.Company;
 
@@ -15,22 +14,7 @@ import com.agilityroots.invoicely.entity.Company;
  * @author anadi
  *
  */
-@RepositoryRestResource(path = "companies", collectionResourceRel = "companies")
+@Repository
 public interface CompanyRepository extends CrudRepository<Company, Long> {
 
-	@Override
-	@RestResource(exported = false)
-	void delete(Company entity);
-
-	@Override
-	@RestResource(exported = false)
-	void deleteById(Long id);
-
-	@Override
-	@RestResource(exported = false)
-	void deleteAll();
-
-	@Override
-	@RestResource(exported = false)
-	void deleteAll(Iterable<? extends Company> entities);
 }

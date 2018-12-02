@@ -28,7 +28,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.SortDefault;
@@ -51,13 +50,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
@@ -65,7 +67,7 @@ import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 /**
  * @author anadi
  */
-@RepositoryRestController
+@RestController
 @ExposesResourceFor(Customer.class)
 public class CustomerController {
 
@@ -81,6 +83,9 @@ public class CustomerController {
 
 	@Autowired
 	private BranchRepository branchRepository;
+
+	@Autowired
+	private ContactRepository contactRepository;
 
 	@Autowired
 	private Environment environment;
@@ -203,7 +208,7 @@ public class CustomerController {
 
 		return response;
 	}
-	
+
 	@DeleteMapping("/customers")
 	public CompletableFuture<ResponseEntity<Object>> delete() {
 		return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
@@ -441,7 +446,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
+				LOGGER.error("Could not create due to error : {}", ex.getMessage(), ex);
 				response.setErrorResult(
 						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 			}
@@ -495,7 +500,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
+				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
 				response.setErrorResult(
 						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 			}
@@ -503,7 +508,48 @@ public class CustomerController {
 		});
 
 		return response;
+	}
 
+	@PutMapping("/customers/{id}/branches/{branch_id}/contact")
+	private DeferredResult<ResponseEntity<Object>> putOrPatchContact(Long id, Long branch_id,
+			HttpServletRequest request, Contact contact) {
+		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+		response.onTimeout(() -> response
+				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+		response.onError((Throwable t) -> {
+			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+		});
+
+		ListenableFuture<Branch> future = branchRepository.findOneById(branch_id);
+
+		future.addCallback(new ListenableFutureCallback<Branch>() {
+			@Override
+			public void onSuccess(Branch result) {
+				if (result == null)
+					response.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
+				else {
+					Contact saved = contactRepository.saveAndFlush(contact);
+					Contact zombie = result.getContact();
+					if (zombie != null)
+						contactRepository.delete(zombie);
+					result.setContact(saved);
+					branchRepository.saveAndFlush(result);
+					response.setResult(ResponseEntity.ok().location(ServletUriComponentsBuilder.fromRequestUri(request)
+							.path("/{id}").buildAndExpand(saved.getId()).toUri()).build());
+				}
+
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
+				response.setErrorResult(
+						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+
+			}
+		});
+
+		return response;
 	}
 
 	private Date getTodaysDate() {

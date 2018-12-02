@@ -16,6 +16,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.annotations.NaturalId;
 
@@ -38,9 +39,11 @@ public class Branch extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = -8841725432779534218L;
 
-	@Column(length = 25)
+	@NotEmpty(message = "Cannot add a branch without branch name.")
+	@Column(length = 25, nullable = false)
 	private String branchName;
 
+	@NotEmpty(message = "Cannot add a branch without GSTIN")
 	@NaturalId
 	@Column(length = 15)
 	private String gstin;

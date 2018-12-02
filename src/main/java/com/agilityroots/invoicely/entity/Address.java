@@ -9,6 +9,7 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -28,18 +29,23 @@ public class Address implements Serializable {
 
 	private static final long serialVersionUID = 3066264859071664783L;
 
+	@NotEmpty(message = "Street address is mandatory.")
 	@Column(nullable = false, updatable = false)
 	private String streetAddress;
 
+	@NotEmpty(message = "City area is mandatory.")
 	@Column(nullable = false, updatable = false)
 	private String area;
 
+	@NotEmpty(message = "City is mandatory.")
 	@Column(nullable = false, updatable = false)
 	private String city;
 
+	@NotEmpty(message = "State area is mandatory.")
 	@Column(nullable = false, updatable = false)
 	private String state;
 
+	@NotEmpty(message = "Pincode area is mandatory.")
 	@Column(nullable = false, updatable = false)
 	private String pincode;
 

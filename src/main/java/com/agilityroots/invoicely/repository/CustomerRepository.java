@@ -13,7 +13,6 @@ import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
@@ -32,7 +31,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@Cacheable("customers")
-	@RestResource(exported = false)
 	ListenableFuture<Customer> findOneById(Long id);
 
 	@Async
