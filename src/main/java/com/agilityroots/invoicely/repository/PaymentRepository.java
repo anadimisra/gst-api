@@ -6,7 +6,7 @@
 package com.agilityroots.invoicely.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import com.agilityroots.invoicely.entity.Payment;
 
@@ -14,7 +14,7 @@ import com.agilityroots.invoicely.entity.Payment;
  * @author anadi
  *
  */
-@Repository
+@RepositoryRestResource(exported = false)
 public interface PaymentRepository extends CrudRepository<Payment, Long> {
 
 }

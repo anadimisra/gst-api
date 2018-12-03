@@ -5,7 +5,7 @@
  */
 package com.agilityroots.invoicely.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import com.agilityroots.invoicely.entity.Contact;
 
@@ -13,7 +13,7 @@ import com.agilityroots.invoicely.entity.Contact;
  * @author anadi
  *
  */
-@Repository
+@RepositoryRestResource(exported = false)
 public interface ContactRepository extends DataApiRepository<Contact, Long> {
 
 }
