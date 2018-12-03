@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -28,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.SortDefault;
@@ -37,20 +37,16 @@ import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -67,7 +63,7 @@ import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 /**
  * @author anadi
  */
-@RestController
+@RepositoryRestController
 @ExposesResourceFor(Customer.class)
 public class CustomerController {
 
@@ -207,12 +203,6 @@ public class CustomerController {
 		});
 
 		return response;
-	}
-
-	@DeleteMapping("/customers")
-	public CompletableFuture<ResponseEntity<Object>> delete() {
-		return CompletableFuture.completedFuture(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
-				.header(HttpHeaders.ALLOW, "GET,POST,PUT,PATCH,HEAD").build());
 	}
 
 	@GetMapping("/customers/{id}/invoices")
@@ -413,63 +403,9 @@ public class CustomerController {
 		return response;
 	}
 
-	@PostMapping("/customers/{id}/branches")
-	public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id, HttpServletRequest request,
-			@Valid @RequestBody Branch branch) {
-		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
-
-		ListenableFuture<Customer> future = customerRepository.findEagerFetchBranchesById(id);
-		future.addCallback(new ListenableFutureCallback<Customer>() {
-
-			@Override
-			public void onSuccess(Customer customer) {
-				Branch saved = branchRepository.saveAndFlush(branch);
-				List<Branch> branches = new ArrayList<>();
-				branches.addAll(customer.getBranches());
-				branches.add(saved);
-				customer.setBranches(branches);
-				customerRepository.saveAndFlush(customer);
-				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
-						.buildAndExpand(saved.getId()).toUri();
-				LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
-				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-				LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
-				LOGGER.debug(
-						"Reponse Data for PUT Request is :: " + responseEntity.getHeaders().getLocation().toString());
-				response.setResult(responseEntity);
-			}
-
-			@Override
-			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not create due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-			}
-
-		});
-
-		return response;
-	}
-
-	@PatchMapping("/customers/{id}/branches/{branch_id}")
-	public DeferredResult<ResponseEntity<Object>> patchBranch(@PathVariable("id") Long id,
-			@PathVariable("branch_id") Long branch_id, HttpServletRequest request, @Valid @RequestBody Branch branch) {
-		return putOrPatch(id, branch_id, request, branch);
-	}
-
 	@PutMapping("/customers/{id}/branches/{branch_id}")
-	public DeferredResult<ResponseEntity<Object>> updateBranch(@PathVariable("id") Long id,
-			@PathVariable("branch_id") Long branch_id, HttpServletRequest request, @Valid @RequestBody Branch branch) {
-		return putOrPatch(id, branch_id, request, branch);
-	}
-
-	private DeferredResult<ResponseEntity<Object>> putOrPatch(Long id, Long branch_id, HttpServletRequest request,
-			Branch branch) {
+	public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
+			@PathVariable("branch_id") Long branch_id, HttpServletRequest request) {
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
 				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -482,14 +418,13 @@ public class CustomerController {
 
 			@Override
 			public void onSuccess(Customer customer) {
-				Branch saved = branchRepository.saveAndFlush(branch);
+				Branch saved = branchRepository.findById(branch_id).get();
 				List<Branch> branches = new ArrayList<>();
 				branches.addAll(customer.getBranches());
 				branches.add(saved);
 				customer.setBranches(branches);
 				customerRepository.saveAndFlush(customer);
-				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
-						.buildAndExpand(saved.getId()).toUri();
+				URI location = ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
 				LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
 				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
 				LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
@@ -510,9 +445,9 @@ public class CustomerController {
 		return response;
 	}
 
-	@PutMapping("/customers/{id}/branches/{branch_id}/contact")
-	private DeferredResult<ResponseEntity<Object>> putOrPatchContact(Long id, Long branch_id,
-			HttpServletRequest request, Contact contact) {
+	@PutMapping("/customers/{id}/contact")
+	private DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
+			@RequestBody @Valid Contact contact) {
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
 				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -520,23 +455,13 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Branch> future = branchRepository.findOneById(branch_id);
+		ListenableFuture<Contact> future = AsyncResult.forValue(contactRepository.saveAndFlush(contact));
 
-		future.addCallback(new ListenableFutureCallback<Branch>() {
+		future.addCallback(new ListenableFutureCallback<Contact>() {
 			@Override
-			public void onSuccess(Branch result) {
-				if (result == null)
-					response.setErrorResult(ResponseEntity.status(HttpStatus.BAD_REQUEST).build());
-				else {
-					Contact saved = contactRepository.saveAndFlush(contact);
-					Contact zombie = result.getContact();
-					if (zombie != null)
-						contactRepository.delete(zombie);
-					result.setContact(saved);
-					branchRepository.saveAndFlush(result);
-					response.setResult(ResponseEntity.ok().location(ServletUriComponentsBuilder.fromRequestUri(request)
-							.path("/{id}").buildAndExpand(saved.getId()).toUri()).build());
-				}
+			public void onSuccess(Contact result) {
+				response.setResult(ResponseEntity.created(ServletUriComponentsBuilder.fromRequestUri(request)
+						.path("/{id}").buildAndExpand(result.getId()).toUri()).build());
 
 			}
 
@@ -545,6 +470,41 @@ public class CustomerController {
 				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
 				response.setErrorResult(
 						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+
+			}
+		});
+
+		return response;
+	}
+
+	@GetMapping("/customers/{id}/contact")
+	public DeferredResult<ResponseEntity<Resource<Contact>>> getContact(@PathVariable("id") Long id,
+			HttpServletRequest request) {
+		DeferredResult<ResponseEntity<Resource<Contact>>> response = new DeferredResult<>();
+		response.onTimeout(() -> response
+				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+		response.onError((Throwable t) -> {
+			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+		});
+
+		ListenableFuture<Customer> future = customerRepository.findOneById(id);
+
+		future.addCallback(new ListenableFutureCallback<Customer>() {
+
+			@Override
+			public void onSuccess(Customer result) {
+				URI location = ServletUriComponentsBuilder.fromRequestUri(request)
+						.buildAndExpand(result.getContact().getId()).toUri();
+				Resource<Contact> contact = new Resource<Contact>(result.getContact(),
+						new Link(new StringBuilder(location.toString()).toString(), "contact"));
+				response.setResult(ResponseEntity.ok(contact));
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				LOGGER.error("Could not retrieve contact due to error : {}", ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot retrieve contact for this customer due to server error."));
 
 			}
 		});
