@@ -11,7 +11,6 @@ import javax.persistence.LockModeType;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
@@ -26,7 +25,7 @@ import com.agilityroots.invoicely.entity.Branch;
  * @author anadi
  */
 @Repository
-public interface BranchRepository extends JpaRepository<Branch, Long> {
+public interface BranchRepository extends DataApiRepository<Branch, Long> {
 
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)

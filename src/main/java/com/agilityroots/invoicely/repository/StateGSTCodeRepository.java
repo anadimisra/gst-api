@@ -5,7 +5,7 @@
  */
 package com.agilityroots.invoicely.repository;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import com.agilityroots.invoicely.entity.StateGSTCode;
@@ -15,6 +15,6 @@ import com.agilityroots.invoicely.entity.StateGSTCode;
  *
  */
 @Repository
-public interface StateGSTCodeRepository extends PagingAndSortingRepository<StateGSTCode, Long> {
+public interface StateGSTCodeRepository extends CrudRepository<StateGSTCode, Long> {
 
 }

@@ -5,7 +5,6 @@
  */
 package com.agilityroots.invoicely.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.agilityroots.invoicely.entity.Contact;
@@ -15,6 +14,6 @@ import com.agilityroots.invoicely.entity.Contact;
  *
  */
 @Repository
-public interface ContactRepository extends JpaRepository<Contact, Long> {
+public interface ContactRepository extends DataApiRepository<Contact, Long> {
 
 }

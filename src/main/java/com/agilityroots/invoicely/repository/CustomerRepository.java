@@ -10,7 +10,6 @@ import javax.persistence.LockModeType;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
@@ -25,7 +24,7 @@ import com.agilityroots.invoicely.entity.Customer;
  * @author anadi
  */
 @Repository
-public interface CustomerRepository extends JpaRepository<Customer, Long> {
+public interface CustomerRepository extends DataApiRepository<Customer, Long> {
 
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)

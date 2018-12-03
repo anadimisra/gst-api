@@ -36,12 +36,6 @@ import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.Payment;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.CompanyRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
-import com.agilityroots.invoicely.repository.PaymentRepository;
 import com.github.javafaker.Faker;
 
 /**
@@ -167,7 +161,7 @@ public class InvoiceRepositoryIntegrationTests {
 		payment.setAdjustmentValue(100.00);
 		payment.setPaymentDate(
 				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		payment = paymentRepository.saveAndFlush(payment);
+		payment = paymentRepository.save(payment);
 		invoice.setPayments(Arrays.asList(payment));
 		Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
