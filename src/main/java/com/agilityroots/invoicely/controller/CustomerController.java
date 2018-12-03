@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,6 +57,7 @@ import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 
 /**
@@ -87,15 +87,18 @@ public class CustomerController {
 	private Environment environment;
 
 	@Autowired
-	private CustomerResourceAssember resourceAssembler;
+	private CustomerResourceAssember customerResourceAssembler;
+
+	@Autowired
+	private BranchResourceAssembler branchResourceAssembler;
 
 	@GetMapping("/customers")
-	public DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> getAllCustomers(
+	public DeferredResult<ResponseEntity<Resources<?>>> getAllCustomers(
 			@PageableDefault(page = 0, size = 20) @SortDefault.SortDefaults({
 					@SortDefault(sort = "name", direction = Direction.ASC) }) Pageable pageable,
 			PagedResourcesAssembler<Customer> assembler, HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> response = new DeferredResult<>();
+		DeferredResult<ResponseEntity<Resources<?>>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
 				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
 		response.onError((Throwable t) -> {
@@ -107,13 +110,15 @@ public class CustomerController {
 		future.addCallback(new ListenableFutureCallback<Page<Customer>>() {
 
 			@Override
-			@SuppressWarnings({ "unchecked" })
 			public void onSuccess(Page<Customer> result) {
 				Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
 						"self");
-				Resources<Resource<Customer>> resources = (Resources<Resource<Customer>>) entitiesToResources(assembler,
-						result, Optional.of(rootLink));
-				response.setResult(ResponseEntity.ok(resources));
+				if (!result.getContent().isEmpty())
+					response.setResult(
+							ResponseEntity.ok(assembler.toResource(result, customerResourceAssembler, rootLink)));
+				else
+					response.setResult(ResponseEntity.ok(assembler.toEmptyResource(result, Customer.class, rootLink)));
+
 			}
 
 			@Override
@@ -363,10 +368,11 @@ public class CustomerController {
 	}
 
 	@GetMapping("/customers/{id}/branches")
-	public DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> getAllBranches(@PathVariable("id") Long id,
-			@PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Branch> assembler) {
+	public DeferredResult<ResponseEntity<Resources<?>>> getAllBranches(@PathVariable("id") Long id,
+			@PageableDefault(page = 0, size = 20) Pageable pageable, PagedResourcesAssembler<Branch> assembler,
+			HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> response = new DeferredResult<>();
+		DeferredResult<ResponseEntity<Resources<?>>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
 				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
 		response.onError((Throwable t) -> {
@@ -378,16 +384,16 @@ public class CustomerController {
 
 			@Override
 			public void onSuccess(Customer result) {
-				if (result.getBranches() != null && result.getBranches().size() > 0) {
-					Page<Branch> branches = new PageImpl<>(result.getBranches(), pageable, result.getBranches().size());
-					LOGGER.debug("Retrieved {} Branches for customer {}", result.getBranches().size(),
-							result.getName());
-					response.setResult(ResponseEntity.ok(assembler.toResource(branches)));
-				} else {
-					LOGGER.debug("No branches found for the customer {}.", id);
-					response.setErrorResult(ResponseEntity.status(HttpStatus.NOT_FOUND)
-							.body("There are no branches for this customer."));
-				}
+				Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
+						"self");
+
+				if (result.getBranches() != null && !result.getBranches().isEmpty())
+					response.setResult(ResponseEntity.ok(assembler.toResource(
+							new PageImpl<>(result.getBranches(), pageable, result.getBranches().size()),
+							branchResourceAssembler, rootLink)));
+				else
+					response.setResult(ResponseEntity.ok(assembler.toEmptyResource(
+							new PageImpl<>(result.getBranches(), pageable, 0), Branch.class, rootLink)));
 
 			}
 
@@ -534,19 +540,6 @@ public class CustomerController {
 		links.add(new Link(new StringBuilder(location).append("/").append("invoices/overdue").toString(),
 				"overdue-invoices"));
 		return links;
-	}
-
-	private Resources<?> entitiesToResources(PagedResourcesAssembler<Customer> pagedResourcesAssembler,
-			Page<Customer> page, Optional<Link> baseLink) {
-
-		if (page.getContent().isEmpty()) {
-			return baseLink
-					.<PagedResources<?>>map(it -> pagedResourcesAssembler.toEmptyResource(page, Customer.class, it))//
-					.orElseGet(() -> pagedResourcesAssembler.toEmptyResource(page, Customer.class));
-		}
-
-		return baseLink.map(it -> pagedResourcesAssembler.toResource(page, resourceAssembler, it))//
-				.orElseGet(() -> pagedResourcesAssembler.toResource(page, resourceAssembler));
 	}
 
 }
