@@ -5,14 +5,9 @@
  */
 package com.agilityroots.invoicely.repository;
 
-import java.util.List;
-
 import javax.persistence.LockModeType;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.repository.query.Param;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
@@ -31,29 +26,5 @@ public interface BranchRepository extends DataApiRepository<Branch, Long> {
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	ListenableFuture<Branch> findOneById(Long id);
-
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-//	@RestResource(path = "name", rel = "findbyname")
-	ListenableFuture<Page<Branch>> findByBranchNameLike(@Param("branchName") String branchName, Pageable pageable);
-
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-//	@RestResource(path = "city", rel = "findbycity")
-	ListenableFuture<List<Branch>> findByAddress_City(@Param("city") String city);
-
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-//	@RestResource(path = "state", rel = "findbystate")
-	ListenableFuture<List<Branch>> findByAddress_State(@Param("state") String state);
-
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-//	@RestResource(path = "gstin", rel = "findbygstin")
-	ListenableFuture<Page<Branch>> findByGstinLike(@Param("gstin") String gstin, Pageable pageable);
 
 }
