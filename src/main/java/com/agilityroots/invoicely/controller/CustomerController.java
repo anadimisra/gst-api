@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -183,19 +184,15 @@ public class CustomerController {
 		response.onError((Throwable t) -> {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
-		ListenableFuture<Customer> future = customerRepository.findOneById(id);
+		ListenableFuture<Optional<Customer>> future = AsyncResult.forValue(customerRepository.findById(id));
 
-		future.addCallback(new ListenableFutureCallback<Customer>() {
+		future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
 			@Override
-			public void onSuccess(Customer customer) {
-				if (customer == null)
-					response.setResult(ResponseEntity.notFound().build());
-				else {
-					LOGGER.debug("Returning details of {}", customer.getName());
-					Resource<Customer> resource = new Resource<Customer>(customer, getEntityLinks(request));
-					response.setResult(ResponseEntity.ok(resource));
-				}
+			public void onSuccess(Optional<Customer> customer) {
+				response.setResult(ResponseEntity
+						.ok(customer.<Resource<Customer>>map(it -> new Resource<Customer>(it, getEntityLinks(request)))
+								.orElse(new Resource<Customer>(new Customer(), getEntityLinks(request)))));
 
 			}
 
@@ -206,7 +203,6 @@ public class CustomerController {
 			}
 
 		});
-
 		return response;
 	}
 
@@ -386,15 +382,10 @@ public class CustomerController {
 			public void onSuccess(Customer result) {
 				Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
 						"self");
+				List<Branch> branches = result != null ? result.getBranches() : new ArrayList<>();
 
-				if (result.getBranches() != null && !result.getBranches().isEmpty())
-					response.setResult(ResponseEntity.ok(assembler.toResource(
-							new PageImpl<>(result.getBranches(), pageable, result.getBranches().size()),
-							branchResourceAssembler, rootLink)));
-				else
-					response.setResult(ResponseEntity.ok(assembler.toEmptyResource(
-							new PageImpl<>(result.getBranches(), pageable, 0), Branch.class, rootLink)));
-
+				Page<Branch> page = new PageImpl<>(branches, pageable, branches.size());
+				response.setResult(ResponseEntity.ok(assembler.toResource(page, branchResourceAssembler, rootLink)));
 			}
 
 			@Override
@@ -409,9 +400,9 @@ public class CustomerController {
 		return response;
 	}
 
-	@PutMapping("/customers/{id}/branches/{branch_id}")
+	@PutMapping("/customers/{id}/branches")
 	public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
-			@PathVariable("branch_id") Long branch_id, HttpServletRequest request) {
+			@RequestBody @Valid Branch branch, HttpServletRequest request) {
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
 				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -423,20 +414,25 @@ public class CustomerController {
 		future.addCallback(new ListenableFutureCallback<Customer>() {
 
 			@Override
-			public void onSuccess(Customer customer) {
-				Branch saved = branchRepository.findById(branch_id).get();
-				List<Branch> branches = new ArrayList<>();
-				branches.addAll(customer.getBranches());
-				branches.add(saved);
-				customer.setBranches(branches);
-				customerRepository.saveAndFlush(customer);
-				URI location = ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
-				LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
-				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-				LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
-				LOGGER.debug(
-						"Reponse Data for PUT Request is :: " + responseEntity.getHeaders().getLocation().toString());
-				response.setResult(responseEntity);
+			public void onSuccess(Customer result) {
+				if (result != null) {
+					Branch saved = branchRepository.saveAndFlush(branch);
+					List<Branch> branches = new ArrayList<>();
+					branches.addAll(result.getBranches());
+					branches.add(saved);
+					result.setBranches(branches);
+					customerRepository.saveAndFlush(result);
+					URI location = ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
+					LOGGER.debug("Created Location Header {} for {}", location.toString(), saved.getBranchName());
+					ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
+					LOGGER.debug("Reponse Status for PUT Request is :: " + responseEntity.getStatusCodeValue());
+					LOGGER.debug("Reponse Data for PUT Request is :: "
+							+ responseEntity.getHeaders().getLocation().toString());
+					response.setResult(responseEntity);
+				} else {
+					response.setResult(ResponseEntity.unprocessableEntity().build());
+				}
+
 			}
 
 			@Override
@@ -461,13 +457,19 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Contact> future = AsyncResult.forValue(contactRepository.saveAndFlush(contact));
+		ListenableFuture<Customer> future = customerRepository.findOneById(id);
 
-		future.addCallback(new ListenableFutureCallback<Contact>() {
+		future.addCallback(new ListenableFutureCallback<Customer>() {
 			@Override
-			public void onSuccess(Contact result) {
-				response.setResult(ResponseEntity.created(ServletUriComponentsBuilder.fromRequestUri(request)
-						.path("/{id}").buildAndExpand(result.getId()).toUri()).build());
+			public void onSuccess(Customer result) {
+
+				if (result != null) {
+					Contact saved = contactRepository.saveAndFlush(contact);
+					result.setContact(saved);
+					response.setResult(ResponseEntity.created(ServletUriComponentsBuilder.fromRequestUri(request)
+							.path("/{id}").buildAndExpand(result.getId()).toUri()).build());
+				} else
+					response.setResult(ResponseEntity.unprocessableEntity().build());
 
 			}
 
@@ -501,9 +503,10 @@ public class CustomerController {
 			public void onSuccess(Customer result) {
 				URI location = ServletUriComponentsBuilder.fromRequestUri(request)
 						.buildAndExpand(result.getContact().getId()).toUri();
-				Resource<Contact> contact = new Resource<Contact>(result.getContact(),
+				Contact contact = result != null ? result.getContact() : new Contact();
+				Resource<Contact> resource = new Resource<Contact>(contact,
 						new Link(new StringBuilder(location.toString()).toString(), "contact"));
-				response.setResult(ResponseEntity.ok(contact));
+				response.setResult(ResponseEntity.ok(resource));
 			}
 
 			@Override
