@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.data.web.SortDefault;
@@ -38,6 +37,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -50,7 +50,7 @@ import com.agilityroots.invoicely.repository.ContactRepository;
  * @author anadi
  *
  */
-@RepositoryRestController
+@RestController
 @ExposesResourceFor(Branch.class)
 public class BranchController {
 
@@ -71,55 +71,15 @@ public class BranchController {
 			PagedResourcesAssembler<Branch> assembler, HttpServletRequest request) {
 
 		DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
 		response.setErrorResult(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
 		return response;
 	}
 
 	@PostMapping("/branches")
-	public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request, @RequestBody @Valid Branch branch) {
+	public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request) {
 
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
-
-		if (branch.getContact() != null) {
-			Contact saved = contactRepository.saveAndFlush(branch.getContact());
-			branch.setContact(saved);
-		}
-		ListenableFuture<Branch> future = AsyncResult.forValue(branchRepository.saveAndFlush(branch));
-
-		future.addCallback(new ListenableFutureCallback<Branch>() {
-
-			@Override
-			public void onSuccess(Branch result) {
-				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
-						.buildAndExpand(result.getId()).toUri();
-				LOGGER.debug("Created Location Header {} for {}", location.toString(), result.getBranchName());
-				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-				LOGGER.debug("Reponse Status for POST Request is :: " + responseEntity.getStatusCodeValue());
-				LOGGER.debug(
-						"Reponse Data for POST Request is :: " + responseEntity.getHeaders().getLocation().toString());
-				response.setResult(responseEntity);
-			}
-
-			@Override
-			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not save branch {} due to error", branch.getBranchName(), ex);
-				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Could not save branch details due to server error."));
-
-			}
-
-		});
-
+		response.setErrorResult(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build());
 		return response;
 	}
 

@@ -111,7 +111,7 @@ public class BranchRepositoryIntegrationTests {
 		branch.setBranchName("Other Branch");
 		branch = branchRepository.save(branch);
 		LOGGER.debug("Saved Branch with id {} and details {}", branch.getId(), branch.toString());
-		List<Branch> branches = new ArrayList<Branch>();
+		List<Branch> branches = new ArrayList<>();
 		branches.addAll(customer.getBranches());
 		branches.add(branch);
 		customer.setBranches(branches);

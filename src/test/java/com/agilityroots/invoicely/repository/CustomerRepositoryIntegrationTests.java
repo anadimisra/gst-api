@@ -5,7 +5,7 @@
  */
 package com.agilityroots.invoicely.repository;
 
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -107,7 +107,7 @@ public class CustomerRepositoryIntegrationTests {
 	public void testGettingBranchesForNonExistingCustomer() throws InterruptedException, ExecutionException {
 		
 		Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)).get());	
-		assertNull(result);
+		assertThat(result.isPresent()).isFalse();
 		
 	}
 	

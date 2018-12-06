@@ -23,9 +23,13 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.Where;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
@@ -33,6 +37,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Where(clause = "DELETED = 0")
 @Table(indexes = { @Index(name = "place_of_supply_index", columnList = "placeOfSupply", unique = false),
@@ -66,10 +71,12 @@ public class Invoice extends AuditableEntity implements Serializable {
 
 	@OneToMany(fetch = FetchType.EAGER)
 	@JoinColumn(name = "invoice_id", referencedColumnName = "id")
+	@JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
 	private List<LineItem> lineItems;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "invoice_id", referencedColumnName = "id")
+	@JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
 	private List<Payment> payments;
 
 	@ManyToOne(fetch = FetchType.LAZY)
