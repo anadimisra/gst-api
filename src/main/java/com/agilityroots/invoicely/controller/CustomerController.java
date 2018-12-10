@@ -465,13 +465,13 @@ public class CustomerController {
 			@Override
 			public void onSuccess(Optional<Contact> contact) {
 				LOGGER.debug("Rendering customer contact details {}", contact.map(Contact::getName).orElse("None"));
-				response.setResult(contact
-						.map(it -> new Resource<>(it,
-								new Link(new StringBuilder(ServletUriComponentsBuilder.fromRequestUri(request)
-										.buildAndExpand(it.getId()).toUri().toString()).toString(), "contact")))
-						.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()));
+				response.setResult(
+						contact.map(
+								it -> new Resource<>(it,
+										new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri()
+												.toString(), "contact")))
+								.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()));
 			}
-
 			@Override
 			public void onFailure(Throwable ex) {
 				LOGGER.error("Could not retrieve contact due to error : {}", ex.getMessage(), ex);

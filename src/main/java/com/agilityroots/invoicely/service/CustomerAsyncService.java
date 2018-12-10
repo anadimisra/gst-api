@@ -43,7 +43,7 @@ public class CustomerAsyncService {
 		return AsyncResult.forValue(customerRepository.findAll(pageable));
 	}
 
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+	@Transactional(isolation = Isolation.SERIALIZABLE)
 	public ListenableFuture<Customer> saveAndFlsuh(Customer customer) {
 		return AsyncResult.forValue(customerRepository.saveAndFlush(customer));
 	}
@@ -58,10 +58,13 @@ public class CustomerAsyncService {
 		return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
 	}
 
+	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	public ListenableFuture<Optional<Contact>> getContact(Long id) {
-		LOGGER.debug("Get Contact Details for id {}", id);
-		return AsyncResult
-				.forValue(Optional.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
+		LOGGER.debug("Getting Contact Details for id {}", id);
+		Optional<Contact> result = Optional
+				.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null));
+		LOGGER.debug("Got Contact Details {} for id {}", result.map(Contact::toString).orElse("None"), id);
+		return AsyncResult.forValue(result);
 	}
 
 }
