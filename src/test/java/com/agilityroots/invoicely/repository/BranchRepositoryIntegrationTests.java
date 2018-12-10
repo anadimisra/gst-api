@@ -61,11 +61,11 @@ public class BranchRepositoryIntegrationTests {
 
 	private Faker faker = new Faker(new Locale("en-IND"));
 
-	private Long customerId;
+	private Customer customer;
 
 	@Before
 	public void setup() {
-		Customer customer = new Customer();
+		customer = new Customer();
 		customer.setName(faker.company().name());
 		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
 		customer.setTds(0.10);
@@ -74,8 +74,7 @@ public class BranchRepositoryIntegrationTests {
 		branch = branchRepository.save(branch);
 
 		customer.setBranches(Arrays.asList(branch));
-		Customer saved = customerRepository.save(customer);
-		customerId = saved.getId();
+		customer = customerRepository.save(customer);
 	}
 
 	/**
@@ -106,7 +105,6 @@ public class BranchRepositoryIntegrationTests {
 
 	@Test
 	public void testBranchEqualityWhenAddingBranchToCustomers() throws InterruptedException, ExecutionException {
-		Customer customer = customerRepository.findEagerFetchBranchesById(customerId).get();
 		Branch branch = getBranchObject();
 		branch.setBranchName("Other Branch");
 		branch = branchRepository.save(branch);

@@ -24,13 +24,14 @@ import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
 
 /**
- * A {@link ResourcesAssembler}/{@link ResourcesAssembler} that focuses purely on the domain type,
- * returning back {@link Resource} and {@link Resources} for that type instead of
- * {@link org.springframework.hateoas.ResourceSupport}.
+ * A {@link ResourcesAssembler}/{@link ResourcesAssembler} that focuses purely
+ * on the domain type, returning back {@link Resource} and {@link Resources} for
+ * that type instead of {@link org.springframework.hateoas.ResourceSupport}.
  *
  * @author Greg Turnquist
  */
-public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource<T>>, ResourcesAssembler<T, Resource<T>> {
+public class SimpleResourceAssembler<T>
+		implements ResourceAssembler<T, Resource<T>>, ResourcesAssembler<T, Resource<T>> {
 
 	/**
 	 * Converts the given entity into a {@link Resource}.
@@ -40,7 +41,7 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	 */
 	@Override
 	public Resource<T> toResource(T entity) {
-		
+
 		Resource<T> resource = new Resource<T>(entity);
 
 		addLinks(resource);
@@ -49,7 +50,8 @@ public class SimpleResourceAssembler<T> implements ResourceAssembler<T, Resource
 	}
 
 	/**
-	 * Converts all given entities into resources and wraps the collection as a resource as well.
+	 * Converts all given entities into resources and wraps the collection as a
+	 * resource as well.
 	 *
 	 * @see #toResource(Object)
 	 * @param entities must not be {@literal null}.

@@ -21,10 +21,15 @@ import javax.persistence.NamedEntityGraphs;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.validation.constraints.NotEmpty;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.core.Relation;
+
+import com.fasterxml.jackson.annotation.JsonRootName;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +44,8 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
+@JsonRootName("customer")
+@Relation(value = "customer", collectionRelation = "customers")
 @Table(indexes = { @Index(name = "customer_name_index", columnList = "name", unique = false) })
 @NamedEntityGraphs({
 		@NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
@@ -46,17 +53,28 @@ import lombok.ToString;
 		@NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(Customer.class);
+
 	private static final long serialVersionUID = 8101819808147191270L;
 
-	@NotEmpty(message = "Cannot save customer without billing currency.")
 	@Column(nullable = false, length = 3, updatable = false)
-	private String currecny = new String("INR");
+	private String currecny;
 
-	private Double tds = 0.10;
+	private Double tds;
 
-	@NotEmpty(message = "Cannot save customer without invoice prefix.")
 	@Column(updatable = false, length = 3, nullable = false)
-	private String invoicePrefix = new String("INV");
+	private String invoicePrefix;
+
+	@PrePersist
+	public void prePersist() {
+		LOGGER.debug("Checking for empty fields to set default values");
+		if (tds == null)
+			tds = 0.10;
+		if (currecny == null)
+			currecny = "INR";
+		if (invoicePrefix == null)
+			invoicePrefix = "INV";
+	}
 
 	@OneToOne(fetch = FetchType.LAZY)
 	@JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))

@@ -8,6 +8,7 @@ package com.agilityroots.invoicely.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -18,10 +19,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
@@ -44,8 +45,6 @@ import com.github.javafaker.Faker;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerRepositoryIntegrationTests {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerRepositoryIntegrationTests.class);
-
 	@Autowired
 	private CustomerRepository customerRepository;
 
@@ -64,23 +63,23 @@ public class CustomerRepositoryIntegrationTests {
 
 	@Before
 	public void setup() {
+
 		Customer customer = new Customer();
 		customer.setName(faker.company().name());
 		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
 		customer.setTds(0.10);
-
 		Branch branch = getBranchObject();
 		branch = branchRepository.save(branch);
-
 		customer.setBranches(Arrays.asList(branch));
-		Customer saved = customerRepository.save(customer);
-		customerId = saved.getId();
+		customer = customerRepository.save(customer);
+		customerId = customer.getId();
 	}
 
 	/**
 	 * @return {@link Branch} object
 	 */
 	private Branch getBranchObject() {
+
 		Address address = new Address();
 		address.setStreetAddress(faker.address().streetAddress());
 		address.setArea(faker.address().streetName());
@@ -104,11 +103,44 @@ public class CustomerRepositoryIntegrationTests {
 	}
 
 	@Test
-	public void testGettingBranchesForNonExistingCustomer() throws InterruptedException, ExecutionException {
-		
-		Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)).get());	
-		assertThat(result.isPresent()).isFalse();
-		
+	public void testNonExistingCustomerGivesEmptyOptional() throws InterruptedException, ExecutionException {
+
+		Optional<Customer> result = Optional
+				.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)));
+		assertThat(result).isNotNull();
+		assertThat(result).isEmpty();
+
 	}
-	
+
+	@Test
+	public void testEagerLoadBranchesByCustomer() throws InterruptedException, ExecutionException {
+
+		Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(customerId));
+		assertThat(result).isNotNull();
+		assertThat(result).isNotEmpty();
+		assertThat(result.map(Customer::getBranches).map(List::size).get()).isEqualTo(1);
+
+	}
+
+	@Test
+	public void testPageWhenNoCustomerRecordsArePresent() {
+
+		customerRepository.deleteAll();
+		customerRepository.flush();
+		Page<Customer> page = customerRepository.findAll(PageRequest.of(0, 20));
+		assertThat(page).isNotNull();
+		assertThat(page.hasContent()).isFalse();
+	}
+
+	@Test
+	public void testPrePersistAddsMandatoryFields() {
+
+		Customer minty = new Customer();
+		minty.setName("Minty & Sons Pvt. Ltd.");
+		minty.setPan(RandomStringUtils.randomAlphanumeric(10));
+		Customer badiMinty = customerRepository.saveAndFlush(minty);
+		assertThat(badiMinty.getTds().doubleValue()).isEqualTo(0.10);
+		assertThat(badiMinty.getInvoicePrefix()).isEqualTo("INV");
+		assertThat(badiMinty.getCurrecny()).isEqualTo("INR");
+	}
 }

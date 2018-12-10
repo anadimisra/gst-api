@@ -51,7 +51,8 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-hateoas")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.0")
     compile("org.apache.commons:commons-lang3:3.8.1")
-    compile("io.projectreactor:reactor-core")
+    compile("org.atteo:evo-inflector:1.2.2")
+    //implementation("io.reactivex.rxjava2:rxjava:2.2.4")
     //compile("org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT")
     //compile("io.r2dbc:r2dbc-postgresql:1.0.0.M5")
 	
