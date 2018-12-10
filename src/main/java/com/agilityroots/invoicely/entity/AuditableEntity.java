@@ -23,6 +23,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.hateoas.Identifiable;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +36,7 @@ import lombok.Setter;
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
+@JsonInclude(value = Include.NON_EMPTY)
 public class AuditableEntity implements Identifiable<Long> {
 
 	@Id
