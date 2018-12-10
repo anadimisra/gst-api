@@ -133,9 +133,9 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve customers due to error", ex);
+				LOGGER.error("Cannot retrieve customers due to error: {}", ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Could not save customers list due to server error."));
+						.body("Cannot save customers list due to server error."));
 			}
 
 		});
@@ -172,9 +172,9 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not save customer {} due to error", customer.getName(), ex);
+				LOGGER.error("Cannot save customer {} due to error: {}", customer.toString(), ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Could not save customer details due to server error."));
+						.body("Cannot save customer details due to server error."));
 
 			}
 
@@ -206,6 +206,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
+				LOGGER.error("Cannot get customer details for id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer details due to server error."));
 			}
@@ -243,9 +244,9 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot retrieve invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot get customer invoices due to server error."));
 			}
 
 		});
@@ -282,9 +283,10 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
+						ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot get customer paid invoices due to server error."));
 			}
 
 		});
@@ -320,9 +322,10 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id,
+						ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot get customer pending invoices due to server error."));
 			}
 
 		});
@@ -358,9 +361,10 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve results due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
+						ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot get customer overdue invoices due to server error."));
 			}
 
 		});
@@ -396,9 +400,9 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve branches due to error : {}", ex.getMessage(), ex);
+				LOGGER.error("Cannot retrieve branches for customer id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Cannot retrieve brnches for this customer due to server error."));
+						.body("Cannot retrieve branches for this customer due to server error."));
 
 			}
 		});
@@ -440,9 +444,10 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot update branch {} for customer id {} due to error: {}", branch.toString(), id,
+						ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot update branch for this customer due to error."));
 			}
 
 		});
@@ -472,9 +477,10 @@ public class CustomerController {
 												.toString(), "contact")))
 								.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()));
 			}
+
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not retrieve contact due to error : {}", ex.getMessage(), ex);
+				LOGGER.error("Cannot retrieve contact due to error: {}", ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot retrieve contact for this customer due to server error."));
 
@@ -517,9 +523,10 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+				LOGGER.error("Cannot update contact {} for customer id {} due to error: {}", contact.toString(), id,
+						ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot update contact for this customer due to error."));
 
 			}
 		});
