@@ -18,8 +18,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.agilityroots.invoicely.entity.Customer;
 
@@ -39,7 +37,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
 	@Lock(LockModeType.OPTIMISTIC)
 	@Cacheable("customers")
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@EntityGraph(value = "graph.Customer.branches", type = EntityGraphType.LOAD)
 	Customer findEagerFetchBranchesById(@Param("id") Long id);
 

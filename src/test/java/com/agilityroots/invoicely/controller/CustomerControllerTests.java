@@ -35,7 +35,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.DataApiAsyncConfiguration;
+import com.agilityroots.invoicely.DataApiApplication;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
@@ -54,9 +54,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
-@EnableSpringDataWebSupport
-@Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
-		CustomerAsyncService.class, DataApiAsyncConfiguration.class })
+@Import({ DataApiApplication.class })
 public class CustomerControllerTests {
 
 	@Autowired

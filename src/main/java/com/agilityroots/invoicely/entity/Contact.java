@@ -32,10 +32,10 @@ public class Contact extends AuditableEntity implements Identifiable<Long>, Seri
 
 	private static final long serialVersionUID = -7756870986677314517L;
 
-	@Column(nullable = false, length = 50, updatable = false)
+	@Column(nullable = false, updatable = false, length = 50)
 	private String name;
 
-	@Column(nullable = false, length = 50, updatable = false)
+	@Column(nullable = false, updatable = false, length = 50)
 	private String email;
 
 	@Column(length = 10, updatable = false)

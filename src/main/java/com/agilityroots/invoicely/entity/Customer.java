@@ -29,8 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
 
-import com.fasterxml.jackson.annotation.JsonRootName;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,8 +42,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@JsonRootName("customer")
-@Relation(value = "customer", collectionRelation = "customers")
+@Relation(collectionRelation = "customers")
 @Table(indexes = { @Index(name = "customer_name_index", columnList = "name", unique = false) })
 @NamedEntityGraphs({
 		@NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
@@ -57,12 +54,12 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
 
 	private static final long serialVersionUID = 8101819808147191270L;
 
-	@Column(nullable = false, length = 3, updatable = false)
+	@Column(nullable = false, updatable = false, length = 3)
 	private String currecny;
 
 	private Double tds;
 
-	@Column(updatable = false, length = 3, nullable = false)
+	@Column(nullable = false, updatable = false, length = 3)
 	private String invoicePrefix;
 
 	@PrePersist

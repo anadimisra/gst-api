@@ -25,10 +25,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.DataApiJpaConfiguration;
 import com.agilityroots.invoicely.entity.Address;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
@@ -41,7 +39,6 @@ import com.github.javafaker.Faker;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
-@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerRepositoryIntegrationTests {
 

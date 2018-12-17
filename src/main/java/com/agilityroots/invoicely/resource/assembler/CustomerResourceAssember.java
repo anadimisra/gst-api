@@ -5,6 +5,8 @@
  */
 package com.agilityroots.invoicely.resource.assembler;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +23,16 @@ import com.agilityroots.invoicely.entity.Invoice;
 @Component
 public class CustomerResourceAssember extends SimpleIdentifiableResourceAssembler<Customer> {
 
+	@Autowired
+	private Environment environment;
+	
 	public CustomerResourceAssember() {
 		super(CustomerController.class);
 	}
 
 	@Override
 	protected void addLinks(Resource<Customer> resource) {
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("customer"));
+		super.addLinks(resource);
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
 				.slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())

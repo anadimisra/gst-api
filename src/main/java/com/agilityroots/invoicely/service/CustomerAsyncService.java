@@ -67,4 +67,9 @@ public class CustomerAsyncService {
 		return AsyncResult.forValue(result);
 	}
 
+	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+	public ListenableFuture<Optional<Customer>> getWithAllBranches(Long id) {
+		return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
+	}
+
 }

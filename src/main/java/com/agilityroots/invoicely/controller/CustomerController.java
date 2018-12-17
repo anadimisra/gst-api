@@ -29,9 +29,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.data.web.SortDefault;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.PagedResources;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -99,10 +99,9 @@ public class CustomerController {
 	@Autowired
 	private CustomerAsyncService customerService;
 
-	@GetMapping("/customers")
+	@GetMapping(value = "/customers", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> getAllCustomers(
-			@PageableDefault(page = 0, size = 20) @SortDefault.SortDefaults({
-					@SortDefault(sort = "name", direction = Direction.ASC) }) Pageable pageable,
+			@PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
 			PagedResourcesAssembler<Customer> assembler, HttpServletRequest request) {
 
 		DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> response = new DeferredResult<>(
@@ -120,7 +119,7 @@ public class CustomerController {
 			@Override
 			public void onSuccess(Page<Customer> result) {
 				Link self = new Link(
-						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand().toUri().toString(),
+						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(),
 						"self");
 				LOGGER.debug("Generated Self Link {} for Customer Resource Collection", self.getHref());
 				if (result.hasContent())
@@ -183,7 +182,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}")
+	@GetMapping(value = "/customers/{id}", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable Long id,
 			HttpServletRequest request) {
 
@@ -215,7 +214,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/invoices")
+	@GetMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getInvoicesByCustomer(
 			@PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
 			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
@@ -253,7 +252,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/invoices/paid")
+	@GetMapping(value = "/customers/{id}/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoicesByCustomer(
 			@PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
 			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request)
@@ -293,7 +292,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/invoices/pending")
+	@GetMapping(value = "/customers/{id}/invoices/pending", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoicesByCustomer(
 			@PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
 			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
@@ -332,7 +331,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/invoices/overdue")
+	@GetMapping(value = "/customers/{id}/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoicesByCustomer(
 			@PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
 			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
@@ -371,7 +370,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/branches")
+	@GetMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> getAllBranches(@PathVariable("id") Long id,
 			@PageableDefault(page = 0, size = 20) Pageable pageable, PagedResourcesAssembler<Branch> assembler,
 			HttpServletRequest request) {
@@ -409,7 +408,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@PutMapping("/customers/{id}/branches")
+	@PutMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
 			@RequestBody @Valid Branch branch, HttpServletRequest request) {
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
@@ -454,7 +453,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@GetMapping("/customers/{id}/contact")
+	@GetMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
 	public DeferredResult<ResponseEntity<?>> getContact(@PathVariable("id") Long id, HttpServletRequest request) {
 		DeferredResult<ResponseEntity<?>> response = new DeferredResult<>();
 		response.onTimeout(() -> response
@@ -489,7 +488,7 @@ public class CustomerController {
 		return response;
 	}
 
-	@PutMapping("/customers/{id}/contact")
+	@PutMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
 	private DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
 			@RequestBody @Valid Contact contact) {
 		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
