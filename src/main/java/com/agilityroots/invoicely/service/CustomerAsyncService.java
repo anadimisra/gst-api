@@ -39,22 +39,22 @@ public class CustomerAsyncService {
 	}
 
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Page<Customer>> findAll(Pageable pageable) {
+	public ListenableFuture<Page<Customer>> getCustomers(Pageable pageable) {
 		return AsyncResult.forValue(customerRepository.findAll(pageable));
 	}
 
 	@Transactional(isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Customer> saveAndFlsuh(Customer customer) {
+	public ListenableFuture<Customer> save(Customer customer) {
 		return AsyncResult.forValue(customerRepository.saveAndFlush(customer));
 	}
 
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Customer>> findById(Long id) {
+	public ListenableFuture<Optional<Customer>> getCustomer(Long id) {
 		return AsyncResult.forValue(customerRepository.findById(id));
 	}
 
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Customer>> findWithAllBranches(Long id) {
+	public ListenableFuture<Optional<Customer>> getCustomerWithAllBranches(Long id) {
 		return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
 	}
 
@@ -65,11 +65,6 @@ public class CustomerAsyncService {
 				.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null));
 		LOGGER.debug("Got Contact Details {} for id {}", result.map(Contact::toString).orElse("None"), id);
 		return AsyncResult.forValue(result);
-	}
-
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Customer>> getWithAllBranches(Long id) {
-		return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
 	}
 
 }
