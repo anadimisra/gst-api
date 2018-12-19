@@ -5,16 +5,21 @@
  */
 package com.agilityroots.invoicely.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +36,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -91,11 +97,11 @@ public class CustomerControllerTests {
 		BDDMockito.given(customerRepository.findAll(any(Pageable.class))).willReturn(emptyPage);
 
 		// When
-		MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print()).andReturn();
+		MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
 
 		// Then
-		mockMvc.perform(asyncDispatch(result)).andDo(print());
-		assertThat(result.getResponse().getStatus()).isEqualTo(404);
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -111,11 +117,101 @@ public class CustomerControllerTests {
 		BDDMockito.given(customerRepository.findAll(any(Pageable.class))).willReturn(page);
 
 		// When
-		MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print()).andReturn();
+		MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then return a PagedResource with One Customer
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.customers", hasSize(1)));
+	}
+
+	@Test
+	public void testSuccessfulSavingOfCustomerReturnsLocationHeader() throws Exception {
+
+		Customer minty = new Customer();
+		minty.setId(Long.valueOf(10));
+		minty.setName("Minty and Sons Private Limited");
+		minty.setPan("ABCDE1234Q");
+		minty.setInvoicePrefix("MNT");
+		minty.setTds(0.10);
+		minty.setCurrecny("INR");
+		BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(minty);
+
+		// When
+		MvcResult result = mockMvc
+				.perform(post("/customers").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(objectMapper.writeValueAsString(minty)))
+				.andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
 		// Then
-		mockMvc.perform(asyncDispatch(result)).andDo(print());
-		assertThat(result.getResponse().getStatus()).isEqualTo(200);
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
+		assertThat(result.getResponse().getHeader("Location")).contains("customers/10");
 	}
-	
+
+	@Test
+	public void testFailedSavingOfCustomerReturnsInternalServerError() throws Exception {
+
+		Customer minty = new Customer();
+		minty.setId(Long.valueOf(10));
+		minty.setName("Minty and Sons Private Limited");
+		minty.setPan("ABCDE1234Q");
+		minty.setInvoicePrefix("MNT");
+		minty.setTds(0.10);
+		minty.setCurrecny("INR");
+		BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willThrow(new RuntimeException());
+
+		// When
+		MvcResult result = mockMvc
+				.perform(post("/customers").contentType(MediaType.APPLICATION_JSON_VALUE)
+						.content(objectMapper.writeValueAsString(minty)))
+				.andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().is5xxServerError());
+		assertThat(result.getResponse().getContentAsString())
+				.contains("Cannot save customer details due to server error.");
+	}
+
+	@Test
+	public void testResponds404WhenCustomerDoesNotExist() throws Exception {
+
+		BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+		// When
+		MvcResult result = mockMvc.perform(get("/customers/1")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
+	}
+
+	@Test
+	public void testGeneratesHALDocumentWithLinksWhenCustomerExists() throws Exception {
+
+		Customer minty = new Customer();
+		minty.setId(Long.valueOf(10));
+		minty.setName("Minty and Sons Private Limited");
+		minty.setPan("ABCDE1234Q");
+		minty.setInvoicePrefix("MNT");
+		minty.setTds(0.10);
+		minty.setCurrecny("INR");
+		BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(minty));
+
+		// When
+		MvcResult result = mockMvc.perform(get("/customers/1")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$.name", is("Minty and Sons Private Limited")))
+				.andExpect(jsonPath("$._links.self.href", containsString("/customers/10")))
+				.andExpect(jsonPath("$._links.customers.href", containsString("/customers")))
+				.andExpect(jsonPath("$._links.contact.href", containsString("/customers/10/contact")))
+				.andExpect(jsonPath("$._links.branches.href", containsString("/customers/10/branches")))
+				.andExpect(jsonPath("$._links.invoices.href", containsString("/customers/10/invoices")))
+				.andExpect(jsonPath("$._links.paid-invoices.href", containsString("/customers/10/invoices/paid")))
+				.andExpect(jsonPath("$._links.pending-invoices.href", containsString("/customers/10/invoices/pending")))
+				.andExpect(
+						jsonPath("$._links.overdue-invoices.href", containsString("/customers/10/invoices/overdue")));
+	}
 }
