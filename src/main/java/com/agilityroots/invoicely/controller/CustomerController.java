@@ -73,9 +73,6 @@ public class CustomerController {
 	public static final Iterable<Resource<?>> EMPTY_RESOURCE_LIST = Collections.emptyList();
 
 	@Autowired
-	private CustomerRepository customerRepository;
-
-	@Autowired
 	private InvoiceRepository invoiceRepository;
 
 	@Autowired
@@ -83,6 +80,9 @@ public class CustomerController {
 
 	@Autowired
 	private ContactRepository contactRepository;
+
+	@Autowired
+	private CustomerRepository customerRepository;
 
 	@Autowired
 	private Environment environment;
@@ -112,7 +112,7 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Page<Customer>> future = customerService.findAll(pageable);
+		ListenableFuture<Page<Customer>> future = customerService.getCustomers(pageable);
 
 		future.addCallback(new ListenableFutureCallback<Page<Customer>>() {
 
@@ -153,7 +153,7 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Customer> future = customerService.saveAndFlsuh(customer);
+		ListenableFuture<Customer> future = customerService.save(customer);
 
 		future.addCallback(new ListenableFutureCallback<Customer>() {
 
@@ -192,7 +192,7 @@ public class CustomerController {
 		response.onError((Throwable t) -> {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
-		ListenableFuture<Optional<Customer>> future = customerService.findById(id);
+		ListenableFuture<Optional<Customer>> future = customerService.getCustomer(id);
 
 		future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
@@ -381,7 +381,7 @@ public class CustomerController {
 		response.onError((Throwable t) -> {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
 		});
-		ListenableFuture<Optional<Customer>> future = customerService.findWithAllBranches(id);
+		ListenableFuture<Optional<Customer>> future = customerService.getCustomerWithAllBranches(id);
 
 		future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
@@ -418,7 +418,7 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Optional<Customer>> future = customerService.findWithAllBranches(id);
+		ListenableFuture<Optional<Customer>> future = customerService.getCustomerWithAllBranches(id);
 		future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
 			@Override
@@ -498,7 +498,7 @@ public class CustomerController {
 			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 		});
 
-		ListenableFuture<Optional<Customer>> future = customerService.findById(id);
+		ListenableFuture<Optional<Customer>> future = customerService.getCustomer(id);
 
 		future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 			@Override
