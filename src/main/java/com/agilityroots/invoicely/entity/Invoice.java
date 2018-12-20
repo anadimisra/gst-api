@@ -10,21 +10,25 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
+import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.core.Relation;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -42,11 +46,12 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @Where(clause = "DELETED = 0")
+@Relation(collectionRelation = "invoices")
 @Table(indexes = { @Index(name = "place_of_supply_index", columnList = "placeOfSupply", unique = false),
 		@Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
 		@Index(name = "due_date_index", columnList = "dueDate", unique = false),
 		@Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false) })
-public class Invoice extends AuditableEntity implements Serializable {
+public class Invoice extends AuditableEntity implements Identifiable<Long>, Serializable {
 
 	private static final long serialVersionUID = 1560474818107754225L;
 
@@ -54,6 +59,7 @@ public class Invoice extends AuditableEntity implements Serializable {
 	@Column(unique = true, length = 20)
 	private String invoiceNumber;
 
+	@JsonIgnore
 	private Integer deleted = 0;
 
 	@Column(nullable = false, length = 25)
@@ -72,13 +78,13 @@ public class Invoice extends AuditableEntity implements Serializable {
 	@Column(nullable = false)
 	private String paymentTerms;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinColumn(name = "invoice_id", referencedColumnName = "id")
+	@ElementCollection
+	@CollectionTable(name = "invoice_line_items", joinColumns = @JoinColumn(name = "invoice_id"))
 	@JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
 	private List<LineItem> lineItems;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "invoice_id", referencedColumnName = "id")
+	@ElementCollection
+	@CollectionTable(name = "invoice_payments", joinColumns = @JoinColumn(name = "invoice_id"))
 	@JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
 	private List<Payment> payments;
 

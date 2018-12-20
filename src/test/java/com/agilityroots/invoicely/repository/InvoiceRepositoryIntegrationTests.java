@@ -25,14 +25,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.agilityroots.invoicely.DataApiJpaConfiguration;
 import com.agilityroots.invoicely.entity.Address;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Company;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.entity.LineItem;
 import com.agilityroots.invoicely.entity.Payment;
 import com.github.javafaker.Faker;
 
@@ -42,6 +45,7 @@ import com.github.javafaker.Faker;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
+@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class InvoiceRepositoryIntegrationTests {
 
@@ -225,6 +229,36 @@ public class InvoiceRepositoryIntegrationTests {
 		LOGGER.info("Elasped time for invoiceRepository.findAllByCustomer_Id() is {}", endTime - startTime);
 		assertThat(overdueInvoices).isNotEmpty();
 		assertThat(overdueInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+	}
+
+	public void testGettingLineItemsForInvoice() {
+
+		Customer customer = customerRepository.findById(customerId).get();
+		invoice.setDueDate(
+				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+		invoice.setPaymentTerms("NET-30");
+		invoice.setInvoiceDate(
+				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+		invoice.setInvoiceNumber(customer.getInvoicePrefix() + LocalDate.now().minusDays(40).toString());
+		invoice.setPlaceOfSupply("Karnataka");
+		LineItem lineItem = new LineItem();
+		lineItem.setAmount(1180.00);
+		lineItem.setDescription("That Service");
+		lineItem.setDiscount(0.0);
+		lineItem.setHsn("998313");
+		lineItem.setItem("That Item");
+		lineItem.setSerialNumber(1);
+		lineItem.setTax(0.18);
+		lineItem.setPrice(1000.00);
+		invoice.setLineItems(Arrays.asList(lineItem));
+		invoice.setId(Long.valueOf(100));
+		invoiceRepository.saveAndFlush(invoice);
+
+		Invoice savedInvoice = invoiceRepository.getOne(invoice.getId());
+		assertThat(savedInvoice.getLineItems()).isNotNull();
+		assertThat(savedInvoice.getLineItems()).isNotEmpty();
+		assertThat(savedInvoice.getLineItems().get(0).getItem()).isEqualTo("That Item");
+
 	}
 
 }

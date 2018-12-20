@@ -6,6 +6,7 @@
 package com.agilityroots.invoicely.repository;
 
 import java.util.Date;
+import java.util.Optional;
 
 import javax.persistence.LockModeType;
 
@@ -30,11 +31,13 @@ import com.agilityroots.invoicely.entity.Invoice;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDelete<Invoice> {
 
-	@Async
 	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@Cacheable("invoices")
-	ListenableFuture<Invoice> findOneById(Long id);
+	Optional<Invoice> findById(Long id);
+
+	@Lock(LockModeType.OPTIMISTIC)
+	@Cacheable("invoices")
+	Page<Invoice> findAll(Pageable pageable);
 
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)
