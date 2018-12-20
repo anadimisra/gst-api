@@ -435,7 +435,7 @@ public class CustomerController {
 					customer.setBranches(allBranches);
 					customerRepository.saveAndFlush(customer);
 					response.setResult(ResponseEntity.created(ServletUriComponentsBuilder.fromRequestUri(request)
-							.path("{id}").buildAndExpand(saved.getId()).toUri()).build());
+							.path("/{id}").buildAndExpand(saved.getId()).toUri()).build());
 				} else
 					response.setErrorResult(ResponseEntity.unprocessableEntity().build());
 
