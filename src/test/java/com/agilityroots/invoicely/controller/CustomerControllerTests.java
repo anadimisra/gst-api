@@ -258,6 +258,7 @@ public class CustomerControllerTests {
 				.andDo(print()).andReturn();
 
 		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices").doesNotHaveJsonPath())
 				.andExpect(jsonPath("$._links.self.href", containsString("/customers/1/invoices")));
 
 	}
@@ -274,6 +275,7 @@ public class CustomerControllerTests {
 				.andDo(print()).andReturn();
 
 		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices").doesNotHaveJsonPath())
 				.andExpect(jsonPath("$._links.self.href", containsString("/customers/1/invoices/paid")));
 
 	}
@@ -292,6 +294,7 @@ public class CustomerControllerTests {
 				.andDo(print()).andReturn();
 
 		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices").doesNotHaveJsonPath())
 				.andExpect(jsonPath("$._links.self.href", containsString("/customers/1/invoices/overdue")));
 
 	}
@@ -310,6 +313,7 @@ public class CustomerControllerTests {
 				.andDo(print()).andReturn();
 
 		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices").doesNotHaveJsonPath())
 				.andExpect(jsonPath("$._links.self.href", containsString("/customers/1/invoices/pending")));
 
 	}
