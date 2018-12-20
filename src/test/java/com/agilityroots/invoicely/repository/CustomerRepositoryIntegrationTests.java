@@ -13,8 +13,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import javax.persistence.EntityManager;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -53,9 +51,6 @@ public class CustomerRepositoryIntegrationTests {
 
 	@Autowired
 	private ContactRepository contactRepository;
-
-	@Autowired
-	EntityManager entityManager;
 
 	private Faker faker = new Faker(new Locale("en-IND"));
 
