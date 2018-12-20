@@ -25,8 +25,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.agilityroots.invoicely.DataApiJpaConfiguration;
 import com.agilityroots.invoicely.entity.Address;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
@@ -39,6 +41,7 @@ import com.github.javafaker.Faker;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
+@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerRepositoryIntegrationTests {
 
@@ -57,6 +60,8 @@ public class CustomerRepositoryIntegrationTests {
 	private Faker faker = new Faker(new Locale("en-IND"));
 
 	private Long customerId;
+
+	private Contact contact;
 
 	@Before
 	public void setup() {
@@ -84,10 +89,10 @@ public class CustomerRepositoryIntegrationTests {
 		address.setState(faker.address().state());
 		address.setPincode(faker.address().zipCode());
 
-		Contact contact = new Contact();
+		contact = new Contact();
 		contact.setName(faker.name().fullName());
 		contact.setEmail(faker.internet().emailAddress());
-		contact.setPhone(RandomStringUtils.randomNumeric(10));
+		contact.setPhone("8067601867");
 		contact = contactRepository.save(contact);
 
 		Branch branch = new Branch();
@@ -120,7 +125,7 @@ public class CustomerRepositoryIntegrationTests {
 	}
 
 	@Test
-	public void testPageWhenNoCustomerRecordsArePresent() {
+	public void testPageIsEmptyWhenNoCustomerRecordsArePresent() {
 
 		customerRepository.deleteAll();
 		customerRepository.flush();
@@ -140,4 +145,5 @@ public class CustomerRepositoryIntegrationTests {
 		assertThat(badiMinty.getInvoicePrefix()).isEqualTo("INV");
 		assertThat(badiMinty.getCurrecny()).isEqualTo("INR");
 	}
+
 }
