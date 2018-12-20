@@ -5,8 +5,6 @@ package com.agilityroots.invoicely.service;
 
 import java.util.Optional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,8 +26,6 @@ import com.agilityroots.invoicely.repository.CustomerRepository;
 @Async
 @Service
 public class CustomerAsyncService {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerAsyncService.class);
 
 	private CustomerRepository customerRepository;
 
@@ -60,11 +56,8 @@ public class CustomerAsyncService {
 
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	public ListenableFuture<Optional<Contact>> getContact(Long id) {
-		LOGGER.debug("Getting Contact Details for id {}", id);
-		Optional<Contact> result = Optional
-				.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null));
-		LOGGER.debug("Got Contact Details {} for id {}", result.map(Contact::toString).orElse("None"), id);
-		return AsyncResult.forValue(result);
+		return AsyncResult.forValue(Optional
+				.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
 	}
 
 }

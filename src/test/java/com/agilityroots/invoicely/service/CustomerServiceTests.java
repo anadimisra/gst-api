@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.agilityroots.invoicely.repository;
+package com.agilityroots.invoicely.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.repository.CustomerRepository;
 import com.agilityroots.invoicely.service.CustomerAsyncService;
 
 /**
