@@ -12,7 +12,6 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.NamedAttributeNode;
@@ -22,10 +21,7 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
-import javax.persistence.Table;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
 
@@ -33,6 +29,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author anadi
@@ -40,17 +37,15 @@ import lombok.ToString;
 @Entity
 @Getter
 @Setter
+@Slf4j
 @ToString
 @NoArgsConstructor
 @Relation(collectionRelation = "customers")
-@Table(indexes = { @Index(name = "customer_name_index", columnList = "name", unique = false) })
 @NamedEntityGraphs({
 		@NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
 		@NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")),
 		@NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(Customer.class);
 
 	private static final long serialVersionUID = 8101819808147191270L;
 
@@ -64,7 +59,7 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
 
 	@PrePersist
 	public void prePersist() {
-		LOGGER.debug("Checking for empty fields to set default values");
+		log.debug("Checking for empty fields to set default values");
 		if (tds == null)
 			tds = 0.10;
 		if (currecny == null)

@@ -8,6 +8,7 @@ package com.agilityroots.invoicely.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -21,6 +22,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -48,6 +50,7 @@ public class Invoice extends AuditableEntity implements Serializable {
 
 	private static final long serialVersionUID = 1560474818107754225L;
 
+	@NaturalId
 	@Column(unique = true, length = 20)
 	private String invoiceNumber;
 
@@ -94,4 +97,21 @@ public class Invoice extends AuditableEntity implements Serializable {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinTable(name = "shipped_to_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
 	private Branch shippedTo;
+
+	@Override
+	public int hashCode() {
+		return (Objects.hash(invoiceNumber) * 17);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Invoice other = (Invoice) obj;
+		return Objects.equals(invoiceNumber, other.getInvoiceNumber());
+	}
 }

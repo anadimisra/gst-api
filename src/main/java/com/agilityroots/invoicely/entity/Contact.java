@@ -8,7 +8,6 @@ package com.agilityroots.invoicely.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -27,7 +26,6 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@Embeddable
 public class Contact extends AuditableEntity implements Identifiable<Long>, Serializable {
 
 	private static final long serialVersionUID = -7756870986677314517L;

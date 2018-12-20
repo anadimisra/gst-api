@@ -5,9 +5,13 @@
  */
 package com.agilityroots.invoicely.entity;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.NaturalId;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +29,7 @@ public abstract class Organisation extends AuditableEntity {
 
 	@NotNull(message = "Cannot save customer without registered name")
 	@Column(unique = true, length = 50, nullable = false)
+	@NaturalId
 	private String name;
 
 	@NotNull(message = "PAN is mandatory while adding a new Customer")
@@ -33,5 +38,22 @@ public abstract class Organisation extends AuditableEntity {
 
 	@Column(length = 11)
 	private String vatTin;
+
+	@Override
+	public int hashCode() {
+		return (Objects.hash(name) * 79);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Organisation other = (Organisation) obj;
+		return Objects.equals(name, other.getName());
+	}
 
 }
