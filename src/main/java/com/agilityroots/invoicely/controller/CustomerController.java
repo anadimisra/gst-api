@@ -19,8 +19,6 @@ import java.util.concurrent.ExecutionException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
@@ -61,16 +59,15 @@ import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CustomerAsyncService;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author anadi
  */
+@Slf4j
 @RestController
 @ExposesResourceFor(Customer.class)
 public class CustomerController {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(CustomerController.class);
-
-	public static final Iterable<Resource<?>> EMPTY_RESOURCE_LIST = Collections.emptyList();
 
 	@Autowired
 	private InvoiceRepository invoiceRepository;
@@ -121,18 +118,18 @@ public class CustomerController {
 				Link self = new Link(
 						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(),
 						"self");
-				LOGGER.debug("Generated Self Link {} for Customer Resource Collection", self.getHref());
+				log.debug("Generated Self Link {} for Customer Resource Collection", self.getHref());
 				if (result.hasContent())
 					response.setResult(
 							ResponseEntity.ok(assembler.toResource(result, customerResourceAssembler, self)));
 				else
 					response.setErrorResult(ResponseEntity.notFound().build());
-				LOGGER.debug("Returning Response with {} customers", result.getNumber());
+				log.debug("Returning Response with {} customers", result.getNumber());
 			}
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve customers due to error: {}", ex.getMessage(), ex);
+				log.error("Cannot retrieve customers due to error: {}", ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot save customers list due to server error."));
 			}
@@ -161,17 +158,17 @@ public class CustomerController {
 			public void onSuccess(Customer result) {
 				URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
 						.buildAndExpand(result.getId()).toUri();
-				LOGGER.debug("Created Location Header {} for {}", location.toString(), result.getName());
+				log.debug("Created Location Header {} for {}", location.toString(), result.getName());
 				ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-				LOGGER.debug("Reponse Status for POST Request is :: " + responseEntity.getStatusCodeValue());
-				LOGGER.debug(
+				log.debug("Reponse Status for POST Request is :: " + responseEntity.getStatusCodeValue());
+				log.debug(
 						"Reponse Data for POST Request is :: " + responseEntity.getHeaders().getLocation().toString());
 				response.setResult(responseEntity);
 			}
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot save customer {} due to error: {}", customer.toString(), ex.getMessage(), ex);
+				log.error("Cannot save customer {} due to error: {}", customer.toString(), ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot save customer details due to server error."));
 
@@ -205,7 +202,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot get customer details for id {} due to error: {}", id, ex.getMessage(), ex);
+				log.error("Cannot get customer details for id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer details due to server error."));
 			}
@@ -243,7 +240,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
+				log.error("Cannot retrieve invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer invoices due to server error."));
 			}
@@ -282,7 +279,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
+				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
 						ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer paid invoices due to server error."));
@@ -321,7 +318,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id,
+				log.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id,
 						ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer pending invoices due to server error."));
@@ -360,7 +357,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
+				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
 						ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer overdue invoices due to server error."));
@@ -399,7 +396,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve branches for customer id {} due to error: {}", id, ex.getMessage(), ex);
+				log.error("Cannot retrieve branches for customer id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot retrieve branches for this customer due to server error."));
 
@@ -443,7 +440,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot update branch {} for customer id {} due to error: {}", branch.toString(), id,
+				log.error("Cannot update branch {} for customer id {} due to error: {}", branch.toString(), id,
 						ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot update branch for this customer due to error."));
@@ -468,7 +465,7 @@ public class CustomerController {
 
 			@Override
 			public void onSuccess(Optional<Contact> contact) {
-				LOGGER.debug("Rendering customer contact details {}", contact.map(Contact::getName).orElse("None"));
+				log.debug("Rendering customer contact details {}", contact.map(Contact::getName).orElse("None"));
 				response.setResult(
 						contact.map(
 								it -> new Resource<>(it,
@@ -479,7 +476,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot retrieve contact due to error: {}", ex.getMessage(), ex);
+				log.error("Cannot retrieve contact due to error: {}", ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot retrieve contact for this customer due to server error."));
 
@@ -505,7 +502,7 @@ public class CustomerController {
 			public void onSuccess(Optional<Customer> customer) {
 
 				if (customer.isPresent()) {
-					LOGGER.debug("Adding contact details {} to customer {}", contact.toString(),
+					log.debug("Adding contact details {} to customer {}", contact.toString(),
 							customer.map(Customer::getName).orElse("None"));
 					Contact saved = contactRepository.saveAndFlush(contact);
 					Customer unsaved = customer.get();
@@ -514,7 +511,7 @@ public class CustomerController {
 					URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}")
 							.buildAndExpand(saved.getId()).toUri();
 					response.setResult(ResponseEntity.created(location).build());
-					LOGGER.debug("Rendered Location header {}", location.toString());
+					log.debug("Rendered Location header {}", location.toString());
 				} else
 					response.setResult(ResponseEntity.unprocessableEntity().build());
 
@@ -522,7 +519,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				LOGGER.error("Cannot update contact {} for customer id {} due to error: {}", contact.toString(), id,
+				log.error("Cannot update contact {} for customer id {} due to error: {}", contact.toString(), id,
 						ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot update contact for this customer due to error."));
@@ -535,7 +532,7 @@ public class CustomerController {
 	private Date getTodaysDate() {
 		Date today = Date.from(LocalDate.now()
 				.atStartOfDay(ZoneId.of(environment.getProperty("spring.jackson.time-zone"))).toInstant());
-		LOGGER.debug("Returning Date filter for today, value is {}", new SimpleDateFormat("dd-MM-yyyy").format(today));
+		log.debug("Returning Date filter for today, value is {}", new SimpleDateFormat("dd-MM-yyyy").format(today));
 		return today;
 	}
 
