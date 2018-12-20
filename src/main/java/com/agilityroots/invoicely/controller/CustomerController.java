@@ -279,8 +279,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
-						ex);
+				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer paid invoices due to server error."));
 			}
@@ -318,8 +317,8 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				log.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id,
-						ex.getMessage(), ex);
+				log.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id, ex.getMessage(),
+						ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer pending invoices due to server error."));
 			}
@@ -357,8 +356,7 @@ public class CustomerController {
 
 			@Override
 			public void onFailure(Throwable ex) {
-				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(),
-						ex);
+				log.error("Cannot retrieve paid invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
 				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
 						.body("Cannot get customer overdue invoices due to server error."));
 			}

@@ -56,8 +56,8 @@ public class CustomerAsyncService {
 
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	public ListenableFuture<Optional<Contact>> getContact(Long id) {
-		return AsyncResult.forValue(Optional
-				.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
+		return AsyncResult
+				.forValue(Optional.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
 	}
 
 }

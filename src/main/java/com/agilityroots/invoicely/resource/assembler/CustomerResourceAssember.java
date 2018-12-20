@@ -25,7 +25,7 @@ public class CustomerResourceAssember extends SimpleIdentifiableResourceAssemble
 
 	@Autowired
 	private Environment environment;
-	
+
 	public CustomerResourceAssember() {
 		super(CustomerController.class);
 	}

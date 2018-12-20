@@ -20,7 +20,7 @@ public class DataApiApplication {
 	public Module hibernate5Module() {
 		return new Hibernate5Module();
 	}
-	
+
 	@Bean(name = "webExecutor")
 	public AsyncTaskExecutor webAsyncExecutor() {
 
@@ -32,7 +32,7 @@ public class DataApiApplication {
 		webExecutor.initialize();
 		return webExecutor;
 	}
-	
+
 	public static void main(String[] args) {
 		SpringApplication.run(DataApiApplication.class, args);
 	}
