@@ -9,7 +9,7 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.MappedSuperclass;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.annotations.NaturalId;
 
@@ -27,12 +27,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public abstract class Organisation extends AuditableEntity {
 
-	@NotNull(message = "Cannot save customer without registered name")
+	@NotEmpty(message = "Cannot save customer without registered name")
 	@Column(unique = true, length = 50, nullable = false)
 	@NaturalId
 	private String name;
 
-	@NotNull(message = "PAN is mandatory while adding a new Customer")
+	@NotEmpty(message = "PAN is mandatory while adding a new Customer")
 	@Column(unique = true, length = 10, updatable = false, nullable = false)
 	private String pan;
 
