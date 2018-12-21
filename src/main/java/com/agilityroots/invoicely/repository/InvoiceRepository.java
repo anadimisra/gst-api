@@ -69,25 +69,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 	@Cacheable("invoices")
 	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	/**
-	 * Overdue Invoiced by Customer
-	 * 
-	 * @param today
-	 * @param id
-	 * @param pageable
-	 * @return
-	 */
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
-			Pageable pageable);
-
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
 	/**
 	 * Paid invoices by Customer
 	 * 
@@ -96,12 +77,12 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 	 * @param pageable
 	 * @return
 	 */
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNotNullAndCustomer_Id(Long id, Pageable pageable);
-
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@Cacheable("invoices")
+	ListenableFuture<Page<Invoice>> findByPaymentsIsNotNullAndCustomer_Id(Long id, Pageable pageable);
+
 	/**
 	 * Pending invoices by Customer
 	 * 
@@ -110,7 +91,26 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 	 * @param pageable
 	 * @return
 	 */
+	@Async
+	@Lock(LockModeType.OPTIMISTIC)
+	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+	@Cacheable("invoices")
 	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
+			Pageable pageable);
+
+	/**
+	 * Overdue Invoiced by Customer
+	 * 
+	 * @param today
+	 * @param id
+	 * @param pageable
+	 * @return
+	 */
+	@Async
+	@Lock(LockModeType.OPTIMISTIC)
+	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+	@Cacheable("invoices")
+	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
 			Pageable pageable);
 
 }

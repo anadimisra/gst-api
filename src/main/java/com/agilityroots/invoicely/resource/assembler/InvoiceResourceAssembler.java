@@ -25,8 +25,7 @@ public class InvoiceResourceAssembler extends SimpleIdentifiableResourceAssemble
 
 	@Override
 	protected void addLinks(Resource<Invoice> resource) {
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("invoices"));
+		super.addLinks(resource);
 		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
 				.slash(getRelProvider().getItemResourceRelFor(Customer.class)).withRel("customer"));
 	}

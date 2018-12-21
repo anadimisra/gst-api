@@ -5,6 +5,9 @@
  */
 package com.agilityroots.invoicely.controller;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,11 +29,13 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.InvoiceService;
 
@@ -49,6 +54,9 @@ public class InvoiceController {
 	private InvoiceService invoiceService;
 
 	@Autowired
+	private InvoiceRepository invoiceRepository;
+
+	@Autowired
 	private InvoiceResourceAssembler invoiceResourceAssembler;
 
 	@GetMapping(value = "/invoices", produces = MediaTypes.HAL_JSON_VALUE)
@@ -56,12 +64,7 @@ public class InvoiceController {
 			@PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
 			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
+		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
 
 		ListenableFuture<Page<Invoice>> result = invoiceService.getInvoices(pageable);
 
@@ -125,6 +128,144 @@ public class InvoiceController {
 			}
 		});
 
+		return response;
+	}
+
+	@GetMapping(value = "/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
+	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoices(
+			@PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
+
+		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
+
+		ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNotNull(pageable);
+
+		result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
+
+			@Override
+			public void onSuccess(Page<Invoice> result) {
+				Link self = new Link(
+						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(),
+						"self");
+				log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
+				if (result.hasContent())
+					response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
+				else
+					response.setErrorResult(ResponseEntity.notFound().build());
+				log.debug("Returning Response with {} invoices", result.getNumber());
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				log.error("Cannot retrieve invoices due to error: {}", ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot save invoices list due to server error."));
+
+			}
+		});
+
+		return response;
+
+	}
+
+	@GetMapping(value = "/invoices/pending", produces = MediaTypes.HAL_JSON_VALUE)
+	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoices(
+			@PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request,
+			@RequestParam(required = false) Date date) {
+
+		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
+		Date queryDate = getOptinalDateParamter(date);
+		ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNullAndDueDateAfter(queryDate,
+				pageable);
+
+		result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
+
+			@Override
+			public void onSuccess(Page<Invoice> result) {
+				Link self = new Link(
+						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(),
+						"self");
+				log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
+				if (result.hasContent())
+					response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
+				else
+					response.setErrorResult(ResponseEntity.notFound().build());
+				log.debug("Returning Response with {} invoices", result.getNumber());
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				log.error("Cannot retrieve invoices due to error: {}", ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot save invoices list due to server error."));
+
+			}
+		});
+
+		return response;
+
+	}
+
+	@GetMapping(value = "/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
+	public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoices(
+			@PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+			PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request,
+			@RequestParam(required = false) Date date) {
+
+		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
+		Date queryDate = getOptinalDateParamter(date);
+		ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNullAndDueDateBefore(queryDate,
+				pageable);
+
+		result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
+
+			@Override
+			public void onSuccess(Page<Invoice> result) {
+				Link self = new Link(
+						ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(),
+						"self");
+				log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
+				if (result.hasContent())
+					response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
+				else
+					response.setErrorResult(ResponseEntity.notFound().build());
+				log.debug("Returning Response with {} invoices", result.getNumber());
+			}
+
+			@Override
+			public void onFailure(Throwable ex) {
+				log.error("Cannot retrieve invoices due to error: {}", ex.getMessage(), ex);
+				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("Cannot save invoices list due to server error."));
+
+			}
+		});
+
+		return response;
+
+	}
+
+	/**
+	 * @param date
+	 * @return
+	 */
+	private Date getOptinalDateParamter(Date date) {
+		Date queryDate = date != null ? date
+				: Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
+		return queryDate;
+	}
+
+	/**
+	 * @return
+	 */
+	private DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> setupDeferredResult() {
+		DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
+		response.onTimeout(() -> response
+				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+		response.onError((Throwable t) -> {
+			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+		});
 		return response;
 	}
 }

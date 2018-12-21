@@ -37,6 +37,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -146,10 +147,70 @@ public class InvoiceControllerTests {
 				.andExpect(jsonPath("$.line_items").doesNotHaveJsonPath())
 				.andExpect(jsonPath("$.invoice_number", is(equalTo("INV-20180918"))))
 				.andExpect(jsonPath("$._links.self.href", containsString("/invoices/20")))
-				.andExpect(jsonPath("$._links.invoices.href", containsString("/invoices")))
+				.andExpect(jsonPath("$._links.invoices.href", is(equalTo("/invoices"))))
 				.andExpect(jsonPath("$._links.customer.href", containsString("/invoices/20/customer")));
 
 	}
+
+	@Test
+	public void testGetPaidInvoicesReturnsHALDocument() throws Exception {
+		// Given
+		Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
+		BDDMockito.given(invoiceRepository.findByPaymentsIsNotNull(ArgumentMatchers.any(Pageable.class)))
+				.willReturn(AsyncResult.forValue(page));
+
+		// When
+		MvcResult result = mockMvc.perform(get("/invoices/paid")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
+				.andExpect(jsonPath("$._links.self.href", containsString("/invoices/paid")));
+	}
+
+	@Test
+	public void testGetPendingInvoicesReturnsHALDocument() throws Exception {
+		// Given
+		Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
+		BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateAfter(ArgumentMatchers.any(Date.class),
+				ArgumentMatchers.any(Pageable.class))).willReturn(AsyncResult.forValue(page));
+
+		// When
+		MvcResult result = mockMvc.perform(get("/invoices/pending")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
+				.andExpect(jsonPath("$._links.self.href", containsString("/invoices/pending")));
+	}
+	
+	@Test
+	public void testGetOverdueInvoicesReturnsHALDocument() throws Exception {
+		// Given
+		Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
+		BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateBefore(ArgumentMatchers.any(Date.class),
+				ArgumentMatchers.any(Pageable.class))).willReturn(AsyncResult.forValue(page));
+
+		// When
+		MvcResult result = mockMvc.perform(get("/invoices/overdue")).andExpect(request().asyncStarted()).andDo(print())
+				.andReturn();
+
+		// Then
+		mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+				.andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(1)))
+				.andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
+				.andExpect(jsonPath("$._links.self.href", containsString("/invoices/overdue")));
+	}	
 
 	private Invoice getInvoiceObjectWithLineItems() {
 		Invoice invoice = getInvoiceObject();
