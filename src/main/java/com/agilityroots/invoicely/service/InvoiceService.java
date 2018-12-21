@@ -24,18 +24,22 @@ import com.agilityroots.invoicely.repository.InvoiceRepository;
 @Service
 public class InvoiceService {
 
-	private InvoiceRepository invoiceRepository;
+  private InvoiceRepository invoiceRepository;
 
-	@Autowired
-	public InvoiceService(InvoiceRepository invoiceRepository) {
-		this.invoiceRepository = invoiceRepository;
-	}
+  @Autowired
+  public InvoiceService(InvoiceRepository invoiceRepository) {
+    this.invoiceRepository = invoiceRepository;
+  }
 
-	public ListenableFuture<Page<Invoice>> getInvoices(Pageable pageable) {
-		return AsyncResult.forValue(invoiceRepository.findAll(pageable));
-	}
+  public ListenableFuture<Page<Invoice>> getInvoices(Pageable pageable) {
+    return AsyncResult.forValue(invoiceRepository.findAll(pageable));
+  }
 
-	public ListenableFuture<Optional<Invoice>> getInvoice(Long id) {
-		return AsyncResult.forValue(invoiceRepository.findById(id));
-	}
+  public ListenableFuture<Optional<Invoice>> getInvoice(Long id) {
+    return AsyncResult.forValue(invoiceRepository.findById(id));
+  }
+
+  public ListenableFuture<Invoice> save(Invoice invoice) {
+    return AsyncResult.forValue(invoiceRepository.saveAndFlush(invoice));
+  }
 }

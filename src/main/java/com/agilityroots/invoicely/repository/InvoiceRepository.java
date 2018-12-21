@@ -61,7 +61,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 	@Lock(LockModeType.OPTIMISTIC)
 	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
 	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
 
 	@Async
 	@Lock(LockModeType.OPTIMISTIC)
