@@ -22,12 +22,12 @@ import com.agilityroots.invoicely.controller.CustomerController;
 @SpringBootTest
 public class DataApiApplicationTest {
 
-	@Autowired
-	private CustomerController customerController;
-	
-	@Test
-	public void contextLoads() throws Exception {
-		assertThat(customerController).isNotNull();
-	}
+  @Autowired
+  private CustomerController customerController;
+
+  @Test
+  public void contextLoads() throws Exception {
+    assertThat(customerController).isNotNull();
+  }
 
 }

@@ -54,149 +54,147 @@ import com.agilityroots.invoicely.repository.ContactRepository;
 @ExposesResourceFor(Branch.class)
 public class BranchController {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BranchController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BranchController.class);
 
-	public static final Iterable<Resource<?>> EMPTY_RESOURCE_LIST = Collections.emptyList();
+  public static final Iterable<Resource<?>> EMPTY_RESOURCE_LIST = Collections.emptyList();
 
-	@Autowired
-	private BranchRepository branchRepository;
+  @Autowired
+  private BranchRepository branchRepository;
 
-	@Autowired
-	private ContactRepository contactRepository;
+  @Autowired
+  private ContactRepository contactRepository;
 
-	@GetMapping("/branches")
-	public DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> getAll(
-			@PageableDefault(page = 0, size = 20) @SortDefault.SortDefaults({
-					@SortDefault(sort = "name", direction = Direction.ASC) }) Pageable pageable,
-			PagedResourcesAssembler<Branch> assembler, HttpServletRequest request) {
+  @GetMapping("/branches")
+  public DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> getAll(
+      @PageableDefault(page = 0, size = 20) @SortDefault.SortDefaults({
+          @SortDefault(sort = "name", direction = Direction.ASC) }) Pageable pageable,
+      PagedResourcesAssembler<Branch> assembler, HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> response = new DeferredResult<>();
-		response.setErrorResult(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
-		return response;
-	}
+    DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> response = new DeferredResult<>();
+    response.setErrorResult(ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    return response;
+  }
 
-	@PostMapping("/branches")
-	public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request) {
+  @PostMapping("/branches")
+  public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-		response.setErrorResult(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build());
-		return response;
-	}
+    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+    response.setErrorResult(ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).build());
+    return response;
+  }
 
-	@GetMapping("/branches/{id}")
-	public DeferredResult<ResponseEntity<ResourceSupport>> getBranch(@PathVariable Long id,
-			HttpServletRequest request) {
+  @GetMapping("/branches/{id}")
+  public DeferredResult<ResponseEntity<ResourceSupport>> getBranch(@PathVariable Long id, HttpServletRequest request) {
 
-		DeferredResult<ResponseEntity<ResourceSupport>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
-		ListenableFuture<Branch> future = branchRepository.findOneById(id);
+    DeferredResult<ResponseEntity<ResourceSupport>> response = new DeferredResult<>();
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError((Throwable t) -> {
+      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+    });
+    ListenableFuture<Branch> future = branchRepository.findOneById(id);
 
-		future.addCallback(new ListenableFutureCallback<Branch>() {
+    future.addCallback(new ListenableFutureCallback<Branch>() {
 
-			@Override
-			public void onSuccess(Branch branch) {
-				if (branch == null)
-					response.setResult(ResponseEntity.notFound().build());
-				else {
-					LOGGER.debug("Returning details of {}", branch.getBranchName());
-					Resource<Branch> resource = new Resource<Branch>(branch, getEntityLinks(request));
-					response.setResult(ResponseEntity.ok(resource));
-				}
+      @Override
+      public void onSuccess(Branch branch) {
+        if (branch == null)
+          response.setResult(ResponseEntity.notFound().build());
+        else {
+          LOGGER.debug("Returning details of {}", branch.getBranchName());
+          Resource<Branch> resource = new Resource<Branch>(branch, getEntityLinks(request));
+          response.setResult(ResponseEntity.ok(resource));
+        }
 
-			}
+      }
 
-			@Override
-			public void onFailure(Throwable ex) {
-				response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("Cannot get branch details due to server error."));
-			}
+      @Override
+      public void onFailure(Throwable ex) {
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Cannot get branch details due to server error."));
+      }
 
-		});
+    });
 
-		return response;
-	}
+    return response;
+  }
 
-	@PutMapping("/branches/{id}/contact")
-	public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
-			@RequestBody @Valid Contact contact) {
-		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
+  @PutMapping("/branches/{id}/contact")
+  public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
+      @RequestBody @Valid Contact contact) {
+    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError((Throwable t) -> {
+      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+    });
 
-		ListenableFuture<Contact> future = AsyncResult.forValue(contactRepository.saveAndFlush(contact));
+    ListenableFuture<Contact> future = AsyncResult.forValue(contactRepository.saveAndFlush(contact));
 
-		future.addCallback(new ListenableFutureCallback<Contact>() {
-			@Override
-			public void onSuccess(Contact result) {
-				response.setResult(ResponseEntity.ok().location(ServletUriComponentsBuilder.fromRequestUri(request)
-						.path("/{id}").buildAndExpand(result.getId()).toUri()).build());
-			}
+    future.addCallback(new ListenableFutureCallback<Contact>() {
+      @Override
+      public void onSuccess(Contact result) {
+        response.setResult(ResponseEntity.ok().location(
+            ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(result.getId()).toUri())
+            .build());
+      }
 
-			@Override
-			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+      @Override
+      public void onFailure(Throwable ex) {
+        LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 
-			}
-		});
+      }
+    });
 
-		return response;
-	}
+    return response;
+  }
 
-	@GetMapping("/branches/{id}/contact")
-	public DeferredResult<ResponseEntity<Object>> getContact(@PathVariable("id") Long id, HttpServletRequest request) {
-		DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-		response.onTimeout(() -> response
-				.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-		response.onError((Throwable t) -> {
-			response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-		});
+  @GetMapping("/branches/{id}/contact")
+  public DeferredResult<ResponseEntity<Object>> getContact(@PathVariable("id") Long id, HttpServletRequest request) {
+    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError((Throwable t) -> {
+      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+    });
 
-		ListenableFuture<Optional<Contact>> future = AsyncResult
-				.forValue(branchRepository.findById(id).map(it -> it.getContact()));
+    ListenableFuture<Optional<Contact>> future = AsyncResult
+        .forValue(branchRepository.findById(id).map(it -> it.getContact()));
 
-		future.addCallback(new ListenableFutureCallback<Optional<Contact>>() {
-			@Override
-			public void onSuccess(Optional<Contact> result) {
+    future.addCallback(new ListenableFutureCallback<Optional<Contact>>() {
+      @Override
+      public void onSuccess(Optional<Contact> result) {
 
-				Resource<Contact> resource = result.<Resource<Contact>>map(
-						it -> new Resource<Contact>(it, new Link(getCurrentLocation(request).toString(), "contact")))
-						.orElse(new Resource<Contact>(new Contact(),
-								new Link(getCurrentLocation(request).toString(), "contact")));
-				response.setResult(ResponseEntity.ok().body(resource));
-			}
+        Resource<Contact> resource = result
+            .<Resource<Contact>>map(
+                it -> new Resource<Contact>(it, new Link(getCurrentLocation(request).toString(), "contact")))
+            .orElse(new Resource<Contact>(new Contact(), new Link(getCurrentLocation(request).toString(), "contact")));
+        response.setResult(ResponseEntity.ok().body(resource));
+      }
 
-			@Override
-			public void onFailure(Throwable ex) {
-				LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
-				response.setErrorResult(
-						ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+      @Override
+      public void onFailure(Throwable ex) {
+        LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
 
-			}
-		});
+      }
+    });
 
-		return response;
-	}
+    return response;
+  }
 
-	private URI getCurrentLocation(HttpServletRequest request) {
-		return ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
-	}
+  private URI getCurrentLocation(HttpServletRequest request) {
+    return ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
+  }
 
-	private List<Link> getEntityLinks(HttpServletRequest request) {
-		String location = getCurrentLocation(request).toString();
-		List<Link> links = new ArrayList<>();
-		links.add(new Link(location, "self"));
-		links.add(new Link(location, "branch"));
-		links.add(new Link(new StringBuilder(location).append("/").append("contact").toString(), "contact"));
-		return links;
+  private List<Link> getEntityLinks(HttpServletRequest request) {
+    String location = getCurrentLocation(request).toString();
+    List<Link> links = new ArrayList<>();
+    links.add(new Link(location, "self"));
+    links.add(new Link(location, "branch"));
+    links.add(new Link(new StringBuilder(location).append("/").append("contact").toString(), "contact"));
+    return links;
 
-	}
+  }
 }

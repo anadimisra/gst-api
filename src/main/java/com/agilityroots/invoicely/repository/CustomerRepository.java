@@ -27,17 +27,17 @@ import com.agilityroots.invoicely.entity.Customer;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-	@Lock(LockModeType.OPTIMISTIC)
-	@Cacheable("customers")
-	Optional<Customer> findById(Long id);
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("customers")
+  Optional<Customer> findById(Long id);
 
-	@Lock(LockModeType.OPTIMISTIC)
-	@Cacheable("customers")
-	Page<Customer> findAll(Pageable pageable);
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("customers")
+  Page<Customer> findAll(Pageable pageable);
 
-	@Lock(LockModeType.OPTIMISTIC)
-	@Cacheable("customers")
-	@EntityGraph(value = "graph.Customer.branches", type = EntityGraphType.LOAD)
-	Customer findEagerFetchBranchesById(@Param("id") Long id);
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("customers")
+  @EntityGraph(value = "graph.Customer.branches", type = EntityGraphType.LOAD)
+  Customer findEagerFetchBranchesById(@Param("id") Long id);
 
 }

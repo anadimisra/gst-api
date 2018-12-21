@@ -27,33 +27,33 @@ import lombok.Setter;
 @NoArgsConstructor
 public abstract class Organisation extends AuditableEntity {
 
-	@NotEmpty(message = "Cannot save customer without registered name")
-	@Column(unique = true, length = 50, nullable = false)
-	@NaturalId
-	private String name;
+  @NotEmpty(message = "Cannot save customer without registered name")
+  @Column(unique = true, length = 50, nullable = false)
+  @NaturalId
+  private String name;
 
-	@NotEmpty(message = "PAN is mandatory while adding a new Customer")
-	@Column(unique = true, length = 10, updatable = false, nullable = false)
-	private String pan;
+  @NotEmpty(message = "PAN is mandatory while adding a new Customer")
+  @Column(unique = true, length = 10, updatable = false, nullable = false)
+  private String pan;
 
-	@Column(length = 11)
-	private String vatTin;
+  @Column(length = 11)
+  private String vatTin;
 
-	@Override
-	public int hashCode() {
-		return (Objects.hash(name) * 79);
-	}
+  @Override
+  public int hashCode() {
+    return (Objects.hash(name) * 79);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Organisation other = (Organisation) obj;
-		return Objects.equals(name, other.getName());
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Organisation other = (Organisation) obj;
+    return Objects.equals(name, other.getName());
+  }
 
 }

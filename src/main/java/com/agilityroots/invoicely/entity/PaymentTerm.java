@@ -23,12 +23,12 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PaymentTerm extends AuditableEntity implements Serializable {
 
-	private static final long serialVersionUID = -9205180346170113156L;
+  private static final long serialVersionUID = -9205180346170113156L;
 
-	@Column(unique = true, length = 6)
-	private String name;
+  @Column(unique = true, length = 6)
+  private String name;
 
-	@Column(nullable = false)
-	private Integer value;
+  @Column(nullable = false)
+  private Integer value;
 
 }

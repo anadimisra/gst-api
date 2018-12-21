@@ -42,42 +42,42 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Relation(collectionRelation = "customers")
 @NamedEntityGraphs({
-		@NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
-		@NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")),
-		@NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
+    @NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
+    @NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")),
+    @NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
-	private static final long serialVersionUID = 8101819808147191270L;
+  private static final long serialVersionUID = 8101819808147191270L;
 
-	@Column(nullable = false, updatable = false, length = 3)
-	private String currecny;
+  @Column(nullable = false, updatable = false, length = 3)
+  private String currecny;
 
-	private Double tds;
+  private Double tds;
 
-	@Column(nullable = false, updatable = false, length = 3)
-	private String invoicePrefix;
+  @Column(nullable = false, updatable = false, length = 3)
+  private String invoicePrefix;
 
-	@PrePersist
-	public void prePersist() {
-		log.debug("Checking for empty fields to set default values");
-		if (tds == null)
-			tds = 0.10;
-		if (currecny == null)
-			currecny = "INR";
-		if (invoicePrefix == null)
-			invoicePrefix = "INV";
-	}
+  @PrePersist
+  public void prePersist() {
+    log.debug("Checking for empty fields to set default values");
+    if (tds == null)
+      tds = 0.10;
+    if (currecny == null)
+      currecny = "INR";
+    if (invoicePrefix == null)
+      invoicePrefix = "INV";
+  }
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
-	private Contact contact;
+  @OneToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
+  private Contact contact;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
-	private List<Invoice> invoices;
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
+  private List<Invoice> invoices;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "customer_id", referencedColumnName = "id")
-	private List<Branch> branches = new ArrayList<Branch>();
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "customer_id", referencedColumnName = "id")
+  private List<Branch> branches = new ArrayList<Branch>();
 
 }

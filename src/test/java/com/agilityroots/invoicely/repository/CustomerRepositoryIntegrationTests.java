@@ -43,102 +43,101 @@ import com.github.javafaker.Faker;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class CustomerRepositoryIntegrationTests {
 
-	@Autowired
-	private CustomerRepository customerRepository;
+  @Autowired
+  private CustomerRepository customerRepository;
 
-	@Autowired
-	private BranchRepository branchRepository;
+  @Autowired
+  private BranchRepository branchRepository;
 
-	@Autowired
-	private ContactRepository contactRepository;
+  @Autowired
+  private ContactRepository contactRepository;
 
-	private Faker faker = new Faker(new Locale("en-IND"));
+  private Faker faker = new Faker(new Locale("en-IND"));
 
-	private Long customerId;
+  private Long customerId;
 
-	private Contact contact;
+  private Contact contact;
 
-	@Before
-	public void setup() {
+  @Before
+  public void setup() {
 
-		Customer customer = new Customer();
-		customer.setName(faker.company().name());
-		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
-		customer.setTds(0.10);
-		Branch branch = getBranchObject();
-		branch = branchRepository.save(branch);
-		customer.setBranches(Arrays.asList(branch));
-		customer = customerRepository.save(customer);
-		customerId = customer.getId();
-	}
+    Customer customer = new Customer();
+    customer.setName(faker.company().name());
+    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
+    customer.setTds(0.10);
+    Branch branch = getBranchObject();
+    branch = branchRepository.save(branch);
+    customer.setBranches(Arrays.asList(branch));
+    customer = customerRepository.save(customer);
+    customerId = customer.getId();
+  }
 
-	/**
-	 * @return {@link Branch} object
-	 */
-	private Branch getBranchObject() {
+  /**
+   * @return {@link Branch} object
+   */
+  private Branch getBranchObject() {
 
-		Address address = new Address();
-		address.setStreetAddress(faker.address().streetAddress());
-		address.setArea(faker.address().streetName());
-		address.setCity(faker.address().city());
-		address.setState(faker.address().state());
-		address.setPincode(faker.address().zipCode());
+    Address address = new Address();
+    address.setStreetAddress(faker.address().streetAddress());
+    address.setArea(faker.address().streetName());
+    address.setCity(faker.address().city());
+    address.setState(faker.address().state());
+    address.setPincode(faker.address().zipCode());
 
-		contact = new Contact();
-		contact.setName(faker.name().fullName());
-		contact.setEmail(faker.internet().emailAddress());
-		contact.setPhone("8067601867");
-		contact = contactRepository.save(contact);
+    contact = new Contact();
+    contact.setName(faker.name().fullName());
+    contact.setEmail(faker.internet().emailAddress());
+    contact.setPhone("8067601867");
+    contact = contactRepository.save(contact);
 
-		Branch branch = new Branch();
-		branch.setBranchName("Main Branch");
-		branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-		branch.setSez(Boolean.FALSE);
-		branch.setContact(contact);
-		branch.setAddress(address);
-		return branch;
-	}
+    Branch branch = new Branch();
+    branch.setBranchName("Main Branch");
+    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
+    branch.setSez(Boolean.FALSE);
+    branch.setContact(contact);
+    branch.setAddress(address);
+    return branch;
+  }
 
-	@Test
-	public void testNonExistingCustomerGivesEmptyOptional() throws InterruptedException, ExecutionException {
+  @Test
+  public void testNonExistingCustomerGivesEmptyOptional() throws InterruptedException, ExecutionException {
 
-		Optional<Customer> result = Optional
-				.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)));
-		assertThat(result).isNotNull();
-		assertThat(result).isEmpty();
+    Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)));
+    assertThat(result).isNotNull();
+    assertThat(result).isEmpty();
 
-	}
+  }
 
-	@Test
-	public void testEagerLoadBranchesByCustomer() throws InterruptedException, ExecutionException {
+  @Test
+  public void testEagerLoadBranchesByCustomer() throws InterruptedException, ExecutionException {
 
-		Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(customerId));
-		assertThat(result).isNotNull();
-		assertThat(result).isNotEmpty();
-		assertThat(result.map(Customer::getBranches).map(List::size).get()).isEqualTo(1);
+    Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(customerId));
+    assertThat(result).isNotNull();
+    assertThat(result).isNotEmpty();
+    assertThat(result.map(Customer::getBranches).map(List::size).get()).isEqualTo(1);
 
-	}
+  }
 
-	@Test
-	public void testPageIsEmptyWhenNoCustomerRecordsArePresent() {
+  @Test
+  public void testPageIsEmptyWhenNoCustomerRecordsArePresent() {
 
-		customerRepository.deleteAll();
-		customerRepository.flush();
-		Page<Customer> page = customerRepository.findAll(PageRequest.of(0, 20));
-		assertThat(page).isNotNull();
-		assertThat(page.hasContent()).isFalse();
-	}
+    customerRepository.deleteAll();
+    customerRepository.flush();
+    Page<Customer> page = customerRepository.findAll(PageRequest.of(0, 20));
+    assertThat(page).isNotNull();
+    assertThat(page.hasContent()).isFalse();
+  }
 
-	@Test
-	public void testPrePersistAddsMandatoryFields() {
+  @Test
+  public void testPrePersistAddsMandatoryFields() {
 
-		Customer minty = new Customer();
-		minty.setName("Minty & Sons Pvt. Ltd.");
-		minty.setPan(RandomStringUtils.randomAlphanumeric(10));
-		Customer badiMinty = customerRepository.saveAndFlush(minty);
-		assertThat(badiMinty.getTds().doubleValue()).isEqualTo(0.10);
-		assertThat(badiMinty.getInvoicePrefix()).isEqualTo("INV");
-		assertThat(badiMinty.getCurrecny()).isEqualTo("INR");
-	}
+    Customer minty = new Customer();
+    minty.setName("Minty & Sons Pvt. Ltd.");
+    minty.setPan(RandomStringUtils.randomAlphanumeric(10));
+    Customer badiMinty = customerRepository.saveAndFlush(minty);
+    assertThat(badiMinty.getTds().doubleValue()).isEqualTo(0.10);
+    assertThat(badiMinty.getInvoicePrefix()).isEqualTo("INV");
+    assertThat(badiMinty.getCurrecny()).isEqualTo("INR");
+  }
 
 }

@@ -49,219 +49,214 @@ import com.github.javafaker.Faker;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class InvoiceRepositoryIntegrationTests {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(InvoiceRepositoryIntegrationTests.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(InvoiceRepositoryIntegrationTests.class);
 
-	@Autowired
-	private CustomerRepository customerRepository;
+  @Autowired
+  private CustomerRepository customerRepository;
 
-	@Autowired
-	private CompanyRepository companyRepository;
+  @Autowired
+  private CompanyRepository companyRepository;
 
-	@Autowired
-	private BranchRepository branchRepository;
+  @Autowired
+  private BranchRepository branchRepository;
 
-	@Autowired
-	private ContactRepository contactRepository;
+  @Autowired
+  private ContactRepository contactRepository;
 
-	@Autowired
-	private PaymentRepository paymentRepository;
+  @Autowired
+  private PaymentRepository paymentRepository;
 
-	@Autowired
-	private InvoiceRepository invoiceRepository;
+  @Autowired
+  private InvoiceRepository invoiceRepository;
 
-	@Autowired
-	private LineItemRepository lineItemRepository;
+  @Autowired
+  private LineItemRepository lineItemRepository;
 
-	private Faker faker = new Faker(new Locale("en-IND"));
+  private Faker faker = new Faker(new Locale("en-IND"));
 
-	private Invoice invoice;
+  private Invoice invoice;
 
-	@Before
-	public void setup() {
-		Customer customer = new Customer();
-		customer.setName("Minty And Sons Pvt. Ltd.");
-		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
-		customer.setTds(0.10);
+  @Before
+  public void setup() {
+    Customer customer = new Customer();
+    customer.setName("Minty And Sons Pvt. Ltd.");
+    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
+    customer.setTds(0.10);
 
-		Address address = new Address();
-		address.setStreetAddress(faker.address().streetAddress());
-		address.setArea(faker.address().streetName());
-		address.setCity(faker.address().city());
-		address.setState(faker.address().state());
-		address.setPincode(faker.address().zipCode());
+    Address address = new Address();
+    address.setStreetAddress(faker.address().streetAddress());
+    address.setArea(faker.address().streetName());
+    address.setCity(faker.address().city());
+    address.setState(faker.address().state());
+    address.setPincode(faker.address().zipCode());
 
-		Contact contact = new Contact();
-		contact.setName(faker.name().fullName());
-		contact.setEmail(faker.internet().emailAddress());
-		contact.setPhone("0804126182");
+    Contact contact = new Contact();
+    contact.setName(faker.name().fullName());
+    contact.setEmail(faker.internet().emailAddress());
+    contact.setPhone("0804126182");
 
-		contact = contactRepository.saveAndFlush(contact);
+    contact = contactRepository.saveAndFlush(contact);
 
-		Branch branch = new Branch();
-		branch.setBranchName("Main Branch");
-		branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-		branch.setSez(Boolean.FALSE);
-		branch.setContact(contact);
-		branch.setAddress(address);
+    Branch branch = new Branch();
+    branch.setBranchName("Main Branch");
+    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
+    branch.setSez(Boolean.FALSE);
+    branch.setContact(contact);
+    branch.setAddress(address);
 
-		branch = branchRepository.saveAndFlush(branch);
+    branch = branchRepository.saveAndFlush(branch);
 
-		customer.setBranches(Arrays.asList(branch));
-		customer.setId(Long.valueOf(9));
+    customer.setBranches(Arrays.asList(branch));
+    customer.setId(Long.valueOf(9));
     Customer saved = customerRepository.saveAndFlush(customer);
 
-		Address companyAddress = new Address();
-		companyAddress.setStreetAddress(faker.address().streetAddress());
-		companyAddress.setArea(faker.address().streetName());
-		companyAddress.setCity(faker.address().city());
-		companyAddress.setState(faker.address().state());
-		companyAddress.setPincode(faker.address().zipCode());
+    Address companyAddress = new Address();
+    companyAddress.setStreetAddress(faker.address().streetAddress());
+    companyAddress.setArea(faker.address().streetName());
+    companyAddress.setCity(faker.address().city());
+    companyAddress.setState(faker.address().state());
+    companyAddress.setPincode(faker.address().zipCode());
 
-		Contact companyContact = new Contact();
-		companyContact.setName(faker.name().fullName());
-		companyContact.setEmail(faker.internet().emailAddress());
-		companyContact.setPhone("0802334601");
-		companyContact = contactRepository.saveAndFlush(companyContact);
+    Contact companyContact = new Contact();
+    companyContact.setName(faker.name().fullName());
+    companyContact.setEmail(faker.internet().emailAddress());
+    companyContact.setPhone("0802334601");
+    companyContact = contactRepository.saveAndFlush(companyContact);
 
-		Branch companyBranch = new Branch();
-		companyBranch.setBranchName("Some Branch");
-		companyBranch.setGstin(RandomStringUtils.randomAlphabetic(15));
-		companyBranch.setSez(Boolean.FALSE);
-		companyBranch.setContact(companyContact);
-		companyBranch.setAddress(companyAddress);
-		companyBranch = branchRepository.saveAndFlush(companyBranch);
+    Branch companyBranch = new Branch();
+    companyBranch.setBranchName("Some Branch");
+    companyBranch.setGstin(RandomStringUtils.randomAlphabetic(15));
+    companyBranch.setSez(Boolean.FALSE);
+    companyBranch.setContact(companyContact);
+    companyBranch.setAddress(companyAddress);
+    companyBranch = branchRepository.saveAndFlush(companyBranch);
 
-		Company company = new Company();
-		company.setName("Ruchi And Sons Pvt. Ltd.");
-		company.setCin(RandomStringUtils.randomAlphanumeric(21));
-		company.setPan(RandomStringUtils.randomAlphanumeric(10));
-		company.setTan(RandomStringUtils.randomAlphabetic(10));
-		companyRepository.save(company);
+    Company company = new Company();
+    company.setName("Ruchi And Sons Pvt. Ltd.");
+    company.setCin(RandomStringUtils.randomAlphanumeric(21));
+    company.setPan(RandomStringUtils.randomAlphanumeric(10));
+    company.setTan(RandomStringUtils.randomAlphabetic(10));
+    companyRepository.save(company);
 
-		invoice = new Invoice();
-		invoice.setBilledFrom(companyBranch);
-		invoice.setBilledTo(saved.getBranches().get(0));
-		invoice.setCustomer(saved);
-		invoice.setInvoiceNumber("INV" + LocalDate.now().minusDays(40).toString());
-		invoice.setPlaceOfSupply("Karnataka");
-		
-	}
+    invoice = new Invoice();
+    invoice.setBilledFrom(companyBranch);
+    invoice.setBilledTo(saved.getBranches().get(0));
+    invoice.setCustomer(saved);
+    invoice.setInvoiceNumber("INV" + LocalDate.now().minusDays(40).toString());
+    invoice.setPlaceOfSupply("Karnataka");
 
-	@Test
-	public void testFindAllPaidInvoices() throws Exception {
+  }
 
-		invoice.setDueDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		Payment payment = new Payment();
-		payment.setAmount(1000.00);
-		payment.setAdjustmentName("TDS");
-		payment.setAdjustmentValue(100.00);
-		payment.setPaymentDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		payment = paymentRepository.save(payment);
-		invoice.setPayments(Arrays.asList(payment));
-		Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
+  @Test
+  public void testFindAllPaidInvoices() throws Exception {
 
-		Page<Invoice> paidInvoices = invoiceRepository.findByPaymentsIsNotNull(PageRequest.of(0, 10)).get();
-		assertThat(paidInvoices).isNotEmpty();
-		assertThat(paidInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-	}
+    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Payment payment = new Payment();
+    payment.setAmount(1000.00);
+    payment.setAdjustmentName("TDS");
+    payment.setAdjustmentValue(100.00);
+    payment
+        .setPaymentDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    payment = paymentRepository.save(payment);
+    invoice.setPayments(Arrays.asList(payment));
+    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-	@Test
-	public void testFindAllPendingInvoices() throws Exception {
+    Page<Invoice> paidInvoices = invoiceRepository.findByPaymentsIsNotNull(PageRequest.of(0, 10)).get();
+    assertThat(paidInvoices).isNotEmpty();
+    assertThat(paidInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  }
 
-		invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
+  @Test
+  public void testFindAllPendingInvoices() throws Exception {
 
-		Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-		Page<Invoice> pendingInvoices = invoiceRepository
-				.findByPaymentsIsNullAndDueDateAfter(today, PageRequest.of(0, 10)).get();
-		assertThat(pendingInvoices).isNotEmpty();
-		assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-	}
+    invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-	@Test
-	public void testFindAllOverdueInvoices() throws Exception {
+    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPaymentsIsNullAndDueDateAfter(today, PageRequest.of(0, 10))
+        .get();
+    assertThat(pendingInvoices).isNotEmpty();
+    assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  }
 
-		invoice.setDueDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
+  @Test
+  public void testFindAllOverdueInvoices() throws Exception {
 
-		Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-		Page<Invoice> pendingInvoices = invoiceRepository
-				.findByPaymentsIsNullAndDueDateBefore(today, PageRequest.of(0, 10)).get();
-		assertThat(pendingInvoices).isNotEmpty();
-		assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-	}
+    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-	@Test
-	public void testFindAllInvoicesByCustomer() throws Exception {
+    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPaymentsIsNullAndDueDateBefore(today, PageRequest.of(0, 10))
+        .get();
+    assertThat(pendingInvoices).isNotEmpty();
+    assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  }
 
-		invoice.setDueDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
+  @Test
+  public void testFindAllInvoicesByCustomer() throws Exception {
 
-		Long startTime = System.nanoTime();
-		Page<Invoice> overdueInvoices = invoiceRepository.findAllByCustomer_Id(Long.valueOf(9), PageRequest.of(0, 10))
-				.get();
-		Long endTime = System.nanoTime();
-		LOGGER.info("Elasped time for invoiceRepository.findAllByCustomer_Id() is {}", endTime - startTime);
-		assertThat(overdueInvoices).isNotEmpty();
-		assertThat(overdueInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-	}
+    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-	@Test
-	public void testGettingLineItemsForInvoice() {
+    Long startTime = System.nanoTime();
+    Page<Invoice> overdueInvoices = invoiceRepository.findAllByCustomer_Id(Long.valueOf(9), PageRequest.of(0, 10))
+        .get();
+    Long endTime = System.nanoTime();
+    LOGGER.info("Elasped time for invoiceRepository.findAllByCustomer_Id() is {}", endTime - startTime);
+    assertThat(overdueInvoices).isNotEmpty();
+    assertThat(overdueInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  }
 
-		invoice.setDueDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		LineItem lineItem = new LineItem();
-		lineItem.setId(Long.valueOf(89));
-		lineItem.setAmount(1180.00);
-		lineItem.setDescription("That Service");
-		lineItem.setDiscount(0.0);
-		lineItem.setHsn("998313");
-		lineItem.setItem("That Item");
-		lineItem.setSerialNumber(1);
-		lineItem.setTax(0.18);
-		lineItem.setPrice(1000.00);
-		lineItemRepository.save(lineItem);
-		invoice.setLineItems(Arrays.asList(lineItem));
-		invoice.setId(Long.valueOf(100));
-		invoiceRepository.saveAndFlush(invoice);
+  @Test
+  public void testGettingLineItemsForInvoice() {
 
-		Invoice savedInvoice = invoiceRepository.getOne(invoice.getId());
-		assertThat(savedInvoice.getLineItems()).isNotNull();
-		assertThat(savedInvoice.getLineItems()).isNotEmpty();
-		assertThat(savedInvoice.getLineItems().get(0).getItem()).isEqualTo("That Item");
-	}
+    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    LineItem lineItem = new LineItem();
+    lineItem.setId(Long.valueOf(89));
+    lineItem.setAmount(1180.00);
+    lineItem.setDescription("That Service");
+    lineItem.setDiscount(0.0);
+    lineItem.setHsn("998313");
+    lineItem.setItem("That Item");
+    lineItem.setSerialNumber(1);
+    lineItem.setTax(0.18);
+    lineItem.setPrice(1000.00);
+    lineItemRepository.save(lineItem);
+    invoice.setLineItems(Arrays.asList(lineItem));
+    invoice.setId(Long.valueOf(100));
+    invoiceRepository.saveAndFlush(invoice);
 
-	@Test
-	public void testGetInvoiceCustomerDetails() {
-		invoice.setDueDate(
-				Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoice.setPaymentTerms("NET-30");
-		invoice.setInvoiceDate(
-				Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-		invoiceRepository.saveAndFlush(invoice);
-		Invoice saved = invoiceRepository.getOne(Long.valueOf(7));
-		assertThat(saved.getCustomer()).isNotNull();
-		assertThat(saved.getCustomer().getName()).isEqualTo("Minty And Sons Pvt. Ltd.");
-	}
+    Invoice savedInvoice = invoiceRepository.getOne(invoice.getId());
+    assertThat(savedInvoice.getLineItems()).isNotNull();
+    assertThat(savedInvoice.getLineItems()).isNotEmpty();
+    assertThat(savedInvoice.getLineItems().get(0).getItem()).isEqualTo("That Item");
+  }
+
+  @Test
+  public void testGetInvoiceCustomerDetails() {
+    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoiceRepository.saveAndFlush(invoice);
+    Invoice saved = invoiceRepository.getOne(Long.valueOf(7));
+    assertThat(saved.getCustomer()).isNotNull();
+    assertThat(saved.getCustomer().getName()).isEqualTo("Minty And Sons Pvt. Ltd.");
+  }
 
 }

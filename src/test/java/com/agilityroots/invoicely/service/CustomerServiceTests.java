@@ -33,68 +33,68 @@ import com.agilityroots.invoicely.service.CustomerAsyncService;
 @Import({ CustomerAsyncService.class })
 public class CustomerServiceTests {
 
-	@Autowired
-	private CustomerAsyncService customerService;
+  @Autowired
+  private CustomerAsyncService customerService;
 
-	@MockBean
-	private CustomerRepository customerRepository;
+  @MockBean
+  private CustomerRepository customerRepository;
 
-	private Customer customer;
+  private Customer customer;
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		MockitoAnnotations.initMocks(this);
-		customer = new Customer();
-		customer.setName("Minty & SOns Pvt. Ltd.");
-		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
-	}
+  /**
+   * @throws java.lang.Exception
+   */
+  @Before
+  public void setUp() throws Exception {
+    MockitoAnnotations.initMocks(this);
+    customer = new Customer();
+    customer.setName("Minty & SOns Pvt. Ltd.");
+    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
+  }
 
-	/**
-	 * Test method for
-	 * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
-	 * 
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 */
-	@Test
-	public void testGetContactWhenNoneExistGivesEmptyOptional() throws InterruptedException, ExecutionException {
+  /**
+   * Test method for
+   * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
+   * 
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  @Test
+  public void testGetContactWhenNoneExistGivesEmptyOptional() throws InterruptedException, ExecutionException {
 
-		BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
 
-		Optional<Contact> contact = customerService.getContact(Long.valueOf(1)).get();
+    Optional<Contact> contact = customerService.getContact(Long.valueOf(1)).get();
 
-		assertThat(contact).isNotNull();
-		assertThat(contact).isEmpty();
-		assertThat(contact.map(Contact::getName).orElse("None")).isEqualTo("None");
-		assertThat(contact.map(Contact::getPhone).orElse("None")).isEqualTo("None");
-	}
+    assertThat(contact).isNotNull();
+    assertThat(contact).isEmpty();
+    assertThat(contact.map(Contact::getName).orElse("None")).isEqualTo("None");
+    assertThat(contact.map(Contact::getPhone).orElse("None")).isEqualTo("None");
+  }
 
-	/**
-	 * Test method for
-	 * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
-	 * 
-	 * @throws ExecutionException
-	 * @throws InterruptedException
-	 */
-	@Test
-	public void testGetContactWithExistGivesOptional() throws InterruptedException, ExecutionException {
+  /**
+   * Test method for
+   * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
+   * 
+   * @throws ExecutionException
+   * @throws InterruptedException
+   */
+  @Test
+  public void testGetContactWithExistGivesOptional() throws InterruptedException, ExecutionException {
 
-		Contact contact = new Contact();
-		contact.setEmail("foo@bar.com");
-		contact.setName("The Name");
-		String phoneNumber = RandomStringUtils.randomNumeric(10);
-		contact.setPhone(phoneNumber);
-		customer.setContact(contact);
+    Contact contact = new Contact();
+    contact.setEmail("foo@bar.com");
+    contact.setName("The Name");
+    String phoneNumber = RandomStringUtils.randomNumeric(10);
+    contact.setPhone(phoneNumber);
+    customer.setContact(contact);
 
-		BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
 
-		Optional<Contact> result = customerService.getContact(Long.valueOf(1)).get();
+    Optional<Contact> result = customerService.getContact(Long.valueOf(1)).get();
 
-		assertThat(result.get()).isNotNull();
-		assertThat(result.map(Contact::getName).orElse("None")).isEqualTo("The Name");
-		assertThat(result.map(Contact::getPhone).orElse("None")).isEqualTo(phoneNumber);
-	}
+    assertThat(result.get()).isNotNull();
+    assertThat(result.map(Contact::getName).orElse("None")).isEqualTo("The Name");
+    assertThat(result.map(Contact::getPhone).orElse("None")).isEqualTo(phoneNumber);
+  }
 }

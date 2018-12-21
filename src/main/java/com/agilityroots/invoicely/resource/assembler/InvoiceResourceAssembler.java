@@ -19,14 +19,14 @@ import com.agilityroots.invoicely.entity.Invoice;
 @Component
 public class InvoiceResourceAssembler extends SimpleIdentifiableResourceAssembler<Invoice> {
 
-	public InvoiceResourceAssembler() {
-		super(InvoiceController.class);
-	}
+  public InvoiceResourceAssembler() {
+    super(InvoiceController.class);
+  }
 
-	@Override
-	protected void addLinks(Resource<Invoice> resource) {
-		super.addLinks(resource);
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getItemResourceRelFor(Customer.class)).withRel("customer"));
-	}
+  @Override
+  protected void addLinks(Resource<Invoice> resource) {
+    super.addLinks(resource);
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getItemResourceRelFor(Customer.class)).withRel("customer"));
+  }
 }

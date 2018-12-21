@@ -18,31 +18,31 @@ import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 @EnableSpringDataWebSupport
 public class DataApiApplication {
 
-	@Bean
-	public Module hibernate5Module() {
-		return new Hibernate5Module();
-	}
+  @Bean
+  public Module hibernate5Module() {
+    return new Hibernate5Module();
+  }
 
-	@Bean(name = "webExecutor")
-	public AsyncTaskExecutor webAsyncExecutor() {
+  @Bean(name = "webExecutor")
+  public AsyncTaskExecutor webAsyncExecutor() {
 
-		ThreadPoolTaskExecutor webExecutor = new ThreadPoolTaskExecutor();
-		webExecutor.setCorePoolSize(5);
-		webExecutor.setMaxPoolSize(20);
-		webExecutor.setQueueCapacity(100);
-		webExecutor.setThreadNamePrefix("ApiPool-");
-		webExecutor.initialize();
-		return webExecutor;
-	}
+    ThreadPoolTaskExecutor webExecutor = new ThreadPoolTaskExecutor();
+    webExecutor.setCorePoolSize(5);
+    webExecutor.setMaxPoolSize(20);
+    webExecutor.setQueueCapacity(100);
+    webExecutor.setThreadNamePrefix("ApiPool-");
+    webExecutor.initialize();
+    return webExecutor;
+  }
 
-	@Bean
-	FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
-		FilterRegistrationBean<ForwardedHeaderFilter> bean = new FilterRegistrationBean<>();
-		bean.setFilter(new ForwardedHeaderFilter());
-		return bean;
-	}
+  @Bean
+  FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
+    FilterRegistrationBean<ForwardedHeaderFilter> bean = new FilterRegistrationBean<>();
+    bean.setFilter(new ForwardedHeaderFilter());
+    return bean;
+  }
 
-	public static void main(String[] args) {
-		SpringApplication.run(DataApiApplication.class, args);
-	}
+  public static void main(String[] args) {
+    SpringApplication.run(DataApiApplication.class, args);
+  }
 }

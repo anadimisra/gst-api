@@ -23,11 +23,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class StateGSTCode extends AuditableEntity implements Serializable {
 
-	private static final long serialVersionUID = -2862330986413643014L;
+  private static final long serialVersionUID = -2862330986413643014L;
 
-	@Column(unique = true, length = 25)
-	private String stateName;
+  @Column(unique = true, length = 25)
+  private String stateName;
 
-	@Column(unique = true, length = 2)
-	private String stateCode;
+  @Column(unique = true, length = 2)
+  private String stateCode;
 }

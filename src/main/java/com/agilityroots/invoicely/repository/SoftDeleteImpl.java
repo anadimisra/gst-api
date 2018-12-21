@@ -13,10 +13,10 @@ import com.agilityroots.invoicely.entity.Invoice;
  */
 public class SoftDeleteImpl implements SoftDelete<Invoice> {
 
-	@Override
-	public void delete(Invoice entity) {
-		entity.setDeleted(1);
+  @Override
+  public void delete(Invoice entity) {
+    entity.setDeleted(1);
 
-	}
+  }
 
 }

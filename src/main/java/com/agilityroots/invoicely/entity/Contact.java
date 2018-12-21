@@ -28,44 +28,44 @@ import lombok.ToString;
 @NoArgsConstructor
 public class Contact extends AuditableEntity implements Identifiable<Long>, Serializable {
 
-	private static final long serialVersionUID = -7756870986677314517L;
+  private static final long serialVersionUID = -7756870986677314517L;
 
-	@Column(nullable = false, updatable = false, length = 50)
-	private String name;
+  @Column(nullable = false, updatable = false, length = 50)
+  private String name;
 
-	@Column(nullable = false, updatable = false, length = 50)
-	private String email;
+  @Column(nullable = false, updatable = false, length = 50)
+  private String email;
 
-	@Column(length = 10, updatable = false)
-	private String phone;
+  @Column(length = 10, updatable = false)
+  private String phone;
 
-	@Override
-	public int hashCode() {
+  @Override
+  public int hashCode() {
 
-		HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
-		hashCodeBuilder.append(name).append(email);
-		return hashCodeBuilder.hashCode();
-	}
+    HashCodeBuilder hashCodeBuilder = new HashCodeBuilder();
+    hashCodeBuilder.append(name).append(email);
+    return hashCodeBuilder.hashCode();
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Contact other = (Contact) obj;
-		if (email == null) {
-			if (other.getEmail() != null)
-				return false;
-		} else if (!email.equals(other.getEmail()))
-			return false;
-		if (name == null) {
-			if (other.getName() != null)
-				return false;
-		} else if (!name.equals(other.getName()))
-			return false;
-		return true;
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Contact other = (Contact) obj;
+    if (email == null) {
+      if (other.getEmail() != null)
+        return false;
+    } else if (!email.equals(other.getEmail()))
+      return false;
+    if (name == null) {
+      if (other.getName() != null)
+        return false;
+    } else if (!name.equals(other.getName()))
+      return false;
+    return true;
+  }
 }

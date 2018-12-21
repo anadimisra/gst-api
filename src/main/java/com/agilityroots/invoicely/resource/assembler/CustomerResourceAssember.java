@@ -23,30 +23,29 @@ import com.agilityroots.invoicely.entity.Invoice;
 @Component
 public class CustomerResourceAssember extends SimpleIdentifiableResourceAssembler<Customer> {
 
-	@Autowired
-	private Environment environment;
+  @Autowired
+  private Environment environment;
 
-	public CustomerResourceAssember() {
-		super(CustomerController.class);
-	}
+  public CustomerResourceAssember() {
+    super(CustomerController.class);
+  }
 
-	@Override
-	protected void addLinks(Resource<Customer> resource) {
-		super.addLinks(resource);
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Branch.class)).withRel("branches"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).withRel("invoices"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("paid")
-				.withRel("paid-invoices"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("pending")
-				.withRel("pending-invoices"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("overdue")
-				.withRel("overdue-invoices"));
-	}
+  @Override
+  protected void addLinks(Resource<Customer> resource) {
+    super.addLinks(resource);
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getCollectionResourceRelFor(Branch.class)).withRel("branches"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).withRel("invoices"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("paid").withRel("paid-invoices"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("pending")
+        .withRel("pending-invoices"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("overdue")
+        .withRel("overdue-invoices"));
+  }
 }

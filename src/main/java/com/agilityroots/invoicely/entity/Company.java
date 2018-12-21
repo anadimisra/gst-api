@@ -33,34 +33,34 @@ import lombok.ToString;
 @NoArgsConstructor
 public class Company extends Organisation implements Serializable {
 
-	private static final long serialVersionUID = 4627788171283297107L;
+  private static final long serialVersionUID = 4627788171283297107L;
 
-	@NaturalId
-	@Column(unique = true, length = 21, updatable = false)
-	private String cin;
+  @NaturalId
+  @Column(unique = true, length = 21, updatable = false)
+  private String cin;
 
-	@Column(unique = true, length = 10, updatable = false)
-	private String tan;
+  @Column(unique = true, length = 10, updatable = false)
+  private String tan;
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "owner_id", referencedColumnName = "id")
-	private List<Branch> branches;
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinColumn(name = "owner_id", referencedColumnName = "id")
+  private List<Branch> branches;
 
-	@Override
-	public int hashCode() {
-		return (Objects.hash(cin) * 97);
-	}
+  @Override
+  public int hashCode() {
+    return (Objects.hash(cin) * 97);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Company other = (Company) obj;
-		return Objects.equals(cin, other.getCin());
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (!super.equals(obj))
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Company other = (Company) obj;
+    return Objects.equals(cin, other.getCin());
+  }
 
 }

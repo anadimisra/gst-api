@@ -27,37 +27,37 @@ import com.agilityroots.invoicely.repository.CustomerRepository;
 @Service
 public class CustomerAsyncService {
 
-	private CustomerRepository customerRepository;
+  private CustomerRepository customerRepository;
 
-	@Autowired
-	public CustomerAsyncService(CustomerRepository customerRepository) {
-		this.customerRepository = customerRepository;
-	}
+  @Autowired
+  public CustomerAsyncService(CustomerRepository customerRepository) {
+    this.customerRepository = customerRepository;
+  }
 
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Page<Customer>> getCustomers(Pageable pageable) {
-		return AsyncResult.forValue(customerRepository.findAll(pageable));
-	}
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Page<Customer>> getCustomers(Pageable pageable) {
+    return AsyncResult.forValue(customerRepository.findAll(pageable));
+  }
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Customer> save(Customer customer) {
-		return AsyncResult.forValue(customerRepository.saveAndFlush(customer));
-	}
+  @Transactional(isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Customer> save(Customer customer) {
+    return AsyncResult.forValue(customerRepository.saveAndFlush(customer));
+  }
 
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Customer>> getCustomer(Long id) {
-		return AsyncResult.forValue(customerRepository.findById(id));
-	}
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Optional<Customer>> getCustomer(Long id) {
+    return AsyncResult.forValue(customerRepository.findById(id));
+  }
 
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Customer>> getCustomerWithAllBranches(Long id) {
-		return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
-	}
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Optional<Customer>> getCustomerWithAllBranches(Long id) {
+    return AsyncResult.forValue(Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id)));
+  }
 
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	public ListenableFuture<Optional<Contact>> getContact(Long id) {
-		return AsyncResult
-				.forValue(Optional.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
-	}
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Optional<Contact>> getContact(Long id) {
+    return AsyncResult
+        .forValue(Optional.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
+  }
 
 }

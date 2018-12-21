@@ -23,9 +23,9 @@ import com.agilityroots.invoicely.entity.Branch;
 @Repository
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	ListenableFuture<Branch> findOneById(Long id);
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  ListenableFuture<Branch> findOneById(Long id);
 
 }

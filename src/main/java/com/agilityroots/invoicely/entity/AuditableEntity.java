@@ -39,30 +39,30 @@ import lombok.Setter;
 @JsonInclude(value = Include.NON_EMPTY)
 public class AuditableEntity implements Identifiable<Long> {
 
-	@Id
-	@JsonIgnore
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+  @Id
+  @JsonIgnore
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private Long id;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false, updatable = false)
-	@JsonIgnore
-	@CreatedDate
-	private Date createdAt;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false, updatable = false)
+  @JsonIgnore
+  @CreatedDate
+  private Date createdAt;
 
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(nullable = false)
-	@JsonIgnore
-	@LastModifiedDate
-	private Date updatedAt;
+  @Temporal(TemporalType.TIMESTAMP)
+  @Column(nullable = false)
+  @JsonIgnore
+  @LastModifiedDate
+  private Date updatedAt;
 
-	@JsonIgnore
-	@Version
-	private Integer version;
+  @JsonIgnore
+  @Version
+  private Integer version;
 
-	@Override
-	public int hashCode() {
-		return 71;
-	}
+  @Override
+  public int hashCode() {
+    return 71;
+  }
 
 }

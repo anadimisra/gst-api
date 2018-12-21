@@ -38,64 +38,64 @@ import lombok.Data;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class SimpleResourceAssemblerTest {
 
-	@Test
-	public void convertingToResourceShouldWork() {
+  @Test
+  public void convertingToResourceShouldWork() {
 
-		TestResourceAssembler assembler = new TestResourceAssembler();
-		Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
-		assertThat(resource.getContent().getName(), is("Frodo"));
-	}
+    TestResourceAssembler assembler = new TestResourceAssembler();
+    Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
+    assertThat(resource.getContent().getName(), is("Frodo"));
+  }
 
-	@Test
-	public void convertingToResourcesShouldWork() {
+  @Test
+  public void convertingToResourcesShouldWork() {
 
-		TestResourceAssembler assembler = new TestResourceAssembler();
-		Resources<Resource<Employee>> resources = assembler.toResources(Arrays.asList(new Employee("Frodo")));
-		assertThat(resources.getContent(), hasSize(1));
-		assertThat(resources.getContent(), Matchers.<Resource<Employee>>contains(new Resource(new Employee("Frodo"))));
-		MatcherAssert.assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
+    TestResourceAssembler assembler = new TestResourceAssembler();
+    Resources<Resource<Employee>> resources = assembler.toResources(Arrays.asList(new Employee("Frodo")));
+    assertThat(resources.getContent(), hasSize(1));
+    assertThat(resources.getContent(), Matchers.<Resource<Employee>>contains(new Resource(new Employee("Frodo"))));
+    MatcherAssert.assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
 
-		assertThat(resources.getContent().iterator().next(), is(new Resource(new Employee("Frodo"))));
-	}
+    assertThat(resources.getContent().iterator().next(), is(new Resource(new Employee("Frodo"))));
+  }
 
-	@Test
-	public void convertingToResourceWithCustomLinksShouldWork() {
+  @Test
+  public void convertingToResourceWithCustomLinksShouldWork() {
 
-		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
-		Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
-		assertThat(resource.getContent().getName(), is("Frodo"));
-		assertThat(resource.getLinks(), hasSize(1));
-		assertThat(resource.getLinks(), hasItem(new Link("/employees").withRel("employees")));
-	}
+    ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
+    Resource<Employee> resource = assembler.toResource(new Employee("Frodo"));
+    assertThat(resource.getContent().getName(), is("Frodo"));
+    assertThat(resource.getLinks(), hasSize(1));
+    assertThat(resource.getLinks(), hasItem(new Link("/employees").withRel("employees")));
+  }
 
-	@Test
-	public void convertingToResourcesWithCustomLinksShouldWork() {
+  @Test
+  public void convertingToResourcesWithCustomLinksShouldWork() {
 
-		ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
-		Resources<Resource<Employee>> resources = assembler.toResources(Arrays.asList(new Employee("Frodo")));
-		assertThat(resources.getContent(), hasSize(1));
-		assertThat(resources.getContent(),
-			Matchers.<Resource<Employee>>contains(new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));
-		assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
+    ResourceAssemblerWithCustomLink assembler = new ResourceAssemblerWithCustomLink();
+    Resources<Resource<Employee>> resources = assembler.toResources(Arrays.asList(new Employee("Frodo")));
+    assertThat(resources.getContent(), hasSize(1));
+    assertThat(resources.getContent(), Matchers.<Resource<Employee>>contains(
+        new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));
+    assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
 
-		assertThat(resources.getContent().iterator().next(),
-			is(new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));
-	}
+    assertThat(resources.getContent().iterator().next(),
+        is(new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));
+  }
 
+  class TestResourceAssembler extends SimpleResourceAssembler<Employee> {
+  }
 
-	class TestResourceAssembler extends SimpleResourceAssembler<Employee> {}
+  class ResourceAssemblerWithCustomLink extends SimpleResourceAssembler<Employee> {
 
-	class ResourceAssemblerWithCustomLink extends SimpleResourceAssembler<Employee> {
+    @Override
+    protected void addLinks(Resource<Employee> resource) {
+      resource.add(new Link("/employees").withRel("employees"));
+    }
+  }
 
-		@Override
-		protected void addLinks(Resource<Employee> resource) {
-			resource.add(new Link("/employees").withRel("employees"));
-		}
-	}
-
-	@Data
-	class Employee {
-		private final String name;
-	}
+  @Data
+  class Employee {
+    private final String name;
+  }
 
 }

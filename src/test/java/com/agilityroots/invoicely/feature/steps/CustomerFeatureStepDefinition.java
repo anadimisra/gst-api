@@ -13,6 +13,6 @@ import cucumber.api.java8.En;
  * @author anadi
  *
  */
-public class CustomerFeatureStepDefinition extends DataApiStepDefinition implements En{
+public class CustomerFeatureStepDefinition extends DataApiStepDefinition implements En {
 
 }

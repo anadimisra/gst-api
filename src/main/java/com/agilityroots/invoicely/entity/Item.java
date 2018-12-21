@@ -24,26 +24,26 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @Table(indexes = { @Index(name = "item_names_index", columnList = "name", unique = false),
-		@Index(name = "item_hsn_index", columnList = "hsn", unique = false),
-		@Index(name = "item_sac_index", columnList = "sac", unique = false) })
+    @Index(name = "item_hsn_index", columnList = "hsn", unique = false),
+    @Index(name = "item_sac_index", columnList = "sac", unique = false) })
 public class Item extends AuditableEntity implements Serializable {
 
-	private static final long serialVersionUID = -4121755316741852665L;
+  private static final long serialVersionUID = -4121755316741852665L;
 
-	@Column(length = 20)
-	private String name;
+  @Column(length = 20)
+  private String name;
 
-	@Column(columnDefinition = "TEXT")
-	private String description;
+  @Column(columnDefinition = "TEXT")
+  private String description;
 
-	@Column(length = 6)
-	private String hsn;
+  @Column(length = 6)
+  private String hsn;
 
-	@Column(length = 6)
-	private String sac;
+  @Column(length = 6)
+  private String sac;
 
-	private Double price;
+  private Double price;
 
-	private Double tax;
+  private Double tax;
 
 }

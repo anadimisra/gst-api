@@ -29,58 +29,58 @@ import lombok.Setter;
 @Embeddable
 public class LineItem extends AuditableEntity implements Serializable {
 
-	private static final long serialVersionUID = -977449988990379565L;
+  private static final long serialVersionUID = -977449988990379565L;
 
-	@NotNull
-	@GeneratedValue(strategy = GenerationType.SEQUENCE)
-	private Integer serialNumber;
+  @NotNull
+  @GeneratedValue(strategy = GenerationType.SEQUENCE)
+  private Integer serialNumber;
 
-	@NotEmpty
-	private String item;
+  @NotEmpty
+  private String item;
 
-	@NotEmpty
-	private String description;
+  @NotEmpty
+  private String description;
 
-	private String hsn;
+  private String hsn;
 
-	private String sac;
+  private String sac;
 
-	@NotNull
-	private Double price;
+  @NotNull
+  private Double price;
 
-	private String unit;
+  private String unit;
 
-	private Integer quantity;
+  private Integer quantity;
 
-	@NotNull
-	private Double discount = Double.valueOf(0.0);
+  @NotNull
+  private Double discount = Double.valueOf(0.0);
 
-	@NotNull
-	private Double amount;
+  @NotNull
+  private Double amount;
 
-	@NotNull
-	private Double tax;
+  @NotNull
+  private Double tax;
 
-	@Override
-	public int hashCode() {
-		return Objects.hash(amount, description, discount, hsn, item, price, quantity, sac, serialNumber, tax, unit);
-	}
+  @Override
+  public int hashCode() {
+    return Objects.hash(amount, description, discount, hsn, item, price, quantity, sac, serialNumber, tax, unit);
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LineItem other = (LineItem) obj;
-		return Objects.equals(amount, other.getAmount()) && Objects.equals(description, other.getDescription())
-				&& Objects.equals(discount, other.getDiscount()) && Objects.equals(hsn, other.getHsn())
-				&& Objects.equals(item, other.getItem()) && Objects.equals(price, other.getPrice())
-				&& Objects.equals(quantity, other.getQuantity()) && Objects.equals(sac, other.getSac())
-				&& Objects.equals(serialNumber, other.getSerialNumber()) && Objects.equals(tax, other.getTax())
-				&& Objects.equals(unit, other.getUnit());
-	}
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    LineItem other = (LineItem) obj;
+    return Objects.equals(amount, other.getAmount()) && Objects.equals(description, other.getDescription())
+        && Objects.equals(discount, other.getDiscount()) && Objects.equals(hsn, other.getHsn())
+        && Objects.equals(item, other.getItem()) && Objects.equals(price, other.getPrice())
+        && Objects.equals(quantity, other.getQuantity()) && Objects.equals(sac, other.getSac())
+        && Objects.equals(serialNumber, other.getSerialNumber()) && Objects.equals(tax, other.getTax())
+        && Objects.equals(unit, other.getUnit());
+  }
 
 }

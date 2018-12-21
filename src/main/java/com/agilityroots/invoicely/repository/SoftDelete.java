@@ -11,6 +11,6 @@ package com.agilityroots.invoicely.repository;
  */
 public interface SoftDelete<T> {
 
-	void delete(T entity);
+  void delete(T entity);
 
 }

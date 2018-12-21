@@ -31,86 +31,86 @@ import com.agilityroots.invoicely.entity.Invoice;
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDelete<Invoice> {
 
-	@Lock(LockModeType.OPTIMISTIC)
-	@Cacheable("invoices")
-	Optional<Invoice> findById(Long id);
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("invoices")
+  Optional<Invoice> findById(Long id);
 
-	@Lock(LockModeType.OPTIMISTIC)
-	@Cacheable("invoices")
-	Page<Invoice> findAll(Pageable pageable);
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("invoices")
+  Page<Invoice> findAll(Pageable pageable);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findAllByCustomer_Id(Long id, Pageable pageable);
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findAllByCustomer_Id(Long id, Pageable pageable);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Invoice> findOneByInvoiceNumber(String invoiceNumber);
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Invoice> findOneByInvoiceNumber(String invoiceNumber);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNotNull(Pageable pageable);
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNotNull(Pageable pageable);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
   ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
 
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
 
-	/**
-	 * Paid invoices by Customer
-	 * 
-	 * @param today
-	 * @param id
-	 * @param pageable
-	 * @return
-	 */
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNotNullAndCustomer_Id(Long id, Pageable pageable);
+  /**
+   * Paid invoices by Customer
+   * 
+   * @param today
+   * @param id
+   * @param pageable
+   * @return
+   */
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNotNullAndCustomer_Id(Long id, Pageable pageable);
 
-	/**
-	 * Pending invoices by Customer
-	 * 
-	 * @param today
-	 * @param id
-	 * @param pageable
-	 * @return
-	 */
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
-			Pageable pageable);
+  /**
+   * Pending invoices by Customer
+   * 
+   * @param today
+   * @param id
+   * @param pageable
+   * @return
+   */
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
+      Pageable pageable);
 
-	/**
-	 * Overdue Invoiced by Customer
-	 * 
-	 * @param today
-	 * @param id
-	 * @param pageable
-	 * @return
-	 */
-	@Async
-	@Lock(LockModeType.OPTIMISTIC)
-	@Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-	@Cacheable("invoices")
-	ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
-			Pageable pageable);
+  /**
+   * Overdue Invoiced by Customer
+   * 
+   * @param today
+   * @param id
+   * @param pageable
+   * @return
+   */
+  @Async
+  @Lock(LockModeType.OPTIMISTIC)
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  @Cacheable("invoices")
+  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
+      Pageable pageable);
 
 }

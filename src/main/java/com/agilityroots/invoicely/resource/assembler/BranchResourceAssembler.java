@@ -19,16 +19,16 @@ import com.agilityroots.invoicely.entity.Contact;
 @Component
 public class BranchResourceAssembler extends SimpleIdentifiableResourceAssembler<Branch> {
 
-	public BranchResourceAssembler() {
-		super(BranchController.class);
-		// TODO Auto-generated constructor stub
-	}
+  public BranchResourceAssembler() {
+    super(BranchController.class);
+    // TODO Auto-generated constructor stub
+  }
 
-	@Override
-	protected void addLinks(Resource<Branch> resource) {
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("branch"));
-		resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-				.slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
-	}
+  @Override
+  protected void addLinks(Resource<Branch> resource) {
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("branch"));
+    resource.add(getCollectionLinkBuilder().slash(resource.getContent())
+        .slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
+  }
 }

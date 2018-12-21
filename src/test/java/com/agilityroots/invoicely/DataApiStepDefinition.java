@@ -23,20 +23,17 @@ import org.springframework.test.context.ContextConfiguration;
 @ContextConfiguration
 public abstract class DataApiStepDefinition {
 
-	
-	private static final Logger log = LoggerFactory.getLogger(DataApiStepDefinition.class);
-	 
-    private final String SERVER_URL = "http://localhost";
- 
-    private TestRestTemplate restTemplate;
- 
-    @LocalServerPort
-    protected int port;
- 
- 
-    private String thingsEndpoint() {
-        return SERVER_URL + ":" + port ;
-    }
- 
-	
+  private static final Logger log = LoggerFactory.getLogger(DataApiStepDefinition.class);
+
+  private final String SERVER_URL = "http://localhost";
+
+  private TestRestTemplate restTemplate;
+
+  @LocalServerPort
+  protected int port;
+
+  private String thingsEndpoint() {
+    return SERVER_URL + ":" + port;
+  }
+
 }

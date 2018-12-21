@@ -28,13 +28,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LineItemLabel extends AuditableEntity implements Serializable {
 
-	private static final long serialVersionUID = 1L;
+  private static final long serialVersionUID = 1L;
 
-	@Column(nullable = false, length = 7)
-	private String labelType;
+  @Column(nullable = false, length = 7)
+  private String labelType;
 
-	@ElementCollection
-	@CollectionTable(name = "line_item_labels", joinColumns = @JoinColumn(name = "line_item_label_id"))
-	@Column(name = "labels")
-	private Set<String> labels = new HashSet<>();
+  @ElementCollection
+  @CollectionTable(name = "line_item_labels", joinColumns = @JoinColumn(name = "line_item_label_id"))
+  @Column(name = "labels")
+  private Set<String> labels = new HashSet<>();
 }

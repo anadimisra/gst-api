@@ -8,9 +8,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -24,7 +22,6 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Locale;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -57,7 +54,6 @@ import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.InvoiceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 
 /**
  * @author anadi
@@ -67,8 +63,6 @@ import com.github.javafaker.Faker;
 @WebMvcTest(InvoiceController.class)
 @Import({ InvoiceService.class, InvoiceResourceAssembler.class, CustomerResourceAssember.class })
 public class InvoiceControllerTests {
-
-  private Faker faker = new Faker(new Locale("en-IND"));
 
   @Autowired
   private MockMvc mockMvc;

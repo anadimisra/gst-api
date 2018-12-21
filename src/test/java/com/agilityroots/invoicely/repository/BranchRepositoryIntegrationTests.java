@@ -45,84 +45,84 @@ import com.github.javafaker.Faker;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class BranchRepositoryIntegrationTests {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(BranchRepositoryIntegrationTests.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BranchRepositoryIntegrationTests.class);
 
-	@Autowired
-	private CustomerRepository customerRepository;
+  @Autowired
+  private CustomerRepository customerRepository;
 
-	@Autowired
-	private BranchRepository branchRepository;
+  @Autowired
+  private BranchRepository branchRepository;
 
-	@Autowired
-	private ContactRepository contactRepository;
+  @Autowired
+  private ContactRepository contactRepository;
 
-	@Autowired
-	EntityManager entityManager;
+  @Autowired
+  EntityManager entityManager;
 
-	private Faker faker = new Faker(new Locale("en-IND"));
+  private Faker faker = new Faker(new Locale("en-IND"));
 
-	private Customer customer;
+  private Customer customer;
 
-	@Before
-	public void setup() {
-		customer = new Customer();
-		customer.setName(faker.company().name());
-		customer.setPan(RandomStringUtils.randomAlphanumeric(10));
-		customer.setTds(0.10);
+  @Before
+  public void setup() {
+    customer = new Customer();
+    customer.setName(faker.company().name());
+    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
+    customer.setTds(0.10);
 
-		Branch branch = getBranchObject();
-		branch = branchRepository.save(branch);
+    Branch branch = getBranchObject();
+    branch = branchRepository.save(branch);
 
-		customer.setBranches(Arrays.asList(branch));
-		customer = customerRepository.save(customer);
-	}
+    customer.setBranches(Arrays.asList(branch));
+    customer = customerRepository.save(customer);
+  }
 
-	/**
-	 * @return {@link Branch} object
-	 */
-	private Branch getBranchObject() {
-		Address address = new Address();
-		address.setStreetAddress(faker.address().streetAddress());
-		address.setArea(faker.address().streetName());
-		address.setCity(faker.address().city());
-		address.setState(faker.address().state());
-		address.setPincode(faker.address().zipCode());
+  /**
+   * @return {@link Branch} object
+   */
+  private Branch getBranchObject() {
+    Address address = new Address();
+    address.setStreetAddress(faker.address().streetAddress());
+    address.setArea(faker.address().streetName());
+    address.setCity(faker.address().city());
+    address.setState(faker.address().state());
+    address.setPincode(faker.address().zipCode());
 
-		Contact contact = new Contact();
-		contact.setName(faker.name().fullName());
-		contact.setEmail(faker.internet().emailAddress());
-		contact.setPhone(RandomStringUtils.randomNumeric(10));
-		contact = contactRepository.save(contact);
+    Contact contact = new Contact();
+    contact.setName(faker.name().fullName());
+    contact.setEmail(faker.internet().emailAddress());
+    contact.setPhone(RandomStringUtils.randomNumeric(10));
+    contact = contactRepository.save(contact);
 
-		Branch branch = new Branch();
-		branch.setBranchName("Main Branch");
-		branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-		branch.setSez(Boolean.FALSE);
-		branch.setContact(contact);
-		branch.setAddress(address);
-		return branch;
-	}
+    Branch branch = new Branch();
+    branch.setBranchName("Main Branch");
+    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
+    branch.setSez(Boolean.FALSE);
+    branch.setContact(contact);
+    branch.setAddress(address);
+    return branch;
+  }
 
-	@Test
-	public void testBranchEqualityWhenAddingBranchToCustomers() throws InterruptedException, ExecutionException {
-		Branch branch = getBranchObject();
-		branch.setBranchName("Other Branch");
-		branch = branchRepository.save(branch);
-		LOGGER.debug("Saved Branch with id {} and details {}", branch.getId(), branch.toString());
-		List<Branch> branches = new ArrayList<>();
-		branches.addAll(customer.getBranches());
-		branches.add(branch);
-		customer.setBranches(branches);
-		Customer saved = customerRepository.save(customer);
-		assertThat(saved.getBranches().size()).isEqualTo(2);
+  @Test
+  public void testBranchEqualityWhenAddingBranchToCustomers() throws InterruptedException, ExecutionException {
+    Branch branch = getBranchObject();
+    branch.setBranchName("Other Branch");
+    branch = branchRepository.save(branch);
+    LOGGER.debug("Saved Branch with id {} and details {}", branch.getId(), branch.toString());
+    List<Branch> branches = new ArrayList<>();
+    branches.addAll(customer.getBranches());
+    branches.add(branch);
+    customer.setBranches(branches);
+    Customer saved = customerRepository.save(customer);
+    assertThat(saved.getBranches().size()).isEqualTo(2);
 
-		Branch updatedBranch = saved.getBranches().get(1);
-		updatedBranch.setBranchName("Corporate Office");
-		branchRepository.save(updatedBranch);
-		// Changing the name should not create a new branch object
-		List<Branch> allBranches = branchRepository.findAll();
-		assertThat(allBranches.size()).isEqualTo(2);
-		// Changed name should not change equality
-		assertThat(allBranches.contains(branch));
-	}
+    Branch updatedBranch = saved.getBranches().get(1);
+    updatedBranch.setBranchName("Corporate Office");
+    branchRepository.save(updatedBranch);
+    // Changing the name should not create a new branch object
+    List<Branch> allBranches = branchRepository.findAll();
+    assertThat(allBranches.size()).isEqualTo(2);
+    // Changed name should not change equality
+    assertThat(allBranches.contains(branch));
+  }
 }
