@@ -2,11 +2,13 @@ package com.agilityroots.invoicely;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.web.config.EnableSpringDataWebSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.web.filter.ForwardedHeaderFilter;
 
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
@@ -31,6 +33,13 @@ public class DataApiApplication {
 		webExecutor.setThreadNamePrefix("ApiPool-");
 		webExecutor.initialize();
 		return webExecutor;
+	}
+
+	@Bean
+	FilterRegistrationBean<ForwardedHeaderFilter> forwardedHeaderFilter() {
+		FilterRegistrationBean<ForwardedHeaderFilter> bean = new FilterRegistrationBean<>();
+		bean.setFilter(new ForwardedHeaderFilter());
+		return bean;
 	}
 
 	public static void main(String[] args) {
