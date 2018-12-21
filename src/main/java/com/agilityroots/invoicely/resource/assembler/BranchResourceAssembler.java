@@ -26,8 +26,7 @@ public class BranchResourceAssembler extends SimpleIdentifiableResourceAssembler
 
   @Override
   protected void addLinks(Resource<Branch> resource) {
-    resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withSelfRel());
-    resource.add(getCollectionLinkBuilder().slash(resource.getContent()).withRel("branch"));
+    super.addLinks(resource);
     resource.add(getCollectionLinkBuilder().slash(resource.getContent())
         .slash(getRelProvider().getItemResourceRelFor(Contact.class)).withRel("contact"));
   }
