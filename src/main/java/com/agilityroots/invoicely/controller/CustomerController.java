@@ -57,7 +57,7 @@ import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
-import com.agilityroots.invoicely.service.CustomerAsyncService;
+import com.agilityroots.invoicely.service.CustomerService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -94,7 +94,7 @@ public class CustomerController {
   private InvoiceResourceAssembler invoiceReourceAssembler;
 
   @Autowired
-  private CustomerAsyncService customerService;
+  private CustomerService customerService;
 
   @GetMapping(value = "/customers", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> getAllCustomers(

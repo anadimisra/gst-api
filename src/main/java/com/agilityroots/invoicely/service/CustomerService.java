@@ -25,12 +25,12 @@ import com.agilityroots.invoicely.repository.CustomerRepository;
  */
 @Async
 @Service
-public class CustomerAsyncService {
+public class CustomerService {
 
   private CustomerRepository customerRepository;
 
   @Autowired
-  public CustomerAsyncService(CustomerRepository customerRepository) {
+  public CustomerService(CustomerRepository customerRepository) {
     this.customerRepository = customerRepository;
   }
 

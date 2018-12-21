@@ -23,18 +23,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.service.CustomerAsyncService;
+import com.agilityroots.invoicely.service.CustomerService;
 
 /**
  * @author anadi
  *
  */
 @RunWith(SpringRunner.class)
-@Import({ CustomerAsyncService.class })
+@Import({ CustomerService.class })
 public class CustomerServiceTests {
 
   @Autowired
-  private CustomerAsyncService customerService;
+  private CustomerService customerService;
 
   @MockBean
   private CustomerRepository customerRepository;
@@ -54,7 +54,7 @@ public class CustomerServiceTests {
 
   /**
    * Test method for
-   * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
+   * {@link com.agilityroots.invoicely.service.CustomerService#getContact(java.lang.Long)}.
    * 
    * @throws ExecutionException
    * @throws InterruptedException
@@ -74,7 +74,7 @@ public class CustomerServiceTests {
 
   /**
    * Test method for
-   * {@link com.agilityroots.invoicely.service.CustomerAsyncService#getContact(java.lang.Long)}.
+   * {@link com.agilityroots.invoicely.service.CustomerService#getContact(java.lang.Long)}.
    * 
    * @throws ExecutionException
    * @throws InterruptedException

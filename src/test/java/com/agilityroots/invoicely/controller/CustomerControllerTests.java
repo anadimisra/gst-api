@@ -61,7 +61,7 @@ import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
-import com.agilityroots.invoicely.service.CustomerAsyncService;
+import com.agilityroots.invoicely.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;
 
@@ -72,7 +72,7 @@ import com.github.javafaker.Faker;
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
 @Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
-    CustomerAsyncService.class })
+    CustomerService.class })
 public class CustomerControllerTests {
 
   private Faker faker = new Faker(new Locale("en-IND"));
@@ -96,7 +96,7 @@ public class CustomerControllerTests {
   private CustomerRepository customerRepository;
 
   @InjectMocks
-  CustomerAsyncService customerService = new CustomerAsyncService(customerRepository);
+  CustomerService customerService = new CustomerService(customerRepository);
 
   @Before
   public void setup() {
