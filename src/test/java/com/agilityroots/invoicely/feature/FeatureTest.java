@@ -3,7 +3,7 @@
  *  data-api
  *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
-package com.agilityroots.invoicely;
+package com.agilityroots.invoicely.feature;
 
 import org.junit.runner.RunWith;
 

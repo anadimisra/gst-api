@@ -3,7 +3,7 @@
  *  data-api
  *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
-package com.agilityroots.invoicely;
+package com.agilityroots.invoicely.feature;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

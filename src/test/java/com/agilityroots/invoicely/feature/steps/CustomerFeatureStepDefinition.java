@@ -5,7 +5,7 @@
  */
 package com.agilityroots.invoicely.feature.steps;
 
-import com.agilityroots.invoicely.DataApiStepDefinition;
+import com.agilityroots.invoicely.feature.DataApiStepDefinition;
 
 import cucumber.api.java8.En;
 
