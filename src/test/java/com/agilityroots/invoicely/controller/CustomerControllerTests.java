@@ -265,7 +265,7 @@ public class CustomerControllerTests {
   public void testWhenNoPaidInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNotNullAndCustomer_Id(any(Long.class), any(Pageable.class)))
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
     // When
@@ -282,7 +282,7 @@ public class CustomerControllerTests {
   public void testWhenNoOverDueInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(any(Date.class),
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(any(Date.class),
         any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
@@ -300,7 +300,7 @@ public class CustomerControllerTests {
   public void testWhenNoPendingInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(any(Date.class),
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(any(Date.class),
         any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 

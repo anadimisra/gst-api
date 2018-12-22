@@ -9,7 +9,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.validation.constraints.NotEmpty;
@@ -22,12 +21,11 @@ import lombok.Setter;
 /**
  * @author anadi
  */
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Embeddable
-public class LineItem extends AuditableEntity implements Serializable {
+public class LineItem implements Serializable {
 
   private static final long serialVersionUID = -977449988990379565L;
 

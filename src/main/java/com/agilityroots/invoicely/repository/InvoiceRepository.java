@@ -55,19 +55,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNotNull(Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNotNull(Pageable pageable);
 
   @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
 
   @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
 
   /**
    * Paid invoices by Customer
@@ -81,7 +81,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNotNullAndCustomer_Id(Long id, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNotNullAndCustomer_Id(Long id, Pageable pageable);
 
   /**
    * Pending invoices by Customer
@@ -95,7 +95,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
       Pageable pageable);
 
   /**
@@ -110,7 +110,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
       Pageable pageable);
 
 }

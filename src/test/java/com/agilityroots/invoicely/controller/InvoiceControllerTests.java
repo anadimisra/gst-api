@@ -157,7 +157,7 @@ public class InvoiceControllerTests {
   public void testGetPaidInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNotNull(ArgumentMatchers.any(Pageable.class)))
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNotNull(ArgumentMatchers.any(Pageable.class)))
         .willReturn(AsyncResult.forValue(page));
 
     // When
@@ -177,7 +177,7 @@ public class InvoiceControllerTests {
   public void testGetPendingInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateAfter(ArgumentMatchers.any(Date.class),
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(ArgumentMatchers.any(Date.class),
         ArgumentMatchers.any(Pageable.class))).willReturn(AsyncResult.forValue(page));
 
     // When
@@ -197,7 +197,7 @@ public class InvoiceControllerTests {
   public void testGetOverdueInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findByPaymentsIsNullAndDueDateBefore(ArgumentMatchers.any(Date.class),
+    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(ArgumentMatchers.any(Date.class),
         ArgumentMatchers.any(Pageable.class))).willReturn(AsyncResult.forValue(page));
 
     // When

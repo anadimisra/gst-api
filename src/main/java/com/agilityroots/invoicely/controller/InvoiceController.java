@@ -147,7 +147,7 @@ public class InvoiceController {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
 
-    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNotNull(pageable);
+    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPayments_PaymentDateIsNotNull(pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -184,7 +184,7 @@ public class InvoiceController {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
     Date queryDate = getOptinalDateParamter(date);
-    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNullAndDueDateAfter(queryDate, pageable);
+    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(queryDate, pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -221,7 +221,7 @@ public class InvoiceController {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = setupDeferredResult();
     Date queryDate = getOptinalDateParamter(date);
-    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPaymentsIsNullAndDueDateBefore(queryDate,
+    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(queryDate,
         pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {

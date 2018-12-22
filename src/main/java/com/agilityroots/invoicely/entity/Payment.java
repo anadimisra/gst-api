@@ -10,7 +10,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Entity;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -21,12 +20,11 @@ import lombok.Setter;
 /**
  * @author anadi
  */
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @Embeddable
-public class Payment extends AuditableEntity implements Serializable {
+public class Payment implements Serializable {
 
   private static final long serialVersionUID = 3584499907096911054L;
 

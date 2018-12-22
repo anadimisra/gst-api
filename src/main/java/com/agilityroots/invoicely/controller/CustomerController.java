@@ -256,7 +256,7 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
-    ListenableFuture<Page<Invoice>> future = invoiceRepository.findByPaymentsIsNotNullAndCustomer_Id(id, pageable);
+    ListenableFuture<Page<Invoice>> future = invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(id, pageable);
 
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -293,7 +293,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     ListenableFuture<Page<Invoice>> future = invoiceRepository
-        .findByPaymentsIsNullAndDueDateAfterAndCustomer_Id(getTodaysDate(), id, pageable);
+        .findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override
@@ -329,7 +329,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     ListenableFuture<Page<Invoice>> future = invoiceRepository
-        .findByPaymentsIsNullAndDueDateBeforeAndCustomer_Id(getTodaysDate(), id, pageable);
+        .findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override

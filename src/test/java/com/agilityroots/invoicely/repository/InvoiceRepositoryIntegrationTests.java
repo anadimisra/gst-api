@@ -17,8 +17,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
@@ -49,8 +47,6 @@ import com.github.javafaker.Faker;
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class InvoiceRepositoryIntegrationTests {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(InvoiceRepositoryIntegrationTests.class);
-
   @Autowired
   private CustomerRepository customerRepository;
 
@@ -64,13 +60,7 @@ public class InvoiceRepositoryIntegrationTests {
   private ContactRepository contactRepository;
 
   @Autowired
-  private PaymentRepository paymentRepository;
-
-  @Autowired
   private InvoiceRepository invoiceRepository;
-
-  @Autowired
-  private LineItemRepository lineItemRepository;
 
   private Faker faker = new Faker(new Locale("en-IND"));
 
@@ -160,11 +150,10 @@ public class InvoiceRepositoryIntegrationTests {
     payment.setAdjustmentValue(100.00);
     payment
         .setPaymentDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    payment = paymentRepository.save(payment);
     invoice.setPayments(Arrays.asList(payment));
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-    Page<Invoice> paidInvoices = invoiceRepository.findByPaymentsIsNotNull(PageRequest.of(0, 10)).get();
+    Page<Invoice> paidInvoices = invoiceRepository.findByPayments_PaymentDateIsNotNull(PageRequest.of(0, 10)).get();
     assertThat(paidInvoices).isNotEmpty();
     assertThat(paidInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
   }
@@ -179,7 +168,7 @@ public class InvoiceRepositoryIntegrationTests {
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository.findByPaymentsIsNullAndDueDateAfter(today, PageRequest.of(0, 10))
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(today, PageRequest.of(0, 10))
         .get();
     assertThat(pendingInvoices).isNotEmpty();
     assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
@@ -195,7 +184,7 @@ public class InvoiceRepositoryIntegrationTests {
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository.findByPaymentsIsNullAndDueDateBefore(today, PageRequest.of(0, 10))
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(today, PageRequest.of(0, 10))
         .get();
     assertThat(pendingInvoices).isNotEmpty();
     assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
@@ -210,13 +199,10 @@ public class InvoiceRepositoryIntegrationTests {
         .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
-    Long startTime = System.nanoTime();
-    Page<Invoice> overdueInvoices = invoiceRepository.findAllByCustomer_Id(Long.valueOf(9), PageRequest.of(0, 10))
+    Page<Invoice> invoices = invoiceRepository.findAllByCustomer_Id(savedInvoice.getCustomer().getId(), PageRequest.of(0, 10))
         .get();
-    Long endTime = System.nanoTime();
-    LOGGER.info("Elasped time for invoiceRepository.findAllByCustomer_Id() is {}", endTime - startTime);
-    assertThat(overdueInvoices).isNotEmpty();
-    assertThat(overdueInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+    assertThat(invoices).isNotEmpty();
+    assertThat(invoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
   }
 
   @Test
@@ -227,7 +213,6 @@ public class InvoiceRepositoryIntegrationTests {
     invoice
         .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     LineItem lineItem = new LineItem();
-    lineItem.setId(Long.valueOf(89));
     lineItem.setAmount(1180.00);
     lineItem.setDescription("That Service");
     lineItem.setDiscount(0.0);
@@ -236,7 +221,6 @@ public class InvoiceRepositoryIntegrationTests {
     lineItem.setSerialNumber(1);
     lineItem.setTax(0.18);
     lineItem.setPrice(1000.00);
-    lineItemRepository.save(lineItem);
     invoice.setLineItems(Arrays.asList(lineItem));
     invoice.setId(Long.valueOf(100));
     invoiceRepository.saveAndFlush(invoice);
