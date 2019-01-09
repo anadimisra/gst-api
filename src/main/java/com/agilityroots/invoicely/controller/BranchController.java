@@ -72,13 +72,6 @@ public class BranchController {
     return saveOrUpdateBranch(branch, request);
   }
 
-  @PutMapping("/branches")
-  public DeferredResult<ResponseEntity<Object>> update(@RequestBody(required = true) @Valid Branch branch,
-      HttpServletRequest request) {
-
-    return saveOrUpdateBranch(branch, request);
-  }
-
   private DeferredResult<ResponseEntity<Object>> saveOrUpdateBranch(Branch branch, HttpServletRequest request) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
