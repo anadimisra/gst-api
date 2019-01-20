@@ -5,8 +5,6 @@
  */
 package com.agilityroots.invoicely.feature;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -22,8 +20,6 @@ import org.springframework.test.context.ContextConfiguration;
 @ActiveProfiles("Feature_Tests")
 @ContextConfiguration
 public abstract class DataApiStepDefinition {
-
-  private static final Logger log = LoggerFactory.getLogger(DataApiStepDefinition.class);
 
   private final String SERVER_URL = "http://localhost";
 
