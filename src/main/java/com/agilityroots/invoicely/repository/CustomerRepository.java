@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.persistence.LockModeType;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,4 +41,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
   @EntityGraph(value = "graph.Customer.branches", type = EntityGraphType.LOAD)
   Customer findEagerFetchBranchesById(@Param("id") Long id);
 
+  @Lock(LockModeType.OPTIMISTIC)
+  @CachePut("customers")
+  <S extends Customer> S saveAndFlush(S entity);
 }

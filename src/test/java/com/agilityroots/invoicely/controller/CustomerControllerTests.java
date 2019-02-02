@@ -24,10 +24,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -49,7 +47,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.entity.Address;
+import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
@@ -63,7 +61,6 @@ import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CustomerService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 
 /**
  * @author anadi
@@ -73,9 +70,7 @@ import com.github.javafaker.Faker;
 @WebMvcTest(CustomerController.class)
 @Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
     CustomerService.class })
-public class CustomerControllerTests {
-
-  private Faker faker = new Faker(new Locale("en-IND"));
+public class CustomerControllerTests extends EntityObjectsBuilder {
 
   @Autowired
   private MockMvc mockMvc;
@@ -265,7 +260,9 @@ public class CustomerControllerTests {
   public void testWhenNoPaidInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(any(Long.class), any(Pageable.class)))
+    BDDMockito
+        .given(
+            invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
     // When
@@ -282,8 +279,9 @@ public class CustomerControllerTests {
   public void testWhenNoOverDueInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(any(Date.class),
-        any(Long.class), any(Pageable.class)))
+    BDDMockito
+        .given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(any(Date.class),
+            any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
     // When
@@ -300,8 +298,9 @@ public class CustomerControllerTests {
   public void testWhenNoPendingInvoicesThenGetsOkResponseWithNoContent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(any(Date.class),
-        any(Long.class), any(Pageable.class)))
+    BDDMockito
+        .given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(any(Date.class),
+            any(Long.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
     // When
@@ -350,10 +349,28 @@ public class CustomerControllerTests {
     assertThat(result.getResponse().getHeader("Location")).contains("/customers/10/branches/20");
   }
 
-  public void testAddContactAndCustomerNotExistsGivesUnprocesseableEntity() throws Exception {
+  public void testAddInvoicesToNonExisitingCustomerGivesUnprocesseableEntity() throws Exception {
 
     // Given
-    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(null);
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
+    BDDMockito.given(invoiceRepository.saveAndFlush(any(Invoice.class))).willReturn(getInvoiceObjectWithLineItems());
+    BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(getCustomerObject());
+
+    // When
+    MvcResult result = mockMvc
+        .perform(put("/customers/1/invoices").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(getBranchObject())))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testAddContactToNonExistingCustomerGivesUnprocesseableEntity() throws Exception {
+
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     // When
     MvcResult result = mockMvc
@@ -386,42 +403,4 @@ public class CustomerControllerTests {
     assertThat(result.getResponse().getHeader("Location")).contains("/customers/10/contact");
   }
 
-  private Customer getCustomerObject() {
-    Customer minty = new Customer();
-    minty.setId(Long.valueOf(10));
-    minty.setName("Minty and Sons Private Limited");
-    minty.setPan("ABCDE1234Q");
-    minty.setInvoicePrefix("MNT");
-    minty.setTds(0.10);
-    minty.setCurrecny("INR");
-    return minty;
-  }
-
-  private Branch getBranchObject() {
-
-    Address address = new Address();
-    address.setStreetAddress(faker.address().streetAddress());
-    address.setArea(faker.address().streetName());
-    address.setCity(faker.address().city());
-    address.setState(faker.address().state());
-    address.setPincode(faker.address().zipCode());
-
-    Branch branch = new Branch();
-    branch.setId(Long.valueOf(20));
-    branch.setBranchName("Main Branch");
-    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-    branch.setSez(Boolean.FALSE);
-    branch.setAddress(address);
-    return branch;
-  }
-
-  private Contact getContactObject() {
-
-    Contact contact = new Contact();
-    contact.setId(Long.valueOf(30));
-    contact.setName(faker.name().fullName());
-    contact.setEmail(faker.internet().emailAddress());
-    contact.setPhone("8067601867");
-    return contact;
-  }
 }
