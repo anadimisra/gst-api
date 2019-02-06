@@ -54,7 +54,7 @@ public class CustomerService {
     log.debug("Finding customer with {}", id);
     return AsyncResult.forValue(customerRepository.findById(id));
   }
-
+  
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Customer>> getCustomerWithAllBranches(Long id) {
     log.debug("Loading branches for customer with id {}", id);

@@ -5,6 +5,11 @@
  */
 package com.agilityroots.invoicely.repository;
 
+import java.util.Optional;
+
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,4 +22,9 @@ import com.agilityroots.invoicely.entity.Company;
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
+  @Cacheable("company")
+  Page<Company> findAll(Pageable pageable);
+  
+  @Cacheable("company")
+  Optional<Company> findById(Long id);
 }

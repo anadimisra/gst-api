@@ -9,8 +9,6 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -368,7 +366,7 @@ public class CustomerController {
 
       @Override
       public void onSuccess(Optional<Customer> result) {
-        
+
         Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
             "self");
         response
@@ -404,21 +402,18 @@ public class CustomerController {
 
       @Override
       public void onSuccess(Optional<Customer> result) {
-        List<Branch> allBranches = new ArrayList<>();
-
-        result.map(Customer::getBranches).map(allBranches::addAll).orElse(allBranches.addAll(Collections.emptyList()));
-
         if (result.isPresent()) {
           Branch saved = branchRepository.saveAndFlush(branch);
-          allBranches.add(saved);
           Customer customer = result.get();
-          customer.setBranches(allBranches);
+          List<Branch> branches = customer.getBranches();
+          branches.add(saved);
+          customer.setBranches(branches);
           customerRepository.saveAndFlush(customer);
           response.setResult(ResponseEntity.created(
               ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId()).toUri())
               .build());
         } else
-          response.setErrorResult(ResponseEntity.unprocessableEntity().build());
+          response.setErrorResult(ResponseEntity.badRequest().build());
 
       }
 
@@ -493,7 +488,7 @@ public class CustomerController {
           response.setResult(ResponseEntity.created(location).build());
           log.debug("Rendered Location header {}", location.toString());
         } else
-          response.setResult(ResponseEntity.unprocessableEntity().build());
+          response.setResult(ResponseEntity.badRequest().build());
 
       }
 
@@ -519,22 +514,17 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
-    log.debug("Finding customer with id {}", id);
     ListenableFuture<Optional<Customer>> result = customerService.getCustomer(id);
     result.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
       @Override
       public void onSuccess(Optional<Customer> result) {
         if (result.isPresent()) {
-          Invoice saved = invoiceRepository.saveAndFlush(invoice);
           Customer customer = result.get();
-          List<Invoice> invoices = new ArrayList<>();
-          invoices.addAll(customer.getInvoices());
-          invoices.add(saved);
-          customer.setInvoices(invoices);
-          customerService.save(customer);
-          URI location = ServletUriComponentsBuilder.fromRequestUri(request).host(request.getRemoteHost())
-              .port(request.getRemotePort()).path(request.getContextPath()).path("/invoices/{id}")
-              .buildAndExpand(saved.getId()).toUri();
+          invoice.setCustomer(customer);
+          Invoice saved = invoiceRepository.saveAndFlush(invoice);
+          log.debug("Saved: id:{}, invoice: {}", saved.getId(), invoice);
+          URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId())
+              .toUri();
           response.setResult(ResponseEntity.created(location).build());
 
         } else {

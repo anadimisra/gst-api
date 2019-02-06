@@ -17,7 +17,6 @@ import javax.persistence.JoinTable;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
-import javax.persistence.NamedSubgraph;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
@@ -42,9 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @NoArgsConstructor
 @Relation(collectionRelation = "customers")
 @NamedEntityGraphs({
-    @NamedEntityGraph(name = "graph.Customer.invoices", attributeNodes = @NamedAttributeNode("invoices")),
-    @NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")),
-    @NamedEntityGraph(name = "graph.Customer.invoices.payments", attributeNodes = @NamedAttributeNode(value = "invoices", subgraph = "invoices"), subgraphs = @NamedSubgraph(name = "invoices", attributeNodes = @NamedAttributeNode("payments"))) })
+    @NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")) })
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 8101819808147191270L;

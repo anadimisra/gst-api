@@ -39,8 +39,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("customers")
   @EntityGraph(value = "graph.Customer.branches", type = EntityGraphType.LOAD)
-  Customer findEagerFetchBranchesById(@Param("id") Long id);
-
+  Customer findEagerFetchBranchesById(@Param("id") Long id);  
+  
   @Lock(LockModeType.OPTIMISTIC)
   @CachePut("customers")
   <S extends Customer> S saveAndFlush(S entity);

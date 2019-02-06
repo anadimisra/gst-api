@@ -70,13 +70,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WebMvcTest(CustomerController.class)
 @Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
     CustomerService.class })
-public class CustomerControllerTests extends EntityObjectsBuilder {
+public class CustomerControllerTests {
 
   @Autowired
   private MockMvc mockMvc;
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   @MockBean
   private BranchRepository branchRepository;
@@ -139,7 +141,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   public void testSavingCustomerReturnsLocationHeader() throws Exception {
 
     // Given
-    Customer minty = getCustomerObject();
+    Customer minty = builder.getCustomerObject();
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(minty);
 
     // When
@@ -157,7 +159,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   public void testFailedSavingCustomerReturnsInternalServerError() throws Exception {
 
     // Given
-    Customer minty = getCustomerObject();
+    Customer minty = builder.getCustomerObject();
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willThrow(new RuntimeException());
 
     // When
@@ -189,7 +191,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   public void testGeneratesHALDocumentWithLinksWhenCustomerExists() throws Exception {
 
     // Given
-    Customer minty = getCustomerObject();
+    Customer minty = builder.getCustomerObject();
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(minty));
 
     // When
@@ -213,7 +215,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   public void testWhenNoBranchesThenGetsNotFoundResponse() throws Exception {
 
     // Given
-    Customer customer = getCustomerObject();
+    Customer customer = builder.getCustomerObject();
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
 
     // When
@@ -228,7 +230,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   public void testWhenNoContactThenGetsNotFoundResponse() throws Exception {
 
     // Given
-    Customer customer = getCustomerObject();
+    Customer customer = builder.getCustomerObject();
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(customer));
 
     // When
@@ -313,7 +315,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
 
   }
 
-  public void testAddBranchAndCustomerNotExistsGivesUnprocesseableEntity() throws Exception {
+  public void testAddBranchAndCustomerNotExistsGivesBadRequest() throws Exception {
 
     // Given
     BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(null);
@@ -321,45 +323,7 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
     // When
     MvcResult result = mockMvc
         .perform(put("/customers/1/branches").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getBranchObject())))
-        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isUnprocessableEntity());
-  }
-
-  @Test
-  public void testAddingBranchReturnsLocationHeader() throws Exception {
-
-    // Given
-    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(getCustomerObject());
-    BDDMockito.given(branchRepository.saveAndFlush(any(Branch.class))).willReturn(getBranchObject());
-    Customer withBranch = getCustomerObject();
-    withBranch.setBranches(Arrays.asList(getBranchObject()));
-    BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn((withBranch));
-
-    // When
-    MvcResult result = mockMvc
-        .perform(put("/customers/10/branches").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getBranchObject())))
-        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
-    assertThat(result.getResponse().getHeader("Location")).contains("/customers/10/branches/20");
-  }
-
-  public void testAddInvoicesToNonExisitingCustomerGivesUnprocesseableEntity() throws Exception {
-
-    // Given
-    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
-    BDDMockito.given(invoiceRepository.saveAndFlush(any(Invoice.class))).willReturn(getInvoiceObjectWithLineItems());
-    BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(getCustomerObject());
-
-    // When
-    MvcResult result = mockMvc
-        .perform(put("/customers/1/invoices").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getBranchObject())))
+            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
     // Then
@@ -367,7 +331,63 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
   }
 
   @Test
-  public void testAddContactToNonExistingCustomerGivesUnprocesseableEntity() throws Exception {
+  public void testAddingBranchReturnsLocationHeader() throws Exception {
+
+    // Given
+    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class)))
+        .willReturn(builder.getCustomerObject());
+    BDDMockito.given(branchRepository.saveAndFlush(any(Branch.class))).willReturn(builder.getBranchObject());
+    Customer withBranch = builder.getCustomerObject();
+    withBranch.setBranches(Arrays.asList(builder.getBranchObject()));
+    BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn((withBranch));
+
+    // When
+    MvcResult result = mockMvc
+        .perform(put("/customers/10/branches").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
+    assertThat(result.getResponse().getHeader("Location")).contains("/customers/10/branches/20");
+  }
+
+  @Test
+  public void testAddInvoicesToNonExisitingCustomerGivesBadRequest() throws Exception {
+
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    // When
+    MvcResult result = mockMvc
+        .perform(put("/customers/1/invoices").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isBadRequest());
+  }
+
+  @Test
+  public void testAddInvoiceReturnsLocationHeader() throws Exception {
+
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getCustomerObject()));
+    BDDMockito.given(invoiceRepository.saveAndFlush(any(Invoice.class)))
+        .willReturn(builder.getInvoiceObjectWithCustomer());
+
+    // When
+    MvcResult result = mockMvc
+        .perform(put("/customers/1/invoices").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
+  }
+
+  @Test
+  public void testAddContactToNonExistingCustomerGivesBadRequest() throws Exception {
 
     // Given
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
@@ -375,27 +395,27 @@ public class CustomerControllerTests extends EntityObjectsBuilder {
     // When
     MvcResult result = mockMvc
         .perform(put("/customers/1/contact").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getContactObject())))
+            .content(objectMapper.writeValueAsString(builder.getContactObject())))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
     // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isUnprocessableEntity());
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isBadRequest());
   }
 
   @Test
   public void testAddingContactReturnsLocationHeader() throws Exception {
 
     // Given
-    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(getCustomerObject()));
-    BDDMockito.given(contactRepository.saveAndFlush(any(Contact.class))).willReturn(getContactObject());
-    Customer withContact = getCustomerObject();
-    withContact.setContact(getContactObject());
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getCustomerObject()));
+    BDDMockito.given(contactRepository.saveAndFlush(any(Contact.class))).willReturn(builder.getContactObject());
+    Customer withContact = builder.getCustomerObject();
+    withContact.setContact(builder.getContactObject());
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn((withContact));
 
     // When
     MvcResult result = mockMvc
         .perform(put("/customers/10/contact").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getContactObject())))
+            .content(objectMapper.writeValueAsString(builder.getContactObject())))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
     // Then
