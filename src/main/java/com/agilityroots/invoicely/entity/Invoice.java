@@ -103,22 +103,22 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   @OrderBy("paymentDate DESC")
   private List<Payment> payments;
 
-  //@NotNull(message = "Cannot save invoice without Billed From Branch")
+  @NotNull(message = "Cannot save invoice without Billed From Branch")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "billed_from_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Branch billedFrom;
 
-  //@NotNull(message = "Cannot save invoice without Customer Details")
+  @NotNull(message = "Cannot save invoice without Customer Details")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
   private Customer customer;
 
-  //@NotNull(message = "Cannot save invoice without Billed To Branch")
+  @NotNull(message = "Cannot save invoice without Billed To Branch")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "billed_to_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Branch billedTo;
 
-  //@NotNull(message = "Cannot save invoice without Shipped To Branch")
+  @NotNull(message = "Cannot save invoice without Shipped To Branch")
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "shipped_to_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Branch shippedTo;
