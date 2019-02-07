@@ -9,8 +9,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import javax.persistence.Embeddable;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -30,7 +28,6 @@ public class LineItem implements Serializable {
   private static final long serialVersionUID = -977449988990379565L;
 
   @NotNull
-  @GeneratedValue(strategy = GenerationType.SEQUENCE)
   private Integer serialNumber;
 
   @NotEmpty
