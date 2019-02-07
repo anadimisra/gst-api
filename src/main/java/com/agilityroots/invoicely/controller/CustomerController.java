@@ -522,7 +522,7 @@ public class CustomerController {
           Customer customer = result.get();
           invoice.setCustomer(customer);
           Invoice saved = invoiceRepository.saveAndFlush(invoice);
-          log.debug("Saved: id:{}, invoice: {}", saved.getId(), invoice);
+          log.debug("Saved: id:{}, invoice: {}", saved.getId(), invoice.getInvoiceNumber());
           URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId())
               .toUri();
           response.setResult(ResponseEntity.created(location).build());
