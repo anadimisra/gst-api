@@ -124,6 +124,7 @@ public class EntityObjectsBuilder {
     return branch;
   }
 
+  
   public Contact getContactObject() {
     Contact contact = new Contact();
     contact.setId(Long.valueOf(30));
@@ -140,5 +141,11 @@ public class EntityObjectsBuilder {
     company.setPan(RandomStringUtils.randomAlphanumeric(10));
     company.setTan(RandomStringUtils.randomAlphabetic(10));
     return company;
+  }
+
+  public Branch getBranchWithContactObject() {
+    Branch branch = getBranchObject();
+    branch.setContact(getContactObject());
+    return branch;
   }
 }

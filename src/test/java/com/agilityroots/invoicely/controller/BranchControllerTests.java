@@ -4,7 +4,6 @@
 package com.agilityroots.invoicely.controller;
 
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
@@ -17,10 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.Locale;
 import java.util.Optional;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,15 +36,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.entity.Address;
+import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.service.BranchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.javafaker.Faker;
 
 /**
  * @author anadi
@@ -73,7 +68,7 @@ public class BranchControllerTests {
   @InjectMocks
   BranchService branchService;
 
-  private Faker faker = new Faker(new Locale("en-IND"));
+  EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   @Before
   public void setup() {
@@ -101,7 +96,7 @@ public class BranchControllerTests {
 
     // Given
     BDDMockito.given(branchRepository.findById(ArgumentMatchers.anyLong()))
-        .willReturn(Optional.of(getBranchWithContactObject()));
+        .willReturn(Optional.of(builder.getBranchWithContactObject()));
 
     // When
     MvcResult result = mockMvc.perform(get("/branches/10")).andExpect(request().asyncStarted()).andDo(print())
@@ -109,8 +104,7 @@ public class BranchControllerTests {
 
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.branch_name", is(equalTo("Main Branch"))))
-        .andExpect(jsonPath("$.contact", is(notNullValue())));
+        .andExpect(jsonPath("$.branch_name", endsWith(" Branch"))).andExpect(jsonPath("$.contact", is(notNullValue())));
 
   }
 
@@ -118,17 +112,18 @@ public class BranchControllerTests {
   public void testSavingBranchReturnsLocationHeader() throws Exception {
 
     // Given
-    BDDMockito.given(branchRepository.saveAndFlush(ArgumentMatchers.any(Branch.class))).willReturn(getBranchObject());
+    BDDMockito.given(branchRepository.saveAndFlush(ArgumentMatchers.any(Branch.class)))
+        .willReturn(builder.getBranchObject());
 
     // When
     MvcResult result = mockMvc
         .perform(post("/branches").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getBranchObject())))
+            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated())
-        .andExpect(header().string(HttpHeaders.LOCATION, endsWith("/branches/10")));
+        .andExpect(header().string(HttpHeaders.LOCATION, endsWith("/branches/20")));
   }
 
   @Test
@@ -140,7 +135,7 @@ public class BranchControllerTests {
     // When
     MvcResult result = mockMvc
         .perform(put("/branches/1/contact").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(getBranchWithContactObject().getContact())))
+            .content(objectMapper.writeValueAsString(builder.getBranchWithContactObject().getContact())))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
 
     // Then
@@ -161,32 +156,4 @@ public class BranchControllerTests {
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
   }
 
-  private Branch getBranchWithContactObject() {
-    Contact contact = new Contact();
-    contact.setName(faker.name().fullName());
-    contact.setEmail(faker.internet().emailAddress());
-    contact.setPhone(RandomStringUtils.randomNumeric(10));
-    contact.setId(Long.valueOf(9));
-
-    Branch branch = getBranchObject();
-    branch.setContact(contact);
-    return branch;
-  }
-
-  private Branch getBranchObject() {
-    Address address = new Address();
-    address.setStreetAddress(faker.address().streetAddress());
-    address.setArea(faker.address().streetName());
-    address.setCity(faker.address().city());
-    address.setState(faker.address().state());
-    address.setPincode(faker.address().zipCode());
-
-    Branch branch = new Branch();
-    branch.setBranchName("Main Branch");
-    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-    branch.setSez(Boolean.FALSE);
-    branch.setAddress(address);
-    branch.setId(Long.valueOf(10));
-    return branch;
-  }
 }

@@ -5,15 +5,15 @@
  */
 package com.agilityroots.invoicely.repository;
 
+import java.util.Optional;
+
 import javax.persistence.LockModeType;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import com.agilityroots.invoicely.entity.Branch;
 
@@ -23,9 +23,12 @@ import com.agilityroots.invoicely.entity.Branch;
 @Repository
 public interface BranchRepository extends JpaRepository<Branch, Long> {
 
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-  ListenableFuture<Branch> findOneById(Long id);
+  @Cacheable("branches")
+  Optional<Branch> findById(Long id);
+  
+  @Lock(LockModeType.OPTIMISTIC)
+  @CacheEvict("branches")
+  <S extends Branch> S saveAndFlush(S entity);
 
 }
