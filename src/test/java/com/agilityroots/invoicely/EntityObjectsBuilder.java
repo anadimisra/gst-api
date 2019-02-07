@@ -14,6 +14,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import com.agilityroots.invoicely.entity.Address;
 import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Company;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
@@ -29,24 +30,44 @@ public class EntityObjectsBuilder {
 
   private Faker faker = new Faker(new Locale("en-IND"));
 
-  protected Invoice getInvoiceObjectWithLineItems() {
+  public Invoice getValidInvoiceObject() {
+    Invoice invoice = getInvoiceObjectWithCustomer();
+    invoice.setBilledTo(getBranchObject());
+    invoice.setBilledTo(getBranchObject());
+    invoice.setBilledFrom(getBranchObject());
+    return invoice;
+  }
+  
+  public Invoice getInvoiceObjectWithLineItems() {
     Invoice invoice = getInvoiceObject();
-    LineItem lineItem = new LineItem();
-    lineItem.setAmount(1180.00);
-    lineItem.setDescription("That Service");
-    lineItem.setDiscount(0.0);
-    lineItem.setHsn("998313");
-    lineItem.setItem("That Item");
-    lineItem.setSerialNumber(1);
-    lineItem.setTax(0.18);
-    lineItem.setPrice(1000.00);
+    LineItem item1 = new LineItem();
+    item1.setSerialNumber(1);
+    item1.setAmount(1180.00);
+    item1.setDescription("That Service");
+    item1.setDiscount(0.0);
+    item1.setHsn("998313");
+    item1.setItem("That Item");
+    item1.setSerialNumber(1);
+    item1.setTax(0.18);
+    item1.setPrice(1000.00);
+    LineItem item2 = new LineItem();
+    item2.setSerialNumber(2);
+    item2.setAmount(1180.00);
+    item2.setDescription("Another Service");
+    item2.setDiscount(0.0);
+    item2.setHsn("998313");
+    item2.setItem("Another Item");
+    item2.setSerialNumber(1);
+    item2.setTax(0.18);
+    item2.setPrice(1000.00);
     List<LineItem> lineItems = new ArrayList<LineItem>();
-    lineItems.add(lineItem);
+    lineItems.add(item1);
+    lineItems.add(item2);
     invoice.setLineItems(lineItems);
     return invoice;
   }
 
-  protected Invoice getInvoiceObject() {
+  public Invoice getInvoiceObject() {
     Invoice invoice = new Invoice();
     invoice.setId(Long.valueOf(20));
     invoice.setInvoiceDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
@@ -57,9 +78,8 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
-  protected Invoice getInvoiceObjectWithPayments() {
-    Invoice invoice = getInvoiceObject();
-    invoice.setCustomer(getCustomerObject());
+  public Invoice getInvoiceWithPayments() {
+    Invoice invoice = getInvoiceObjectWithCustomer(); 
     Payment payment = new Payment();
     payment.setAdjustmentName("TDS");
     payment.setAdjustmentValue(100.00);
@@ -71,7 +91,13 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
-  protected Customer getCustomerObject() {
+  public Invoice getInvoiceObjectWithCustomer() {
+    Invoice invoice = getInvoiceObjectWithLineItems();
+    invoice.setCustomer(getCustomerObject());
+    return invoice;
+  }
+
+  public Customer getCustomerObject() {
     Customer minty = new Customer();
     minty.setId(Long.valueOf(10));
     minty.setName("Minty and Sons Private Limited");
@@ -82,31 +108,37 @@ public class EntityObjectsBuilder {
     return minty;
   }
 
-  protected Branch getBranchObject() {
-
+  public Branch getBranchObject() {
     Address address = new Address();
     address.setStreetAddress(faker.address().streetAddress());
     address.setArea(faker.address().streetName());
     address.setCity(faker.address().city());
     address.setState(faker.address().state());
     address.setPincode(faker.address().zipCode());
-
     Branch branch = new Branch();
     branch.setId(Long.valueOf(20));
-    branch.setBranchName("Main Branch");
+    branch.setBranchName(RandomStringUtils.randomAlphabetic(5) + " Branch");
     branch.setGstin(RandomStringUtils.randomAlphabetic(15));
     branch.setSez(Boolean.FALSE);
     branch.setAddress(address);
     return branch;
   }
 
-  protected Contact getContactObject() {
-
+  public Contact getContactObject() {
     Contact contact = new Contact();
     contact.setId(Long.valueOf(30));
     contact.setName(faker.name().fullName());
     contact.setEmail(faker.internet().emailAddress());
     contact.setPhone("8067601867");
     return contact;
+  }
+
+  public Company getCompanyObject() {
+    Company company = new Company();
+    company.setName("Ruchi And Sons Pvt. Ltd.");
+    company.setCin(RandomStringUtils.randomAlphanumeric(21));
+    company.setPan(RandomStringUtils.randomAlphanumeric(10));
+    company.setTan(RandomStringUtils.randomAlphabetic(10));
+    return company;
   }
 }
