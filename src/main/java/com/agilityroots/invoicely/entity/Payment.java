@@ -13,6 +13,8 @@ import javax.persistence.Embeddable;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,6 +32,7 @@ public class Payment implements Serializable {
 
   @Temporal(TemporalType.DATE)
   @Column(nullable = false)
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
   private Date paymentDate;
 
   @Column(nullable = false)
