@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import javax.persistence.LockModeType;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,11 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
   Optional<Invoice> findById(Long id);
+  
+  @SuppressWarnings("unchecked")
+  @Lock(LockModeType.OPTIMISTIC)
+  @CacheEvict("invoices")    
+  Invoice saveAndFlush(Invoice entity);
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
