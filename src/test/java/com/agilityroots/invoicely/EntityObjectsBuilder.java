@@ -37,7 +37,7 @@ public class EntityObjectsBuilder {
     invoice.setBilledFrom(getBranchObject());
     return invoice;
   }
-  
+
   public Invoice getInvoiceObjectWithLineItems() {
     Invoice invoice = getInvoiceObject();
     LineItem item1 = new LineItem();
@@ -79,7 +79,7 @@ public class EntityObjectsBuilder {
   }
 
   public Invoice getInvoiceWithPayments() {
-    Invoice invoice = getInvoiceObjectWithCustomer(); 
+    Invoice invoice = getInvoiceObjectWithCustomer();
     Payment payment = new Payment();
     payment.setAdjustmentName("TDS");
     payment.setAdjustmentValue(100.00);
@@ -124,7 +124,6 @@ public class EntityObjectsBuilder {
     return branch;
   }
 
-  
   public Contact getContactObject() {
     Contact contact = new Contact();
     contact.setId(Long.valueOf(30));

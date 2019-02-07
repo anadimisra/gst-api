@@ -334,7 +334,8 @@ public class InvoiceController {
       @Override
       public void onSuccess(Optional<Invoice> result) {
         if (result.isPresent())
-          response.setResult(ResponseEntity.created(ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand().toUri()).build());
+          response.setResult(ResponseEntity
+              .created(ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand().toUri()).build());
         else
           response.setErrorResult(ResponseEntity.badRequest().body("Cannot update pyments for invoice"));
 

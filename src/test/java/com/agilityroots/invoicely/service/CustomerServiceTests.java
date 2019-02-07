@@ -23,7 +23,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.service.CustomerService;
 
 /**
  * @author anadi

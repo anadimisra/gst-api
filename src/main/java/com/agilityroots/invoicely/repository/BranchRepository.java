@@ -26,7 +26,7 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("branches")
   Optional<Branch> findById(Long id);
-  
+
   @Lock(LockModeType.OPTIMISTIC)
   @CacheEvict("branches")
   <S extends Branch> S saveAndFlush(S entity);

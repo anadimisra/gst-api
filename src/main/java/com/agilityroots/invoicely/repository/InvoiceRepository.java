@@ -35,10 +35,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
   Optional<Invoice> findById(Long id);
-  
+
   @SuppressWarnings("unchecked")
   @Lock(LockModeType.OPTIMISTIC)
-  @CacheEvict("invoices")    
+  @CacheEvict("invoices")
   Invoice saveAndFlush(Invoice entity);
 
   @Lock(LockModeType.OPTIMISTIC)
@@ -67,13 +67,15 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today,
+      Pageable pageable);
 
   @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
+  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today,
+      Pageable pageable);
 
   /**
    * Paid invoices by Customer

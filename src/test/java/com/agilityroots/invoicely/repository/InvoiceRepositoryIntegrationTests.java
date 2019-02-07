@@ -61,7 +61,7 @@ public class InvoiceRepositoryIntegrationTests {
 
   @Autowired
   private InvoiceRepository invoiceRepository;
-  
+
   EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   private Invoice invoice;
@@ -219,24 +219,24 @@ public class InvoiceRepositoryIntegrationTests {
     invoice
         .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     invoiceRepository.saveAndFlush(invoice);
-        
+
     Optional<Invoice> result = invoiceRepository.findById(invoice.getId());
     List<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
     assertThat(invoicePayments).isEmpty();
-    
+
     Payment payment = getPayment();
     List<Payment> payments = new ArrayList<>();
     payments.add(payment);
     invoicePayments.addAll(payments);
     result.ifPresent(it -> it.setPayments(invoicePayments));
     result.ifPresent(it -> invoiceRepository.saveAndFlush(it));
-    
+
     Optional<Invoice> updated = invoiceRepository.findById(invoice.getId());
     List<Payment> addedPayments = updated.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
     assertThat(addedPayments.size()).isEqualTo(1);
     assertThat(addedPayments.get(0).getAmount()).isEqualTo(1000.00);
   }
-  
+
   @Test
   public void testGetInvoiceCustomerDetails() {
     invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));

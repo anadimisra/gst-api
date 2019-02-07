@@ -24,7 +24,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
   @Cacheable("company")
   Page<Company> findAll(Pageable pageable);
-  
+
   @Cacheable("company")
   Optional<Company> findById(Long id);
 }
