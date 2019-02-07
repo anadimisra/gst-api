@@ -1,5 +1,7 @@
 package com.agilityroots.invoicely.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.entity.Payment;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
 
 import lombok.extern.slf4j.Slf4j;
@@ -54,5 +57,19 @@ public class InvoiceService {
   public Invoice save(Invoice invoice) {
     log.debug("Saving invoice number: {}", invoice.getInvoiceNumber());
     return invoiceRepository.saveAndFlush(invoice);
+  }
+
+  public ListenableFuture<Optional<Invoice>> updatePayments(Long id, final List<Payment> payments) {
+    Optional<Invoice> result = invoiceRepository.findById(id);
+    List<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
+    log.debug("This invoice has {} recorded payments", invoicePayments.size());
+    invoicePayments.addAll(payments);
+    log.debug("Added {} payments to the invoice", payments.size());
+    log.debug("Total {} payments recorded", invoicePayments.size());
+    result.ifPresent(it -> {
+      it.setPayments(invoicePayments);
+      invoiceRepository.saveAndFlush(it);
+    });
+    return AsyncResult.forValue(result);
   }
 }
