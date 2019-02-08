@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.repository.CustomerRepository;
@@ -39,6 +40,8 @@ public class CustomerServiceTests {
   private CustomerRepository customerRepository;
 
   private Customer customer;
+  
+  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   /**
    * @throws java.lang.Exception
@@ -46,9 +49,7 @@ public class CustomerServiceTests {
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-    customer = new Customer();
-    customer.setName("Minty & SOns Pvt. Ltd.");
-    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
+    customer = builder.getCustomerObject();
   }
 
   /**

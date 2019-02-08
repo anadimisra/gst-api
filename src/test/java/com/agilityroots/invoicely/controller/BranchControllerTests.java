@@ -32,6 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -50,6 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(BranchController.class)
+@TestPropertySource(locations = "classpath:application-unit-test.properties")
 @Import({ BranchService.class, BranchResourceAssembler.class })
 public class BranchControllerTests {
 

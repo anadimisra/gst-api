@@ -10,12 +10,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 
-import javax.persistence.EntityManager;
-
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,14 +22,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.agilityroots.invoicely.DataApiJpaConfiguration;
-import com.agilityroots.invoicely.entity.Address;
+import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
-import com.github.javafaker.Faker;
 
 /**
  * @author anadi
@@ -42,6 +38,7 @@ import com.github.javafaker.Faker;
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
+@TestPropertySource(locations = "classpath:application-unit-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 public class BranchRepositoryIntegrationTests {
 
@@ -56,56 +53,25 @@ public class BranchRepositoryIntegrationTests {
   @Autowired
   private ContactRepository contactRepository;
 
-  @Autowired
-  EntityManager entityManager;
-
-  private Faker faker = new Faker(new Locale("en-IND"));
+  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   private Customer customer;
 
   @Before
   public void setup() {
-    customer = new Customer();
-    customer.setName(faker.company().name());
-    customer.setPan(RandomStringUtils.randomAlphanumeric(10));
-    customer.setTds(0.10);
-
-    Branch branch = getBranchObject();
+    Contact contact = builder.getContactObject();
+    contact = contactRepository.save(contact);
+    Branch branch = builder.getBranchObject();
+    branch.setContact(contact);
     branch = branchRepository.save(branch);
-
+    customer = builder.getCustomerObject();
     customer.setBranches(Arrays.asList(branch));
     customer = customerRepository.save(customer);
   }
 
-  /**
-   * @return {@link Branch} object
-   */
-  private Branch getBranchObject() {
-    Address address = new Address();
-    address.setStreetAddress(faker.address().streetAddress());
-    address.setArea(faker.address().streetName());
-    address.setCity(faker.address().city());
-    address.setState(faker.address().state());
-    address.setPincode(faker.address().zipCode());
-
-    Contact contact = new Contact();
-    contact.setName(faker.name().fullName());
-    contact.setEmail(faker.internet().emailAddress());
-    contact.setPhone(RandomStringUtils.randomNumeric(10));
-    contact = contactRepository.save(contact);
-
-    Branch branch = new Branch();
-    branch.setBranchName("Main Branch");
-    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
-    branch.setSez(Boolean.FALSE);
-    branch.setContact(contact);
-    branch.setAddress(address);
-    return branch;
-  }
-
   @Test
   public void testBranchEqualityWhenAddingBranchToCustomers() throws InterruptedException, ExecutionException {
-    Branch branch = getBranchObject();
+    Branch branch = builder.getBranchObject();
     branch.setBranchName("Other Branch");
     branch = branchRepository.save(branch);
     LOGGER.debug("Saved Branch with id {} and details {}", branch.getId(), branch.toString());

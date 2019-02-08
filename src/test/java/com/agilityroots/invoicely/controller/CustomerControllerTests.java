@@ -43,6 +43,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -68,6 +69,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
+@TestPropertySource(locations = "classpath:application-unit-test.properties")
 @Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
     CustomerService.class })
 public class CustomerControllerTests {
