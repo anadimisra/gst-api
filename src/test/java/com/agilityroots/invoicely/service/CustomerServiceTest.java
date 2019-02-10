@@ -39,7 +39,7 @@ import com.agilityroots.invoicely.repository.InvoiceRepository;
  */
 @RunWith(SpringRunner.class)
 @Import({ CustomerService.class })
-public class CustomerServiceTests {
+public class CustomerServiceTest {
 
   @Autowired
   @InjectMocks
