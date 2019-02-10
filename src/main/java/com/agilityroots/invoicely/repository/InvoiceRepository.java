@@ -36,10 +36,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Cacheable("invoices")
   Optional<Invoice> findById(Long id);
 
-  @SuppressWarnings("unchecked")
   @Lock(LockModeType.OPTIMISTIC)
   @CacheEvict("invoices")
-  Invoice saveAndFlush(Invoice entity);
+  <S extends Invoice> S saveAndFlush(S entity);
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
@@ -49,7 +48,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findAllByCustomer_Id(Long id, Pageable pageable);
+  Page<Invoice> findAllByCustomer_Id(Long id, Pageable pageable);
 
   @Async
   @Lock(LockModeType.OPTIMISTIC)
@@ -85,11 +84,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    * @param pageable
    * @return
    */
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNotNullAndCustomer_Id(Long id, Pageable pageable);
+  Page<Invoice> findByPayments_PaymentDateIsNotNullAndCustomer_Id(Long id, Pageable pageable);
 
   /**
    * Pending invoices by Customer
@@ -99,12 +97,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    * @param pageable
    * @return
    */
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id,
-      Pageable pageable);
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id, Pageable pageable);
 
   /**
    * Overdue Invoiced by Customer
@@ -114,11 +110,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    * @param pageable
    * @return
    */
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id,
-      Pageable pageable);
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id, Pageable pageable);
 
 }

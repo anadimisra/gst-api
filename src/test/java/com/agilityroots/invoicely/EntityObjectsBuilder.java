@@ -20,6 +20,7 @@ import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.LineItem;
 import com.agilityroots.invoicely.entity.Payment;
+import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
 import com.github.javafaker.Faker;
 
 /**
@@ -30,12 +31,13 @@ public class EntityObjectsBuilder {
 
   private Faker faker = new Faker(new Locale("en-IND"));
 
-  public Invoice getValidInvoiceObject() {
-    Invoice invoice = getInvoiceObjectWithCustomer();
-    invoice.setBilledTo(getBranchObject());
-    invoice.setBilledTo(getBranchObject());
-    invoice.setBilledFrom(getBranchObject());
-    return invoice;
+  public InvoiceHttpPayload getValidInvoicePayloadObject() {
+    InvoiceHttpPayload payload = new InvoiceHttpPayload();
+    payload.setInvoice(getInvoiceObjectWithLineItems());
+    payload.setBilledFrom(Long.valueOf(1));
+    payload.setBilledTo(Long.valueOf(2));
+    payload.setShippedTo(Long.valueOf(2));
+    return payload;
   }
 
   public Invoice getInvoiceObjectWithLineItems() {
@@ -57,7 +59,6 @@ public class EntityObjectsBuilder {
     item2.setDiscount(0.0);
     item2.setHsn("998313");
     item2.setItem("Another Item");
-    item2.setSerialNumber(1);
     item2.setTax(0.18);
     item2.setPrice(1000.00);
     List<LineItem> lineItems = new ArrayList<LineItem>();
@@ -97,6 +98,13 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
+  public Invoice getSavedInvoiceObject() {
+    Invoice invoice = getInvoiceObjectWithCustomer();
+    invoice.setBilledFrom(getBranchWithContactObject());
+    invoice.setShippedTo(getBranchWithContactObject());
+    invoice.setBilledTo(getBranchWithContactObject());
+    return invoice;
+  }
   public Customer getCustomerObject() {
     Customer minty = new Customer();
     minty.setId(Long.valueOf(10));
@@ -108,6 +116,12 @@ public class EntityObjectsBuilder {
     return minty;
   }
 
+  public Customer getCustomerWithContact() {
+    Customer customer = getCustomerObject();
+    customer.setContact(getContactObject());
+    return customer;
+  }
+  
   public Branch getBranchObject() {
     Address address = new Address();
     address.setStreetAddress(faker.address().streetAddress());

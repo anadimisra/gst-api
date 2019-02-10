@@ -48,10 +48,7 @@ import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
+import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
@@ -66,18 +63,6 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @ExposesResourceFor(Customer.class)
 public class CustomerController {
-
-  @Autowired
-  private InvoiceRepository invoiceRepository;
-
-  @Autowired
-  private BranchRepository branchRepository;
-
-  @Autowired
-  private ContactRepository contactRepository;
-
-  @Autowired
-  private CustomerRepository customerRepository;
 
   @Autowired
   private Environment environment;
@@ -202,6 +187,43 @@ public class CustomerController {
     return response;
   }
 
+  @PutMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Object>> addInvoice(@PathVariable("id") Long id,
+      @RequestBody @Valid InvoiceHttpPayload payload, HttpServletRequest request) {
+
+    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError((Throwable t) -> {
+      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
+    });
+    StringBuilder builder = new StringBuilder();
+    builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
+        .append("/invoices/");
+
+    ListenableFuture<Optional<URI>> result = customerService.addInvoice(id, payload.getBilledFrom(),
+        payload.getBilledTo(), payload.getShippedTo(), builder, payload.getInvoice());
+
+    result.addCallback(new ListenableFutureCallback<Optional<URI>>() {
+      @Override
+      public void onSuccess(Optional<URI> result) {
+
+        response.setResult(result.map(location -> ResponseEntity.created(location).build())
+            .orElse(ResponseEntity.badRequest().build()));
+
+      }
+
+      @Override
+      public void onFailure(Throwable ex) {
+        log.error("Cannot add invoice:{} to customer {} due to error: {}", payload.getInvoice().toString(), id,
+            ex.getMessage(), ex);
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Cannot update invoices for this customer due to error."));
+      }
+    });
+    return response;
+  }
+  
   @GetMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getInvoicesByCustomer(@PathVariable("id") Long id,
       @PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
@@ -214,7 +236,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting invoices for customer id {}", id);
-    ListenableFuture<Page<Invoice>> future = invoiceRepository.findAllByCustomer_Id(id, pageable);
+    ListenableFuture<Page<Invoice>> future = customerService.getAllInvoices(id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override
@@ -251,8 +273,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting paid invoices for customer id {}", id);
-    ListenableFuture<Page<Invoice>> future = invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(id,
-        pageable);
+    ListenableFuture<Page<Invoice>> future = customerService.getPaidInvoices(id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override
@@ -275,7 +296,7 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/invoices/pending", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/invoices/due", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoicesByCustomer(
       @PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
@@ -287,8 +308,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting unpaid invoices for customer id {}", id);
-    ListenableFuture<Page<Invoice>> future = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(getTodaysDate(), id, pageable);
+    ListenableFuture<Page<Invoice>> future = customerService.getDueInvoices(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override
@@ -303,9 +323,9 @@ public class CustomerController {
 
       @Override
       public void onFailure(Throwable ex) {
-        log.error("Cannot retrieve pending invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
+        log.error("Cannot retrieve due invoices for customer id {} due to error: {}", id, ex.getMessage(), ex);
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Cannot get customer pending invoices due to server error."));
+            .body("Cannot get customer due invoices due to server error."));
       }
 
     });
@@ -324,8 +344,7 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting overdue invoices for customer id {}", id);
-    ListenableFuture<Page<Invoice>> future = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(getTodaysDate(), id, pageable);
+    ListenableFuture<Page<Invoice>> future = customerService.getOverdueInvoices(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
       @Override
@@ -361,19 +380,20 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting banches for customer {}", id);
-    ListenableFuture<Optional<Customer>> future = customerService.getCustomerWithAllBranches(id);
-    future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
+    ListenableFuture<List<Branch>> future = customerService.getAllBranches(id);
+
+    future.addCallback(new ListenableFutureCallback<List<Branch>>() {
 
       @Override
-      public void onSuccess(Optional<Customer> result) {
-
+      public void onSuccess(List<Branch> result) {
         Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
             "self");
-        response
-            .setResult(result
-                .map(it -> assembler.toResource(new PageImpl<>(it.getBranches(), pageable, it.getBranches().size()),
-                    branchResourceAssembler, rootLink))
-                .map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build()));
+
+        if (result.isEmpty())
+          response.setResult(ResponseEntity.notFound().build());
+        else
+          response.setResult(ResponseEntity.ok(assembler.toResource(new PageImpl<>(result, pageable, result.size()),
+              branchResourceAssembler, rootLink)));
       }
 
       @Override
@@ -383,7 +403,9 @@ public class CustomerController {
             .body("Cannot retrieve branches for this customer due to server error."));
 
       }
+
     });
+
     return response;
   }
 
@@ -397,23 +419,18 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
     log.debug("Adding branch {} to customer with id {}", branch, id);
-    ListenableFuture<Optional<Customer>> future = customerService.getCustomerWithAllBranches(id);
-    future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
+
+    StringBuilder builder = new StringBuilder();
+    builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
+        .append("/branches/");
+    ListenableFuture<Optional<URI>> result = customerService.addBranch(id, branch, builder);
+
+    result.addCallback(new ListenableFutureCallback<Optional<URI>>() {
 
       @Override
-      public void onSuccess(Optional<Customer> result) {
-        if (result.isPresent()) {
-          Branch saved = branchRepository.saveAndFlush(branch);
-          Customer customer = result.get();
-          List<Branch> branches = customer.getBranches();
-          branches.add(saved);
-          customer.setBranches(branches);
-          customerRepository.saveAndFlush(customer);
-          response.setResult(ResponseEntity.created(
-              ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId()).toUri())
-              .build());
-        } else
-          response.setErrorResult(ResponseEntity.badRequest().build());
+      public void onSuccess(Optional<URI> result) {
+        response.setResult(result.map(location -> ResponseEntity.created(location).build())
+            .orElse(ResponseEntity.badRequest().body("Customer  does not exist")));
 
       }
 
@@ -424,8 +441,8 @@ public class CustomerController {
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Cannot update branch for this customer due to error."));
       }
-
     });
+
     return response;
   }
 
@@ -470,25 +487,20 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
-    log.debug("Finding customer with id {}", id);
-    ListenableFuture<Optional<Customer>> future = customerService.getCustomer(id);
-    future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
-      @Override
-      public void onSuccess(Optional<Customer> customer) {
 
-        if (customer.isPresent()) {
-          log.debug("Adding contact details {} to customer {}", contact.toString(),
-              customer.map(Customer::getName).orElse("None"));
-          Contact saved = contactRepository.saveAndFlush(contact);
-          Customer unsaved = customer.get();
-          unsaved.setContact(saved);
-          customerRepository.saveAndFlush(unsaved);
-          URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId())
-              .toUri();
-          response.setResult(ResponseEntity.created(location).build());
-          log.debug("Rendered Location header {}", location.toString());
-        } else
-          response.setResult(ResponseEntity.badRequest().build());
+    StringBuilder builder = new StringBuilder();
+    builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
+        .append("/contact/");
+
+    ListenableFuture<Optional<URI>> result = customerService.addContact(id, contact, builder);
+
+    result.addCallback(new ListenableFutureCallback<Optional<URI>>() {
+
+      @Override
+      public void onSuccess(Optional<URI> result) {
+
+        response.setResult(result.map(location -> ResponseEntity.created(location).build())
+            .orElse(ResponseEntity.badRequest().body("Customer Not Found")));
 
       }
 
@@ -498,47 +510,10 @@ public class CustomerController {
             ex.getMessage(), ex);
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Cannot update contact for this customer due to error."));
-
-      }
-    });
-    return response;
-  }
-
-  @PutMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
-  public DeferredResult<ResponseEntity<Object>> addInvoice(@PathVariable("id") Long id,
-      @RequestBody @Valid Invoice invoice, HttpServletRequest request) {
-
-    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-    response.onTimeout(
-        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
-    ListenableFuture<Optional<Customer>> result = customerService.getCustomer(id);
-    result.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
-      @Override
-      public void onSuccess(Optional<Customer> result) {
-        if (result.isPresent()) {
-          Customer customer = result.get();
-          invoice.setCustomer(customer);
-          Invoice saved = invoiceRepository.saveAndFlush(invoice);
-          log.debug("Saved: id:{}, invoice: {}", saved.getId(), invoice.getInvoiceNumber());
-          URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId())
-              .toUri();
-          response.setResult(ResponseEntity.created(location).build());
-
-        } else {
-          response.setResult(ResponseEntity.badRequest().build());
-        }
       }
 
-      @Override
-      public void onFailure(Throwable ex) {
-        log.error("Cannot add invoice:{} to customer {} due to error: {}", invoice.toString(), id, ex.getMessage(), ex);
-        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Cannot update invoices for this customer due to error."));
-      }
     });
+
     return response;
   }
 

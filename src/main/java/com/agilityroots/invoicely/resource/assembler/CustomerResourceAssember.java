@@ -37,8 +37,8 @@ public class CustomerResourceAssember extends SimpleIdentifiableResourceAssemble
     resource.add(getCollectionLinkBuilder().slash(resource.getContent())
         .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("paid").withRel("paid-invoices"));
     resource.add(getCollectionLinkBuilder().slash(resource.getContent())
-        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("pending")
-        .withRel("pending-invoices"));
+        .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("due")
+        .withRel("due-invoices"));
     resource.add(getCollectionLinkBuilder().slash(resource.getContent())
         .slash(getRelProvider().getCollectionResourceRelFor(Invoice.class)).slash("overdue")
         .withRel("overdue-invoices"));

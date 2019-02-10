@@ -70,10 +70,9 @@ public class CustomerRepositoryIntegrationTests {
   @Test
   public void testNonExistingCustomerGivesEmptyOptional() throws InterruptedException, ExecutionException {
 
-    Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(Long.valueOf(10)));
-    assertThat(result).isNotNull();
-    assertThat(result).isEmpty();
-
+    Customer result = customerRepository.findEagerFetchBranchesById(Long.valueOf(10));
+    assertThat(result).isNull();
+   
   }
 
   @Test
