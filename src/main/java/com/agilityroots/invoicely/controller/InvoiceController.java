@@ -5,7 +5,6 @@
  */
 package com.agilityroots.invoicely.controller;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -42,7 +41,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.Payment;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.InvoiceService;
@@ -60,9 +58,6 @@ public class InvoiceController {
 
   @Autowired
   private InvoiceService invoiceService;
-
-  @Autowired
-  private InvoiceRepository invoiceRepository;
 
   @Autowired
   private InvoiceResourceAssembler invoiceResourceAssembler;
@@ -148,7 +143,7 @@ public class InvoiceController {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = getInvoiceResourceDeferredResult();
 
-    ListenableFuture<Page<Invoice>> result = invoiceRepository.findByPayments_PaymentDateIsNotNull(pageable);
+    ListenableFuture<Page<Invoice>> result = invoiceService.getPaidInvoices(pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -184,9 +179,7 @@ public class InvoiceController {
       @RequestParam(required = false) Date date) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = getInvoiceResourceDeferredResult();
-    Date queryDate = getOptinalDateParamter(date);
-    ListenableFuture<Page<Invoice>> result = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateAfter(queryDate, pageable);
+    ListenableFuture<Page<Invoice>> result = invoiceService.getDueInvoices(getOptinalDateParamter(date), pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -222,9 +215,7 @@ public class InvoiceController {
       @RequestParam(required = false) Date date) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = getInvoiceResourceDeferredResult();
-    Date queryDate = getOptinalDateParamter(date);
-    ListenableFuture<Page<Invoice>> result = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateBefore(queryDate, pageable);
+    ListenableFuture<Page<Invoice>> result = invoiceService.getOverdueInvoices(getOptinalDateParamter(date), pageable);
 
     result.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
 
@@ -278,42 +269,6 @@ public class InvoiceController {
     });
 
     return response;
-  }
-
-  @PutMapping("/invoices/{id}")
-  public DeferredResult<ResponseEntity<Object>> update(@PathVariable("id") Long id,
-      @RequestBody(required = true) @Valid Invoice invoice, HttpServletRequest request) {
-    DeferredResult<ResponseEntity<Object>> response = getLocationHeaderDeferredResult();
-
-    ListenableFuture<Optional<Invoice>> result = invoiceService.getInvoice(id);
-
-    result.addCallback(new ListenableFutureCallback<Optional<Invoice>>() {
-
-      @Override
-      public void onSuccess(Optional<Invoice> result) {
-        if (result.isPresent()) {
-          Invoice saved = result.get();
-          saved = invoice;
-          saved = invoiceRepository.saveAndFlush(saved);
-          URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId())
-              .toUri();
-          log.debug("Created Location Header {} for {}", location.toString(), saved.getInvoiceNumber());
-          ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-          log.debug("Reponse Status for POST Request is ::{}", responseEntity.getStatusCodeValue());
-          log.debug("Reponse Data for POST Request is ::{}", responseEntity.getHeaders().getLocation().toString());
-          response.setResult(responseEntity);
-        }
-      }
-
-      @Override
-      public void onFailure(Throwable ex) {
-        log.error("Cannot save invoice {} due to error: {}", invoice.toString(), ex.getMessage(), ex);
-        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Cannot save invoice details due to server error."));
-      }
-    });
-    return response;
-
   }
 
   @PutMapping("/invoices/{id}/payments")

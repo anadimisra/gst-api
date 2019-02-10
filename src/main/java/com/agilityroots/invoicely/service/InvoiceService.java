@@ -1,6 +1,7 @@
 package com.agilityroots.invoicely.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -59,6 +60,22 @@ public class InvoiceService {
     return invoiceRepository.saveAndFlush(invoice);
   }
 
+  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Page<Invoice>> getPaidInvoices(Pageable pageable) {
+    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNotNull(pageable));
+  }
+
+  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Page<Invoice>> getDueInvoices(Date today, Pageable pageable) {
+    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(today, pageable));
+  }
+
+  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Page<Invoice>> getOverdueInvoices(Date today, Pageable pageable) {
+    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(today, pageable));
+  }
+
+  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Invoice>> updatePayments(Long id, final List<Payment> payments) {
     Optional<Invoice> result = invoiceRepository.findById(id);
     List<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new ArrayList<Payment>());

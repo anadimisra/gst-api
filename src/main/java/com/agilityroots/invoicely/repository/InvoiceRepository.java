@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,36 +43,48 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   @Cacheable("invoices")
   Page<Invoice> findAll(Pageable pageable);
 
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
   Page<Invoice> findAllByCustomer_Id(Long id, Pageable pageable);
 
-  @Async
   @Lock(LockModeType.OPTIMISTIC)
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
   ListenableFuture<Invoice> findOneByInvoiceNumber(String invoiceNumber);
 
-  @Async
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  /**
+   * All paid invoices
+   * 
+   * @param pageable
+   * @return
+   */
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNotNull(Pageable pageable);
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNotNull(Pageable pageable);
 
-  @Async
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  /**
+   * All due invoices
+   * 
+   * @param today
+   * @param pageable
+   * @return
+   */
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today,
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today,
       Pageable pageable);
 
-  @Async
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  /**
+   * All Overdue invoices
+   * 
+   * @param today
+   * @param pageable
+   * @return
+   */
   @Cacheable("invoices")
-  ListenableFuture<Page<Invoice>> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today,
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today,
       Pageable pageable);
 
   /**
@@ -84,22 +95,20 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    * @param pageable
    * @return
    */
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
   Page<Invoice> findByPayments_PaymentDateIsNotNullAndCustomer_Id(Long id, Pageable pageable);
 
   /**
-   * Pending invoices by Customer
+   * Due invoices by Customer
    * 
    * @param today
    * @param id
    * @param pageable
    * @return
    */
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
   Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(Date today, Long id, Pageable pageable);
 
   /**
@@ -110,9 +119,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    * @param pageable
    * @return
    */
-  @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
   Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(Date today, Long id, Pageable pageable);
 
 }

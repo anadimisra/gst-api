@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -20,14 +21,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
-import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -47,7 +47,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.InvoiceService;
@@ -75,10 +74,7 @@ public class InvoiceControllerTests {
   EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   @MockBean
-  private InvoiceRepository invoiceRepository;
-
-  @InjectMocks
-  private InvoiceService invoiceService = new InvoiceService(invoiceRepository);
+  private InvoiceService invoiceService;
 
   @Before
   public void setup() {
@@ -90,8 +86,8 @@ public class InvoiceControllerTests {
   public void testGetInvoicesReturnsNotFoundWhenNoInvoices() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findAll(ArgumentMatchers.any(Pageable.class)))
-        .willReturn(new PageImpl<Invoice>(Collections.emptyList()));
+    BDDMockito.given(invoiceService.getInvoices(any(Pageable.class)))
+        .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices")).andExpect(request().asyncStarted()).andDo(print()).andReturn();
@@ -106,7 +102,7 @@ public class InvoiceControllerTests {
 
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findAll(ArgumentMatchers.any(Pageable.class))).willReturn(page);
+    BDDMockito.given(invoiceService.getInvoices(any(Pageable.class))).willReturn(AsyncResult.forValue(page));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices")).andExpect(request().asyncStarted()).andDo(print()).andReturn();
@@ -125,7 +121,7 @@ public class InvoiceControllerTests {
   public void testGetInvoiceReturnsNotFoundWhenNotPresent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.any(Long.class))).willReturn(Optional.empty());
+    BDDMockito.given(invoiceService.getInvoice(any(Long.class))).willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/1")).andExpect(request().asyncStarted()).andDo(print())
@@ -140,8 +136,8 @@ public class InvoiceControllerTests {
   public void testGetInvoiceReturnsHALDocument() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.any(Long.class)))
-        .willReturn(Optional.of(builder.getInvoiceObject()));
+    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObject())));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/20")).andExpect(request().asyncStarted()).andDo(print())
@@ -161,8 +157,7 @@ public class InvoiceControllerTests {
   public void testGetPaidInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNotNull(ArgumentMatchers.any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(page));
+    BDDMockito.given(invoiceService.getPaidInvoices(any(Pageable.class))).willReturn(AsyncResult.forValue(page));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/paid")).andExpect(request().asyncStarted()).andDo(print())
@@ -181,8 +176,8 @@ public class InvoiceControllerTests {
   public void testGetPendingInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(ArgumentMatchers.any(Date.class),
-        ArgumentMatchers.any(Pageable.class))).willReturn(AsyncResult.forValue(page));
+    BDDMockito.given(invoiceService.getDueInvoices(any(Date.class), any(Pageable.class)))
+        .willReturn(AsyncResult.forValue(page));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/pending")).andExpect(request().asyncStarted()).andDo(print())
@@ -201,9 +196,7 @@ public class InvoiceControllerTests {
   public void testGetOverdueInvoicesReturnsHALDocument() throws Exception {
     // Given
     Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito
-        .given(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(ArgumentMatchers.any(Date.class),
-            ArgumentMatchers.any(Pageable.class)))
+    BDDMockito.given(invoiceService.getOverdueInvoices(any(Date.class), any(Pageable.class)))
         .willReturn(AsyncResult.forValue(page));
 
     // When
@@ -222,7 +215,7 @@ public class InvoiceControllerTests {
   @Test
   public void testWhenInvoiceNotFoundThenCustomerDetailsIsUnprocesseableEntity() throws Exception {
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.empty());
+    BDDMockito.given(invoiceService.getInvoice(any(Long.class))).willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/20/customer")).andExpect(request().asyncStarted()).andDo(print())
@@ -235,8 +228,8 @@ public class InvoiceControllerTests {
   @Test
   public void testGetCustomerDetailsForInvoice() throws Exception {
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.anyLong()))
-        .willReturn(Optional.of(builder.getInvoiceObjectWithCustomer()));
+    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/20/customer")).andExpect(request().asyncStarted()).andDo(print())
@@ -250,8 +243,8 @@ public class InvoiceControllerTests {
   @Test
   public void testCannotAddNullPaymentsToInvoice() throws Exception {
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.anyLong()))
-        .willReturn(Optional.of(builder.getInvoiceObjectWithLineItems()));
+    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
 
     // When, Then
     mockMvc
@@ -261,18 +254,19 @@ public class InvoiceControllerTests {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testAddingPaymentsToInvoiceReturnsLocationHeader() throws Exception {
     // Given
-    Invoice invoice = builder.getInvoiceObjectWithLineItems();
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.of(invoice));
-    Invoice withPayments = builder.getInvoiceWithPayments();
-    BDDMockito.given(invoiceRepository.saveAndFlush(ArgumentMatchers.any(Invoice.class))).willReturn(withPayments);
+    Invoice invoice = builder.getInvoiceWithPayments();
+    BDDMockito.given(invoiceService.updatePayments(any(Long.class), any(List.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(invoice)));
 
-    String jsonContent = objectMapper.writeValueAsString(withPayments.getPayments());
+    String jsonContent = objectMapper.writeValueAsString(invoice.getPayments());
     log.info("Uploading payments {}", jsonContent);
     // When
     MvcResult result = mockMvc
-        .perform(put("/invoices/20/payments").contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonContent))
+        .perform(put("/invoices/" + invoice.getId().toString() + "/payments")
+            .contentType(MediaType.APPLICATION_JSON_VALUE).content(jsonContent))
         .andExpect(request().asyncStarted()).andDo(print()).andReturn();
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated())
@@ -281,12 +275,14 @@ public class InvoiceControllerTests {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testAddingPaymentsWhenInvoiceNotFoundReturnsBadRequest() throws Exception {
     // Given
-    BDDMockito.given(invoiceRepository.findById(ArgumentMatchers.anyLong())).willReturn(Optional.empty());
-    Invoice withPayments = builder.getInvoiceWithPayments();
+    Invoice invoice = builder.getInvoiceWithPayments();
+    BDDMockito.given(invoiceService.updatePayments(any(Long.class), any(List.class)))
+        .willReturn(AsyncResult.forValue(Optional.empty()));
 
-    String jsonContent = objectMapper.writeValueAsString(withPayments.getPayments());
+    String jsonContent = objectMapper.writeValueAsString(invoice.getPayments());
     log.info("Uploading payments {}", jsonContent);
     // When
     MvcResult result = mockMvc
