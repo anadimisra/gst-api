@@ -52,7 +52,6 @@ import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
@@ -80,9 +79,6 @@ public class CustomerControllerTests {
   private ObjectMapper objectMapper;
 
   EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
-  @MockBean
-  private InvoiceRepository invoiceRepository;
 
   @MockBean
   CustomerService customerService;
