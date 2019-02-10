@@ -63,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
 @WebMvcTest(InvoiceController.class)
 @TestPropertySource(locations = "classpath:application-unit-test.properties")
 @Import({ InvoiceService.class, InvoiceResourceAssembler.class, CustomerResourceAssember.class })
-public class InvoiceControllerTests {
+public class InvoiceControllerTest {
 
   @Autowired
   private MockMvc mockMvc;

@@ -53,7 +53,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @WebMvcTest(BranchController.class)
 @TestPropertySource(locations = "classpath:application-unit-test.properties")
 @Import({ BranchService.class, BranchResourceAssembler.class })
-public class BranchControllerTests {
+public class BranchControllerTest {
 
   @Autowired
   private MockMvc mockMvc;

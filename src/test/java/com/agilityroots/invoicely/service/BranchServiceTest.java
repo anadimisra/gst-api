@@ -22,7 +22,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 

@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(locations = "classpath:application-unit-test.properties")
-public class CustomerRepositoryIntegrationTests {
+public class CustomerRepositoryIntegrationTest {
 
   @Autowired
   private CustomerRepository customerRepository;

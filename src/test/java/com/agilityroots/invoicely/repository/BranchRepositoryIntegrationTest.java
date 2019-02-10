@@ -40,9 +40,9 @@ import com.agilityroots.invoicely.entity.Customer;
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @TestPropertySource(locations = "classpath:application-unit-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-public class BranchRepositoryIntegrationTests {
+public class BranchRepositoryIntegrationTest {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BranchRepositoryIntegrationTests.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(BranchRepositoryIntegrationTest.class);
 
   @Autowired
   private CustomerRepository customerRepository;
