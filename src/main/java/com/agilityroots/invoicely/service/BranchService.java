@@ -3,6 +3,7 @@
  */
 package com.agilityroots.invoicely.service;
 
+import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
 
 /**
  * @author anadi
@@ -28,6 +30,9 @@ public class BranchService {
   @Autowired
   private BranchRepository branchRepository;
 
+  @Autowired
+  private ContactRepository contactRepository;
+
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Branch>> getBranch(Long id) {
     return AsyncResult.forValue(branchRepository.findById(id));
@@ -36,6 +41,20 @@ public class BranchService {
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Contact>> getBranchContact(Long id) {
     return AsyncResult.forValue(branchRepository.findById(id).map(Branch::getContact));
+  }
+
+  public ListenableFuture<Optional<URI>> addContact(Long id, Contact contact, URI currentURI) {
+
+    URI location = null;
+    Optional<Branch> result = branchRepository.findById(id);
+    if (result.isPresent()) {
+      contactRepository.save(contact);
+      Branch branch = result.get();
+      branch.setContact(contact);
+      branchRepository.saveAndFlush(branch);
+      location = URI.create(currentURI.toString() + contact.getId());
+    }
+    return AsyncResult.forValue(Optional.ofNullable(location));
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)

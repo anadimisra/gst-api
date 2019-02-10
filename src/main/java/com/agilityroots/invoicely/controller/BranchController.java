@@ -33,8 +33,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.service.BranchService;
 
@@ -55,12 +53,6 @@ public class BranchController {
 
   @Autowired
   private BranchService branchService;
-
-  @Autowired
-  private BranchRepository branchRepository;
-
-  @Autowired
-  private ContactRepository contactRepository;
 
   @Autowired
   private BranchResourceAssembler assembler;
@@ -150,30 +142,20 @@ public class BranchController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
 
-    ListenableFuture<Optional<Branch>> future = branchService.getBranch(id);
+    ListenableFuture<Optional<URI>> future = branchService.addContact(id, contact, getCurrentLocation(request));
 
-    future.addCallback(new ListenableFutureCallback<Optional<Branch>>() {
+    future.addCallback(new ListenableFutureCallback<Optional<URI>>() {
       @Override
-      public void onSuccess(Optional<Branch> result) {
+      public void onSuccess(Optional<URI> result) {
 
-        if (result.isPresent()) {
-          Contact saved = contactRepository.saveAndFlush(contact);
-          Branch updated = result.get();
-          updated.setContact(contact);
-          branchRepository.saveAndFlush(updated);
-          response.setResult(ResponseEntity.created(
-              ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(saved.getId()).toUri())
-              .build());
-        } else
-          response.setErrorResult(ResponseEntity.badRequest().build());
-
+        response.setResult(result.map(location -> ResponseEntity.created(location).build())
+            .orElse(ResponseEntity.badRequest().build()));
       }
 
       @Override
       public void onFailure(Throwable ex) {
         LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-
       }
     });
 
