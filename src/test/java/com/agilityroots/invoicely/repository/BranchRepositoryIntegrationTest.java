@@ -32,7 +32,7 @@ import com.agilityroots.invoicely.entity.Customer;
  *
  */
 @RunWith(SpringRunner.class)
-@DataJpaTest(showSql = true)
+@DataJpaTest(showSql = false)
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
