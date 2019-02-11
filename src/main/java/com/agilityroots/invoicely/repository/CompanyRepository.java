@@ -36,5 +36,5 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
   @CachePut("company")
   @Lock(LockModeType.OPTIMISTIC)
-  <S extends Company> S saveAndFlush();
+  <S extends Company> S saveAndFlush(S entity);
 }
