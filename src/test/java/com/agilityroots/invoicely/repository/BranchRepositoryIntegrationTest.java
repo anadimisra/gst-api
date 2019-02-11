@@ -34,7 +34,7 @@ import com.agilityroots.invoicely.entity.Customer;
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = true)
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
-@TestPropertySource(locations = "classpath:application-unit-test.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class BranchRepositoryIntegrationTest {
 

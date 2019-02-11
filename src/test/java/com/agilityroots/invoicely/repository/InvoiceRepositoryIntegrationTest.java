@@ -44,7 +44,7 @@ import com.agilityroots.invoicely.entity.Payment;
 @DataJpaTest(showSql = true)
 @ContextConfiguration(classes = { DataApiJpaConfiguration.class })
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@TestPropertySource(locations = "classpath:application-unit-test.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 public class InvoiceRepositoryIntegrationTest {
 
   @Autowired

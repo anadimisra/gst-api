@@ -67,7 +67,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
-@TestPropertySource(locations = "classpath:application-unit-test.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
     CustomerService.class })
 public class CustomerControllerTest {

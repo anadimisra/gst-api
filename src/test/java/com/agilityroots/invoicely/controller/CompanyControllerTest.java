@@ -41,7 +41,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 @RunWith(SpringRunner.class)
 @WebMvcTest(CompanyController.class)
-@TestPropertySource(locations = "classpath:application-unit-test.properties")
+@TestPropertySource(locations = "classpath:application-test.properties")
 @Import({ CompanyController.class })
 public class CompanyControllerTest {
 
