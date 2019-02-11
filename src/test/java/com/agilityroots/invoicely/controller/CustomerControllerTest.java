@@ -358,7 +358,7 @@ public class CustomerControllerTest {
   public void testAddContactToNonExistingCustomerGivesBadRequest() throws Exception {
 
     // Given
-    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuffer.class)))
         .willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
@@ -375,7 +375,7 @@ public class CustomerControllerTest {
   public void testAddingContactReturnsLocationHeader() throws Exception {
 
     // Given
-    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuffer.class)))
         .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://localhost/customers/10/contact"))));
 
     // When
@@ -386,7 +386,7 @@ public class CustomerControllerTest {
 
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
-    assertThat(result.getResponse().getHeader("Location")).contains("/customers/10/contact");
+    assertThat(result.getResponse().getHeader("Location")).endsWith("/customers/10/contact");
   }
 
 }

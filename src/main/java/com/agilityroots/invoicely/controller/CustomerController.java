@@ -485,9 +485,8 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
 
-    StringBuilder builder = new StringBuilder();
-    builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
-        .append("/contact/");
+    StringBuffer builder = new StringBuffer();
+    builder.append(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString());
 
     ListenableFuture<Optional<URI>> result = customerService.addContact(id, contact, builder);
 

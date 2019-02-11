@@ -107,7 +107,7 @@ public class CustomerServiceTest {
   public void testAddingContactWhenNoCustomer() throws InterruptedException, ExecutionException {
 
     // Given
-    StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/contact/");
+    StringBuffer stringBuilder = new StringBuffer("http://localhost/customers/1/contact/");
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
 
     // When
@@ -121,7 +121,7 @@ public class CustomerServiceTest {
   public void testAddingContact() throws InterruptedException, ExecutionException {
 
     // Given
-    StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/contact/");
+    StringBuffer stringBuilder = new StringBuffer("http://localhost/customers/1/contact");
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getCustomerObject()));
     BDDMockito.given(contactRepository.save(any(Contact.class))).willReturn(builder.getContactObject());
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(builder.getCustomerWithContact());
@@ -130,7 +130,7 @@ public class CustomerServiceTest {
     Optional<URI> result = customerService.addContact(Long.valueOf(1), builder.getContactObject(), stringBuilder).get();
 
     // Then
-    assertThat(result.get().toString()).endsWith("/customers/1/contact/" + String.valueOf(30));
+    assertThat(result.get().toString()).endsWith("/customers/1/contact");
 
   }
 

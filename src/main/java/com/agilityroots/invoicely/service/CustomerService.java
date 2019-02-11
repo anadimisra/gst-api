@@ -118,7 +118,7 @@ public class CustomerService {
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Optional<URI>> addContact(Long id, Contact contact, StringBuilder uriBuilder) {
+  public ListenableFuture<Optional<URI>> addContact(Long id, Contact contact, StringBuffer uriBuilder) {
     URI location = null;
     Optional<Customer> result = customerRepository.findById(id);
     if (result.isPresent()) {
@@ -126,7 +126,7 @@ public class CustomerService {
       Customer customer = result.get();
       customer.setContact(contact);
       customerRepository.saveAndFlush(customer);
-      location = URI.create(uriBuilder.append(contact.getId()).toString());
+      location = URI.create(uriBuilder.toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }
