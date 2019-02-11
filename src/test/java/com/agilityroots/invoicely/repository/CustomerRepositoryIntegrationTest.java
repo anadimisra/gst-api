@@ -7,9 +7,7 @@ package com.agilityroots.invoicely.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Before;
@@ -17,6 +15,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
@@ -68,14 +68,6 @@ public class CustomerRepositoryIntegrationTest {
   }
 
   @Test
-  public void testNonExistingCustomerGivesEmptyOptional() throws InterruptedException, ExecutionException {
-
-    Customer result = customerRepository.findEagerFetchBranchesById(Long.valueOf(10));
-    assertThat(result).isNull();
-   
-  }
-
-  @Test
   public void testPrePersistAddsMandatoryFields() {
 
     Customer chanchu = new Customer();
@@ -89,18 +81,12 @@ public class CustomerRepositoryIntegrationTest {
 
   @Test
   public void testAddingBranchesToCustomer() {
-    Customer customer = customerRepository.findEagerFetchBranchesById(id);
-    Branch newBranch = builder.getBranchObject();
-    newBranch.setBranchName("Other Branch");
-    newBranch.setGstin(RandomStringUtils.randomAlphanumeric(15));
-    newBranch = branchRepository.saveAndFlush(newBranch);
-    List<Branch> branches = customer.getBranches();
-    assertThat(branches.size()).isEqualTo(0);
-    branches.add(newBranch);
-    customer.setBranches(branches);
-    customerRepository.saveAndFlush(customer);
-    Customer withBranches = customerRepository.findEagerFetchBranchesById(id);
-    assertThat(withBranches.getBranches().size()).isEqualTo(1);
+    Customer customer = customerRepository.findById(id).get();
+    Branch branch = builder.getBranchObject();
+    branch.setOwner(customer);
+    branchRepository.saveAndFlush(branch);
+    Page<Branch> branches = branchRepository.findAllByOwner_Id(customer.getId(), PageRequest.of(0, 10));
+    assertThat(branches.getContent().size()).isEqualTo(1);
   }
 
   @Test

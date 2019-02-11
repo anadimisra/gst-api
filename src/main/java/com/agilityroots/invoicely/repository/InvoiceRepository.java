@@ -72,8 +72,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    */
   @Cacheable("invoices")
   @Lock(LockModeType.OPTIMISTIC)
-  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today,
-      Pageable pageable);
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfter(@Param("today") Date today, Pageable pageable);
 
   /**
    * All Overdue invoices
@@ -84,8 +83,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
    */
   @Cacheable("invoices")
   @Lock(LockModeType.OPTIMISTIC)
-  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today,
-      Pageable pageable);
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBefore(@Param("today") Date today, Pageable pageable);
 
   /**
    * Paid invoices by Customer

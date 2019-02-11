@@ -10,7 +10,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -20,7 +19,6 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.web.PageableDefault;
@@ -223,7 +221,7 @@ public class CustomerController {
     });
     return response;
   }
-  
+
   @GetMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getInvoicesByCustomer(@PathVariable("id") Long id,
       @PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
@@ -380,20 +378,19 @@ public class CustomerController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
     });
     log.debug("Getting banches for customer {}", id);
-    ListenableFuture<List<Branch>> future = customerService.getAllBranches(id);
+    ListenableFuture<Page<Branch>> future = customerService.getAllBranches(id, pageable);
 
-    future.addCallback(new ListenableFutureCallback<List<Branch>>() {
+    future.addCallback(new ListenableFutureCallback<Page<Branch>>() {
 
       @Override
-      public void onSuccess(List<Branch> result) {
+      public void onSuccess(Page<Branch> result) {
         Link rootLink = new Link(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString(),
             "self");
 
-        if (result.isEmpty())
+        if (!result.hasContent())
           response.setResult(ResponseEntity.notFound().build());
         else
-          response.setResult(ResponseEntity.ok(assembler.toResource(new PageImpl<>(result, pageable, result.size()),
-              branchResourceAssembler, rootLink)));
+          response.setResult(ResponseEntity.ok(assembler.toResource(result, branchResourceAssembler, rootLink)));
       }
 
       @Override

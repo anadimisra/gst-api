@@ -6,16 +6,10 @@
 package com.agilityroots.invoicely.entity;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-
-import org.hibernate.annotations.NaturalId;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -35,16 +29,11 @@ public class Company extends Organisation implements Serializable {
 
   private static final long serialVersionUID = 4627788171283297107L;
 
-  @NaturalId
   @Column(unique = true, length = 21, updatable = false)
   private String cin;
 
   @Column(unique = true, length = 10, updatable = false)
   private String tan;
-
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "owner_id", referencedColumnName = "id")
-  private List<Branch> branches;
 
   @Override
   public int hashCode() {

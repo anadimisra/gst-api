@@ -9,10 +9,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -30,7 +28,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.test.context.TestPropertySource;
@@ -39,7 +36,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.service.BranchService;
@@ -62,7 +58,7 @@ public class BranchControllerTest {
   private ObjectMapper objectMapper;
 
   @MockBean
-  BranchService branchService;
+  private BranchService branchService;
 
   EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
@@ -102,23 +98,6 @@ public class BranchControllerTest {
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
         .andExpect(jsonPath("$.branch_name", endsWith(" Branch"))).andExpect(jsonPath("$.contact", is(notNullValue())));
 
-  }
-
-  @Test
-  public void testSavingBranchReturnsLocationHeader() throws Exception {
-
-    // Given
-    BDDMockito.given(branchService.save(any(Branch.class))).willReturn(AsyncResult.forValue(builder.getBranchObject()));
-
-    // When
-    MvcResult result = mockMvc
-        .perform(post("/branches").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(builder.getBranchObject())))
-        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated())
-        .andExpect(header().string(HttpHeaders.LOCATION, endsWith("/branches/20")));
   }
 
   @Test

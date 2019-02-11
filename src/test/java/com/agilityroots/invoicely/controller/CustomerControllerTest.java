@@ -250,8 +250,8 @@ public class CustomerControllerTest {
   public void testWhenNoBranchesThenGetsNotFoundResponse() throws Exception {
 
     // Given
-    BDDMockito.given(customerService.getAllBranches(any(Long.class)))
-        .willReturn(AsyncResult.forValue(Collections.emptyList()));
+    BDDMockito.given(customerService.getAllBranches(any(Long.class), any(Pageable.class)))
+        .willReturn(AsyncResult.forValue(new PageImpl<>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/customers/1/branches")).andExpect(request().asyncStarted()).andDo(print())
@@ -265,8 +265,7 @@ public class CustomerControllerTest {
   public void testAddBranchWhenCustomerNotExistsGivesBadRequest() throws Exception {
 
     // Given
-    BDDMockito
-        .given(customerService.addBranch(any(Long.class), any(Branch.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addBranch(any(Long.class), any(Branch.class), any(StringBuilder.class)))
         .willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
@@ -284,8 +283,7 @@ public class CustomerControllerTest {
 
     // Given
     URI location = URI.create("http://localhost/customers/10/branches/20");
-    BDDMockito
-        .given(customerService.addBranch(any(Long.class), any(Branch.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addBranch(any(Long.class), any(Branch.class), any(StringBuilder.class)))
         .willReturn(AsyncResult.forValue(Optional.of(location)));
 
     // When
@@ -360,8 +358,7 @@ public class CustomerControllerTest {
   public void testAddContactToNonExistingCustomerGivesBadRequest() throws Exception {
 
     // Given
-    BDDMockito
-        .given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
         .willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
@@ -378,8 +375,7 @@ public class CustomerControllerTest {
   public void testAddingContactReturnsLocationHeader() throws Exception {
 
     // Given
-    BDDMockito
-        .given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
+    BDDMockito.given(customerService.addContact(any(Long.class), any(Contact.class), any(StringBuilder.class)))
         .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://localhost/customers/10/contact"))));
 
     // When

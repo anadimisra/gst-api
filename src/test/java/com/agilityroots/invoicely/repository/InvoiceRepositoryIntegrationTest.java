@@ -114,8 +114,8 @@ public class InvoiceRepositoryIntegrationTest {
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateAfter(today, PageRequest.of(0, 10));
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(today,
+        PageRequest.of(0, 10));
     assertThat(pendingInvoices).isNotEmpty();
     assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
   }
@@ -129,8 +129,8 @@ public class InvoiceRepositoryIntegrationTest {
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
 
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository
-        .findByPayments_PaymentDateIsNullAndDueDateBefore(today, PageRequest.of(0, 10));
+    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(today,
+        PageRequest.of(0, 10));
     assertThat(pendingInvoices).isNotEmpty();
     assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
   }

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -21,6 +22,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
@@ -69,99 +72,102 @@ public class CustomerServiceTest {
 
   @Test
   public void testAddingInvoiceWhenNoCustomer() throws InterruptedException, ExecutionException {
-    //Given
-    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(null);
+    // Given
+    BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class), any(Pageable.class)))
+        .willReturn(new PageImpl<>(Collections.emptyList()));
     StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/invoices");
-    
-    //When
+
+    // When
     Optional<URI> location = customerService.addInvoice(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3),
         Long.valueOf(2), stringBuilder, builder.getInvoiceObjectWithLineItems()).get();
-    
-    //Then
+
+    // Then
     assertThat(location).isEmpty();
   }
 
   @Test
   public void testAddingInvoices() throws InterruptedException, ExecutionException {
-    //Given
+    // Given
     StringBuilder stringBuilder = new StringBuilder("http://localhost/invoices/");
     Customer mockCustomer = builder.getCustomerObject();
     List<Branch> branches = new ArrayList<Branch>();
     branches.add(builder.getBranchObject());
-    mockCustomer.setBranches(branches);
-    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(mockCustomer);
-    BDDMockito.given(branchRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getBranchObject()));
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(mockCustomer));
+    BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class))).willReturn(branches);
     BDDMockito.given(invoiceRepository.saveAndFlush(any(Invoice.class))).willReturn(builder.getSavedInvoiceObject());
-    //When
+    // When
     Optional<URI> result = customerService.addInvoice(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3),
         Long.valueOf(2), stringBuilder, builder.getInvoiceObjectWithLineItems()).get();
-    
-    //Then
+
+    // Then
     assertThat(result.get().toString()).isEqualTo("http://localhost/invoices/20");
   }
-  
+
   @Test
   public void testAddingContactWhenNoCustomer() throws InterruptedException, ExecutionException {
-    
-    //Given
+
+    // Given
     StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/contact/");
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
-    
-    //When
+
+    // When
     Optional<URI> result = customerService.addContact(Long.valueOf(1), builder.getContactObject(), stringBuilder).get();
-    
-    //Then
+
+    // Then
     assertThat(result).isEmpty();
   }
-  
+
   @Test
   public void testAddingContact() throws InterruptedException, ExecutionException {
-   
-    //Given
+
+    // Given
     StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/contact/");
     BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getCustomerObject()));
     BDDMockito.given(contactRepository.save(any(Contact.class))).willReturn(builder.getContactObject());
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(builder.getCustomerWithContact());
-    
-    //When
+
+    // When
     Optional<URI> result = customerService.addContact(Long.valueOf(1), builder.getContactObject(), stringBuilder).get();
-    
-    //Then
-    assertThat(result.get().toString()).endsWith("/customers/1/contact/"+String.valueOf(30));
-    
+
+    // Then
+    assertThat(result.get().toString()).endsWith("/customers/1/contact/" + String.valueOf(30));
+
   }
-  
+
   @Test
   public void testAddBranchWhenNoCustomer() throws InterruptedException, ExecutionException {
-      
-    //Given
-    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(null);
-    
-    //When
-    Optional<URI> result = customerService.addBranch(Long.valueOf(1), builder.getBranchObject(), new StringBuilder()).get();
-    
-    //Then
+
+    // Given
+    BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class), any(Pageable.class)))
+        .willReturn(new PageImpl<>(Collections.emptyList()));
+
+    // When
+    Optional<URI> result = customerService.addBranch(Long.valueOf(1), builder.getBranchObject(), new StringBuilder())
+        .get();
+
+    // Then
     assertThat(result).isEmpty();
-    
+
   }
-  
+
   public void testAddingBranch() throws InterruptedException, ExecutionException {
-    
-    //Given
+
+    // Given
     StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/branches/");
     Customer mockCustomer = builder.getCustomerObject();
     List<Branch> branches = new ArrayList<Branch>();
     Branch branch = builder.getBranchObject();
     branches.add(branch);
     mockCustomer.setBranches(branches);
-    BDDMockito.given(customerRepository.findEagerFetchBranchesById(any(Long.class))).willReturn(mockCustomer);
+    BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class), any(Pageable.class)))
+        .willReturn(new PageImpl<>(branches));
     BDDMockito.given(branchRepository.save(any(Branch.class))).willReturn(branch);
     BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(mockCustomer);
-    
-    //When
+
+    // When
     Optional<URI> result = customerService.addBranch(Long.valueOf(1), branch, stringBuilder).get();
-    
-    //Then
-    assertThat(result.get().toString()).endsWith("/customrs/1/branches"+String.valueOf(branch.getId()));
+
+    // Then
+    assertThat(result.get().toString()).endsWith("/customrs/1/branches" + String.valueOf(branch.getId()));
   }
 }

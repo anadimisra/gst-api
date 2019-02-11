@@ -5,10 +5,17 @@
  */
 package com.agilityroots.invoicely.entity;
 
+import java.util.List;
 import java.util.Objects;
 
 import javax.persistence.Column;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
 
 import org.hibernate.annotations.NaturalId;
@@ -21,10 +28,11 @@ import lombok.Setter;
  * @author anadi
  *
  */
+@Entity
 @Getter
 @Setter
-@MappedSuperclass
 @NoArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Organisation extends AuditableEntity {
 
   @NotEmpty(message = "Cannot save customer without registered name")
@@ -39,10 +47,16 @@ public abstract class Organisation extends AuditableEntity {
   @Column(length = 11)
   private String vatTin;
 
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "org_branches", joinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
+  private List<Branch> branches;
+
   @Override
   public int hashCode() {
     return (Objects.hash(name) * 79);
   }
+
+  @OneToMany()
 
   @Override
   public boolean equals(Object obj) {

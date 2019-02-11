@@ -6,7 +6,6 @@
 package com.agilityroots.invoicely.entity;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -14,9 +13,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
@@ -40,8 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @ToString
 @NoArgsConstructor
 @Relation(collectionRelation = "customers")
-@NamedEntityGraphs({
-    @NamedEntityGraph(name = "graph.Customer.branches", attributeNodes = @NamedAttributeNode("branches")) })
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 8101819808147191270L;
@@ -72,9 +66,5 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
   @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
   private List<Invoice> invoices;
-
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinColumn(name = "customer_id", referencedColumnName = "id")
-  private List<Branch> branches = new ArrayList<Branch>();
 
 }

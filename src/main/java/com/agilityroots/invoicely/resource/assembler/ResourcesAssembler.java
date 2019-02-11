@@ -15,6 +15,7 @@
  */
 package com.agilityroots.invoicely.resource.assembler;
 
+import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceSupport;
 import org.springframework.hateoas.Resources;
 

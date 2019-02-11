@@ -38,11 +38,11 @@ public class BranchServiceTest {
 
   @MockBean
   private ContactRepository contactRepository;
-  
+
   @Autowired
   @InjectMocks
   private BranchService branchService;
-  
+
   private EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   /**
@@ -52,30 +52,34 @@ public class BranchServiceTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
   }
-  
+
   @Test
   public void testAddingContactWhenBranchDoesNotExist() throws InterruptedException, ExecutionException {
-    
-    //Given
+
+    // Given
     BDDMockito.given(branchRepository.findById(any(Long.class))).willReturn(Optional.empty());
-    
-    //When 
-    Optional<URI> result = branchService.addContact(any(Long.class), builder.getContactObject(), URI.create("http://localhost/branches/1/contact")).get();
-    
-    //Then
+
+    // When
+    Optional<URI> result = branchService
+        .addContact(any(Long.class), builder.getContactObject(), URI.create("http://localhost/branches/1/contact"))
+        .get();
+
+    // Then
     assertThat(result).isEmpty();
   }
-  
+
   @Test
   public void testAddingContactToBranch() throws InterruptedException, ExecutionException {
-    
-    //Given
+
+    // Given
     BDDMockito.given(branchRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getBranchObject()));
-    
-    //When 
-    Optional<URI> result = branchService.addContact(any(Long.class), builder.getContactObject(), URI.create("http://localhost/branches/1/contact")).get();
-    
-    //Then
+
+    // When
+    Optional<URI> result = branchService
+        .addContact(any(Long.class), builder.getContactObject(), URI.create("http://localhost/branches/1/contact"))
+        .get();
+
+    // Then
     assertThat(result.get().toString()).endsWith("/branches/1/contact" + builder.getContactObject().getId().toString());
-  }  
+  }
 }

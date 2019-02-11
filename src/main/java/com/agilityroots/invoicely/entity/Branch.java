@@ -14,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
@@ -63,6 +64,10 @@ public class Branch extends AuditableEntity implements Serializable {
   @OneToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "branch_contact", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
   private Contact contact;
+
+  @ManyToOne
+  @JoinTable(name = "org_branches", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"))
+  private Organisation owner;
 
   @Override
   public int hashCode() {

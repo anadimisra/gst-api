@@ -21,14 +21,14 @@ import lombok.ToString;
 public class InvoiceHttpPayload {
 
   private Invoice invoice;
-  
+
   @NotNull(message = "Cannot save invoice without Billed From Branch")
   private Long billedFrom;
-  
+
   @NotNull(message = "Cannot save invoice without Billed To Branch")
   private Long billedTo;
-  
+
   @NotNull(message = "Cannot save invoice without Shipped To Branch")
   private Long shippedTo;
-  
+
 }

@@ -105,6 +105,7 @@ public class EntityObjectsBuilder {
     invoice.setBilledTo(getBranchWithContactObject());
     return invoice;
   }
+
   public Customer getCustomerObject() {
     Customer minty = new Customer();
     minty.setId(Long.valueOf(10));
@@ -121,7 +122,7 @@ public class EntityObjectsBuilder {
     customer.setContact(getContactObject());
     return customer;
   }
-  
+
   public Branch getBranchObject() {
     Address address = new Address();
     address.setStreetAddress(faker.address().streetAddress());

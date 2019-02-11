@@ -6,14 +6,11 @@
 package com.agilityroots.invoicely.controller;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
@@ -24,7 +21,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,58 +43,11 @@ import lombok.extern.slf4j.Slf4j;
 @ExposesResourceFor(Branch.class)
 public class BranchController {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(BranchController.class);
-
-  public static final Iterable<Resource<?>> EMPTY_RESOURCE_LIST = Collections.emptyList();
-
   @Autowired
   private BranchService branchService;
 
   @Autowired
   private BranchResourceAssembler assembler;
-
-  @PostMapping("/branches")
-  public DeferredResult<ResponseEntity<Object>> save(@RequestBody(required = true) @Valid Branch branch,
-      HttpServletRequest request) {
-
-    return saveOrUpdateBranch(branch, request);
-  }
-
-  private DeferredResult<ResponseEntity<Object>> saveOrUpdateBranch(Branch branch, HttpServletRequest request) {
-    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
-    response.onTimeout(
-        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
-
-    ListenableFuture<Branch> future = branchService.save(branch);
-
-    future.addCallback(new ListenableFutureCallback<Branch>() {
-
-      @Override
-      public void onSuccess(Branch result) {
-
-        URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(result.getId())
-            .toUri();
-        log.debug("Created Location Header {} for {}", location.toString(), result.getBranchName());
-        ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-        log.debug("Reponse Status for {} Request is :: {} ", request.getMethod(), responseEntity.getStatusCodeValue());
-        log.debug("Reponse Data for {} Request is :: {} ", request.getMethod(),
-            responseEntity.getHeaders().getLocation().toString());
-        response.setResult(responseEntity);
-      }
-
-      @Override
-      public void onFailure(Throwable ex) {
-
-        log.error("Cannot save branch {} due to error: {}", branch.toString(), ex.getMessage(), ex);
-        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body("Cannot save branch details due to server error."));
-      }
-    });
-    return response;
-  }
 
   @GetMapping("/branches/{id}")
   public DeferredResult<ResponseEntity<Resource<Branch>>> getBranch(@PathVariable Long id, HttpServletRequest request) {
@@ -154,7 +103,7 @@ public class BranchController {
 
       @Override
       public void onFailure(Throwable ex) {
-        LOGGER.error("Could not update due to error : {}", ex.getMessage(), ex);
+        log.error("Could not update due to error : {}", ex.getMessage(), ex);
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
       }
     });

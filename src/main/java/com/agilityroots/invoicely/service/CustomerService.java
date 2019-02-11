@@ -4,7 +4,6 @@
 package com.agilityroots.invoicely.service;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -70,10 +69,9 @@ public class CustomerService {
   }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<List<Branch>> getAllBranches(Long id) {
+  public ListenableFuture<Page<Branch>> getAllBranches(Long id, Pageable pageable) {
     log.debug("Loading branches for customer with id {}", id);
-    Optional<Customer> customer = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(id));
-    return AsyncResult.forValue(customer.map(Customer::getBranches).orElse(Collections.emptyList()));
+    return AsyncResult.forValue(branchRepository.findAllByOwner_Id(id, pageable));
   }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
@@ -101,14 +99,12 @@ public class CustomerService {
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<URI>> addBranch(Long id, Branch branch, StringBuilder uriBuilder) {
     URI location = null;
-    Customer customer = customerRepository.findEagerFetchBranchesById(id);
-    if (customer != null) {
+    Optional<Customer> result = customerRepository.findById(id);
+    if (result.isPresent()) {
       log.debug("Saving branch: {}", branch);
+      Customer customer = result.get();
+      branch.setOwner(customer);
       branchRepository.save(branch);
-      List<Branch> branches = customer.getBranches();
-      branches.add(branch);
-      customer.setBranches(branches);
-      customerRepository.saveAndFlush(customer);
       location = URI.create(uriBuilder.append(String.valueOf(branch.getId())).toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
@@ -140,15 +136,14 @@ public class CustomerService {
       StringBuilder locationBuilder, Invoice invoice) {
 
     URI location = null;
-    Optional<Customer> result = Optional.ofNullable(customerRepository.findEagerFetchBranchesById(customerId));
+    Optional<Customer> result = customerRepository.findById(customerId);
     if (result.isPresent()) {
+      List<Branch> branches = branchRepository.findAllByOwner_Id(customerId);
       Customer customer = result.get();
       log.debug("Adding invoice to customer: {}", customer);
       invoice.setCustomer(customer);
-      customer.getBranches().stream().filter(b -> b.getId().equals(billedTo)).findFirst()
-          .ifPresent(it -> invoice.setBilledTo(it));
-      customer.getBranches().stream().filter(b -> b.getId().equals(shippedTo)).findFirst()
-          .ifPresent(it -> invoice.setShippedTo(it));
+      branches.stream().filter(b -> b.getId().equals(billedTo)).findFirst().ifPresent(it -> invoice.setBilledTo(it));
+      branches.stream().filter(b -> b.getId().equals(shippedTo)).findFirst().ifPresent(it -> invoice.setShippedTo(it));
       branchRepository.findById(billedFrom).ifPresent(it -> invoice.setBilledFrom(it));
       log.debug("Added branches: billed to: {} | shipped to: {} | billed from: {}", invoice.getBilledTo(),
           invoice.getShippedTo(), invoice.getBilledFrom());
