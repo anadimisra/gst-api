@@ -23,7 +23,7 @@ import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.event.service.CustomerContactAddedEvent;
+import com.agilityroots.invoicely.event.service.ContactAddedEvent;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
@@ -52,7 +52,6 @@ public class CustomerService {
   @Autowired
   private ContactRepository contactRepository;
 
-  @Autowired
   private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
@@ -107,14 +106,14 @@ public class CustomerService {
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Optional<URI>> addBranch(Long id, Branch branch, StringBuilder uriBuilder) {
+  public ListenableFuture<Optional<URI>> addBranch(Long id, Branch branch, StringBuffer uriBuilder) {
     URI location = null;
     Optional<Customer> result = customerRepository.findById(id);
     if (result.isPresent()) {
-      log.debug("Saving branch: {}", branch);
       Customer customer = result.get();
       branch.setOwner(customer);
-      branchRepository.save(branch);
+      log.debug("Saving branch: {}", branch);
+      branchRepository.saveAndFlush(branch);
       location = URI.create(uriBuilder.append(String.valueOf(branch.getId())).toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
@@ -137,7 +136,7 @@ public class CustomerService {
       customer.setContact(contact);
       customerRepository.saveAndFlush(customer);
       location = URI.create(uriBuilder.toString());
-      eventPublisher.publishEvent(new CustomerContactAddedEvent(contact));
+      eventPublisher.publishEvent(new ContactAddedEvent(contact));
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }

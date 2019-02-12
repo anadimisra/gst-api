@@ -80,6 +80,6 @@ public class BranchServiceTest {
         .get();
 
     // Then
-    assertThat(result.get().toString()).endsWith("/branches/1/contact" + builder.getContactObject().getId().toString());
+    assertThat(result.get().toString()).endsWith("/branches/1/contact/" + builder.getContactObject().getId().toString());
   }
 }

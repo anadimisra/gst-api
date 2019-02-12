@@ -3,6 +3,7 @@
  */
 package com.agilityroots.invoicely.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -130,6 +131,24 @@ public class BranchControllerTest {
 
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
+  }
+
+  @Test
+  public void testAddingContactToBranch() throws Exception {
+
+    // Given
+    BDDMockito.given(branchService.addContact(any(Long.class), any(Contact.class), any(URI.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://locahost/branches/1/contact/20"))));
+
+    // When
+    MvcResult result = mockMvc
+        .perform(put("/branches/1/contact").contentType(MediaType.APPLICATION_JSON_VALUE)
+            .content(objectMapper.writeValueAsString(builder.getBranchWithContactObject().getContact())))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
+    assertThat(result.getResponse().getHeader("Location")).isEqualTo("http://locahost/branches/1/contact/20");
   }
 
 }

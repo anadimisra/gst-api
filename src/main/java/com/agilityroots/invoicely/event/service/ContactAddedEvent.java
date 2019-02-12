@@ -15,7 +15,7 @@ import lombok.ToString;
  *
  */
 @ToString
-public class CustomerContactAddedEvent extends ApplicationEvent {
+public class ContactAddedEvent extends ApplicationEvent {
 
   private static final long serialVersionUID = 8668055952501304660L;
 
@@ -25,7 +25,7 @@ public class CustomerContactAddedEvent extends ApplicationEvent {
   @Getter
   private final String name;
 
-  public CustomerContactAddedEvent(Contact source) {
+  public ContactAddedEvent(Contact source) {
     super(source);
     this.toEmail = source.getEmail();
     this.name = source.getName();

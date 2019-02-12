@@ -146,7 +146,7 @@ public class CustomerServiceTest {
         .willReturn(new PageImpl<>(Collections.emptyList()));
 
     // When
-    Optional<URI> result = customerService.addBranch(Long.valueOf(1), builder.getBranchObject(), new StringBuilder())
+    Optional<URI> result = customerService.addBranch(Long.valueOf(1), builder.getBranchObject(), new StringBuffer())
         .get();
 
     // Then
@@ -154,25 +154,24 @@ public class CustomerServiceTest {
 
   }
 
+  @Test
   public void testAddingBranch() throws InterruptedException, ExecutionException {
 
     // Given
-    StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/branches/");
+    StringBuffer stringBuffer = new StringBuffer("http://localhost/customers/1/branches/");
     Customer mockCustomer = builder.getCustomerObject();
     List<Branch> branches = new ArrayList<Branch>();
     Branch branch = builder.getBranchObject();
     branches.add(branch);
     mockCustomer.setBranches(branches);
-    BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class), any(Pageable.class)))
-        .willReturn(new PageImpl<>(branches));
     BDDMockito.given(branchRepository.save(any(Branch.class))).willReturn(branch);
-    BDDMockito.given(customerRepository.saveAndFlush(any(Customer.class))).willReturn(mockCustomer);
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(mockCustomer));
 
     // When
-    Optional<URI> result = customerService.addBranch(Long.valueOf(1), branch, stringBuilder).get();
+    Optional<URI> result = customerService.addBranch(Long.valueOf(1), branch, stringBuffer).get();
 
     // Then
-    assertThat(result.get().toString()).endsWith("/customrs/1/branches" + String.valueOf(branch.getId()));
+    assertThat(result.get().toString()).endsWith("/branches/" + String.valueOf(branch.getId()));
   }
 }
 

@@ -7,6 +7,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.event.service.ContactAddedEvent;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 
@@ -32,6 +34,13 @@ public class BranchService {
 
   @Autowired
   private ContactRepository contactRepository;
+
+  private final ApplicationEventPublisher eventPublisher;
+
+  @Autowired
+  public BranchService(ApplicationEventPublisher eventPublisher) {
+    this.eventPublisher = eventPublisher;
+  }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Branch>> getBranch(Long id) {
@@ -52,7 +61,8 @@ public class BranchService {
       Branch branch = result.get();
       branch.setContact(contact);
       branchRepository.saveAndFlush(branch);
-      location = URI.create(currentURI.toString() + contact.getId());
+      location = URI.create(currentURI.toString() + "/" + contact.getId());
+      eventPublisher.publishEvent(new ContactAddedEvent(contact));
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }

@@ -25,7 +25,7 @@ public class DataApiApplication {
     return new Hibernate5Module();
   }
 
-  @Bean(name = "webExecutor")
+  @Bean(name = "taskExecutor")
   public AsyncTaskExecutor webAsyncExecutor() {
 
     ThreadPoolTaskExecutor webExecutor = new ThreadPoolTaskExecutor();

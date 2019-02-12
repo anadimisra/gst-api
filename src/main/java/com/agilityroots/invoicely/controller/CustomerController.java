@@ -417,9 +417,10 @@ public class CustomerController {
     });
     log.debug("Adding branch {} to customer with id {}", branch, id);
 
-    StringBuilder builder = new StringBuilder();
+    StringBuffer builder = new StringBuffer();
     builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
         .append("/branches/");
+    log.debug("Builder branch location: {}", builder.toString());
     ListenableFuture<Optional<URI>> result = customerService.addBranch(id, branch, builder);
 
     result.addCallback(new ListenableFutureCallback<Optional<URI>>() {
@@ -476,7 +477,7 @@ public class CustomerController {
   }
 
   @PutMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
-  private DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
+  public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
       @RequestBody @Valid Contact contact) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
