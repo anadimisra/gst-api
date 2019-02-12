@@ -21,9 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
@@ -36,12 +38,14 @@ import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author anadi
  *
  */
 @RunWith(SpringRunner.class)
-@Import({ CustomerService.class })
+@Import({ CustomerService.class, DummyApplicationEventPublisher.class })
 public class CustomerServiceTest {
 
   @Autowired
@@ -170,4 +174,15 @@ public class CustomerServiceTest {
     // Then
     assertThat(result.get().toString()).endsWith("/customrs/1/branches" + String.valueOf(branch.getId()));
   }
+}
+
+@Slf4j
+@Component
+class DummyApplicationEventPublisher implements ApplicationEventPublisher {
+
+  @Override
+  public void publishEvent(Object event) {
+    log.info("Do Nothing");
+  }
+
 }

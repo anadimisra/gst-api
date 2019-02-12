@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -22,6 +23,7 @@ import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.event.service.CustomerContactAddedEvent;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
@@ -49,6 +51,14 @@ public class CustomerService {
 
   @Autowired
   private ContactRepository contactRepository;
+
+  @Autowired
+  private final ApplicationEventPublisher eventPublisher;
+
+  @Autowired
+  public CustomerService(ApplicationEventPublisher eventPublisher) {
+    this.eventPublisher = eventPublisher;
+  }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Customer>> getCustomers(Pageable pageable) {
@@ -127,6 +137,7 @@ public class CustomerService {
       customer.setContact(contact);
       customerRepository.saveAndFlush(customer);
       location = URI.create(uriBuilder.toString());
+      eventPublisher.publishEvent(new CustomerContactAddedEvent(contact));
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }
