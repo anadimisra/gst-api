@@ -138,7 +138,7 @@ public class BranchControllerTest {
 
     // Given
     BDDMockito.given(branchService.addContact(any(Long.class), any(Contact.class), any(URI.class)))
-        .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://locahost/branches/1/contact/20"))));
+        .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://locahost/branches/1/contact"))));
 
     // When
     MvcResult result = mockMvc
@@ -148,7 +148,7 @@ public class BranchControllerTest {
 
     // Then
     mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
-    assertThat(result.getResponse().getHeader("Location")).isEqualTo("http://locahost/branches/1/contact/20");
+    assertThat(result.getResponse().getHeader("Location")).isEqualTo("http://locahost/branches/1/contact");
   }
 
 }

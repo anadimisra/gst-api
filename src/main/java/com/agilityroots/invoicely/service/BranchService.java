@@ -52,6 +52,7 @@ public class BranchService {
     return AsyncResult.forValue(branchRepository.findById(id).map(Branch::getContact));
   }
 
+  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<URI>> addContact(Long id, Contact contact, URI currentURI) {
 
     URI location = null;
@@ -61,7 +62,7 @@ public class BranchService {
       Branch branch = result.get();
       branch.setContact(contact);
       branchRepository.saveAndFlush(branch);
-      location = URI.create(currentURI.toString() + "/" + contact.getId());
+      location = URI.create(currentURI.toString());
       eventPublisher.publishEvent(new ContactAddedEvent(contact));
     }
     return AsyncResult.forValue(Optional.ofNullable(location));

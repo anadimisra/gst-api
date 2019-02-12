@@ -61,7 +61,6 @@ public class CustomerFeatureStepDefinition extends DataApiStepDefinition impleme
 
   @After
   public void tearDown() throws Exception {
-    smtpServer.purgeEmailFromAllMailboxes();
     smtpServer.stop();
     log.debug("Shutting Down SMTP Server");
   }
@@ -128,6 +127,7 @@ public class CustomerFeatureStepDefinition extends DataApiStepDefinition impleme
       ResponseEntity<Object> response = getRestTemplate().exchange(urlBuilder.toString(), HttpMethod.PUT,
           new HttpEntity<Contact>(branchContact), Object.class);
       assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      assertThat(response.getHeaders().getLocation().toString()).endsWith(urlBuilder.toString());
     });
 
   }
