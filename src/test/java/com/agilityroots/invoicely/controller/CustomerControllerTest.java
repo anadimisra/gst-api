@@ -6,6 +6,7 @@
 package com.agilityroots.invoicely.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -304,7 +305,7 @@ public class CustomerControllerTest {
     URI location = null;
     BDDMockito
         .given(customerService.addInvoice(any(Long.class), any(Long.class), any(Long.class), any(Long.class),
-            any(StringBuilder.class), any(Invoice.class)))
+            any(StringBuffer.class), any(Invoice.class)))
         .willReturn(AsyncResult.forValue(Optional.ofNullable(location)));
 
     // When
@@ -324,7 +325,7 @@ public class CustomerControllerTest {
     // Given
     BDDMockito
         .given(customerService.addInvoice(any(Long.class), any(Long.class), any(Long.class), any(Long.class),
-            any(StringBuilder.class), any(Invoice.class)))
+            any(StringBuffer.class), any(Invoice.class)))
         .willReturn(AsyncResult.forValue(Optional.of(URI.create("http://localhost/customers/1/invoices/2"))));
 
     String invoiceJson = objectMapper.writeValueAsString(builder.getValidInvoicePayloadObject());
@@ -389,4 +390,32 @@ public class CustomerControllerTest {
     assertThat(result.getResponse().getHeader("Location")).endsWith("/customers/10/contact");
   }
 
+  @Test
+  public void testGettingContactDetailsReturnsHALDocument() throws Exception {
+    // Given
+    BDDMockito.given(customerService.getContact(any(Long.class)))
+        .willReturn(AsyncResult.forValue(Optional.of(builder.getContactObject())));
+
+    // When
+    MvcResult result = mockMvc.perform(get("/customers/10/contact").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
+        .andExpect(jsonPath("$.phone", is("8067601867")))
+        .andExpect(jsonPath("$._links.contact.href", endsWith("/customers/10/contact")));
+  }
+
+  @Test
+  public void testGettingContactDetailsWhenNoCustomer() throws Exception {
+    // Given
+    BDDMockito.given(customerService.getContact(any(Long.class))).willReturn(AsyncResult.forValue(Optional.empty()));
+
+    // When
+    MvcResult result = mockMvc.perform(get("/customers/10/contact").contentType(MediaType.APPLICATION_JSON_VALUE))
+        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
+
+    // Then
+    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
+  }
 }

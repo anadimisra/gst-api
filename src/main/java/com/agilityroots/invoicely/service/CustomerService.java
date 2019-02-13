@@ -6,6 +6,7 @@ package com.agilityroots.invoicely.service;
 import java.net.URI;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +113,6 @@ public class CustomerService {
     if (result.isPresent()) {
       Customer customer = result.get();
       branch.setOwner(customer);
-      log.debug("Saving branch: {}", branch);
       branchRepository.saveAndFlush(branch);
       location = URI.create(uriBuilder.append(String.valueOf(branch.getId())).toString());
     }
@@ -121,9 +121,16 @@ public class CustomerService {
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Contact>> getContact(Long id) {
-    log.debug("Loading contact details for customer with id {}", id);
-    return AsyncResult
-        .forValue(Optional.ofNullable(customerRepository.findById(id).map(Customer::getContact).orElse(null)));
+    Optional<Contact> contact;
+    Optional<Customer> result = customerRepository.findById(id);
+    try {
+      log.debug("Loading contact details: {} for customer {}", result.get().getContact(), id);
+      contact = result.map(Customer::getContact);
+    } catch (NoSuchElementException e) {
+      contact = Optional.empty();
+      log.warn("No contact found for customer with id {}", id);
+    }
+    return AsyncResult.forValue(contact);
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
@@ -143,14 +150,13 @@ public class CustomerService {
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<URI>> addInvoice(Long customerId, Long billedFrom, Long billedTo, Long shippedTo,
-      StringBuilder locationBuilder, Invoice invoice) {
+      StringBuffer locationBuilder, Invoice invoice) {
 
     URI location = null;
     Optional<Customer> result = customerRepository.findById(customerId);
     if (result.isPresent()) {
       List<Branch> branches = branchRepository.findAllByOwner_Id(customerId);
       Customer customer = result.get();
-      log.debug("Adding invoice to customer: {}", customer);
       invoice.setCustomer(customer);
       branches.stream().filter(b -> b.getId().equals(billedTo)).findFirst().ifPresent(it -> invoice.setBilledTo(it));
       branches.stream().filter(b -> b.getId().equals(shippedTo)).findFirst().ifPresent(it -> invoice.setShippedTo(it));

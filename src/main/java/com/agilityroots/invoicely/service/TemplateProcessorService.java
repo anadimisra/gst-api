@@ -8,7 +8,7 @@ package com.agilityroots.invoicely.service;
  *
  */
 public interface TemplateProcessorService {
-  
-  String processTemplate(String ...variables);
+
+  String processTemplate(String... variables);
 
 }

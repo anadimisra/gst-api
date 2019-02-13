@@ -101,7 +101,6 @@ public class CustomerController {
           response.setResult(ResponseEntity.ok(assembler.toResource(result, customerResourceAssembler, self)));
         else
           response.setErrorResult(ResponseEntity.notFound().build());
-        log.debug("Returning Response with {} customers", result.getNumber());
       }
 
       @Override
@@ -133,10 +132,9 @@ public class CustomerController {
       public void onSuccess(Customer result) {
         URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(result.getId())
             .toUri();
-        log.debug("Created Location Header {} for {}", location.toString(), result.getName());
         ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
-        log.debug("Reponse Status for POST Request is :: " + responseEntity.getStatusCodeValue());
-        log.debug("Reponse Data for POST Request is :: " + responseEntity.getHeaders().getLocation().toString());
+        log.debug("Sending response status {} with location {}", responseEntity.getStatusCodeValue(),
+            responseEntity.getHeaders().getLocation());
         response.setResult(responseEntity);
       }
 
@@ -163,15 +161,15 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
-    log.debug("Finding customer details for {}", id);
     ListenableFuture<Optional<Customer>> future = customerService.getCustomer(id);
     future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
       @Override
       public void onSuccess(Optional<Customer> customer) {
+        
         response.setResult(customer.map(customerResourceAssembler::toResource).map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build()));
-
+        log.debug("Assembling customer resource if it was present");
       }
 
       @Override
@@ -195,7 +193,7 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
-    StringBuilder builder = new StringBuilder();
+    StringBuffer builder = new StringBuffer();
     builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
         .append("/invoices/");
 
@@ -452,7 +450,6 @@ public class CustomerController {
     response.onError((Throwable t) -> {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
-    log.debug("Finding customer details for id {}", id);
     ListenableFuture<Optional<Contact>> future = customerService.getContact(id);
     future.addCallback(new ListenableFutureCallback<Optional<Contact>>() {
 

@@ -79,7 +79,7 @@ public class CustomerServiceTest {
     // Given
     BDDMockito.given(branchRepository.findAllByOwner_Id(any(Long.class), any(Pageable.class)))
         .willReturn(new PageImpl<>(Collections.emptyList()));
-    StringBuilder stringBuilder = new StringBuilder("http://localhost/customers/1/invoices");
+    StringBuffer stringBuilder = new StringBuffer("http://localhost/customers/1/invoices");
 
     // When
     Optional<URI> location = customerService.addInvoice(Long.valueOf(1), Long.valueOf(2), Long.valueOf(3),
@@ -92,7 +92,7 @@ public class CustomerServiceTest {
   @Test
   public void testAddingInvoices() throws InterruptedException, ExecutionException {
     // Given
-    StringBuilder stringBuilder = new StringBuilder("http://localhost/invoices/");
+    StringBuffer stringBuilder = new StringBuffer("http://localhost/invoices/");
     Customer mockCustomer = builder.getCustomerObject();
     List<Branch> branches = new ArrayList<Branch>();
     branches.add(builder.getBranchObject());
@@ -172,6 +172,44 @@ public class CustomerServiceTest {
 
     // Then
     assertThat(result.get().toString()).endsWith("/branches/" + String.valueOf(branch.getId()));
+  }
+
+  @Test
+  public void testGetContactWhenNoCustomer() throws InterruptedException, ExecutionException {
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.empty());
+
+    // When
+    Optional<Contact> result = customerService.getContact(Long.valueOf(1)).get();
+
+    // Then
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void testGetContactWhenNull() throws InterruptedException, ExecutionException {
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class))).willReturn(Optional.of(builder.getCustomerObject()));
+
+    // When
+    Optional<Contact> result = customerService.getContact(Long.valueOf(1)).get();
+
+    // Then
+    assertThat(result).isEmpty();
+  }
+
+  @Test
+  public void testGetContact() throws InterruptedException, ExecutionException {
+    // Given
+    BDDMockito.given(customerRepository.findById(any(Long.class)))
+        .willReturn(Optional.of(builder.getCustomerWithContact()));
+
+    // When
+    Optional<Contact> result = customerService.getContact(Long.valueOf(1)).get();
+
+    // Then
+    assertThat(result).isNotEmpty();
+    assertThat(result.get().getPhone()).isEqualTo("8067601867");
   }
 }
 
