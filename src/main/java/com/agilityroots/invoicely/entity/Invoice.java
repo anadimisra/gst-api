@@ -20,6 +20,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -40,10 +41,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author anadi
  */
+@Slf4j
 @Entity
 @Getter
 @Setter
@@ -59,8 +62,8 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
 
   private static final long serialVersionUID = 1560474818107754225L;
 
+  @NotEmpty(message = "Cannot save invoice without Invoice Code")
   @NaturalId
-  @NotEmpty(message = "Cannot save invoice without Invoice Number")
   @Column(unique = true, length = 20)
   private String invoiceNumber;
 
@@ -118,6 +121,16 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "shipped_to_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Branch shippedTo;
+
+  @PrePersist
+  public void checkInvoiceNumber() {
+    String invoicePrefix = this.customer.getInvoicePrefix();
+    invoicePrefix+= "-";
+    if (!this.invoiceNumber.startsWith(invoicePrefix)) {
+      log.debug("Setting invoice prefix {} for invoice number {}", invoicePrefix, invoiceNumber);
+      this.invoiceNumber = this.customer.getInvoicePrefix() + this.invoiceNumber;
+    }
+  }
 
   @Override
   public int hashCode() {

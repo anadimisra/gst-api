@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.format.datetime.DateFormatter;
 
 import com.agilityroots.invoicely.entity.Address;
 import com.agilityroots.invoicely.entity.Branch;
@@ -71,10 +72,12 @@ public class EntityObjectsBuilder {
   public Invoice getInvoiceObject() {
     Invoice invoice = new Invoice();
     invoice.setId(Long.valueOf(20));
-    invoice.setInvoiceDate(Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
+    invoice.setInvoiceDate(today);
     invoice.setPaymentTerms("NET-30");
     invoice.setDueDate(Date.from(LocalDate.now().plusDays(30).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setInvoiceNumber("INV-20180918");
+    DateFormatter formatter = new DateFormatter("yyyyMMdd");
+    invoice.setInvoiceNumber(formatter.print(today, new Locale("en", "IN")));
     invoice.setPlaceOfSupply("Karnataka");
     return invoice;
   }

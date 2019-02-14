@@ -179,7 +179,7 @@ public class InvoiceRepositoryIntegrationTest {
     paidInvoice.setDueDate(invoice.getDueDate());
     paidInvoice.setCustomer(invoice.getCustomer());
     paidInvoice.setPlaceOfSupply("Karnataka");
-    paidInvoice.setInvoiceNumber("INV-OTHER-1");
+    paidInvoice.setInvoiceNumber("OTHER-1");
     paidInvoice.setPaymentTerms(invoice.getPaymentTerms());
     paidInvoice.setPayments(Arrays.asList(getPayment()));
     paidInvoice.setLineItems(invoice.getLineItems());
