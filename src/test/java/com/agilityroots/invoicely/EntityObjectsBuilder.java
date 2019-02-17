@@ -136,7 +136,7 @@ public class EntityObjectsBuilder {
     Branch branch = new Branch();
     branch.setId(Long.valueOf(20));
     branch.setBranchName(RandomStringUtils.randomAlphabetic(5) + " Branch");
-    branch.setGstin(RandomStringUtils.randomAlphabetic(15));
+    branch.setGstin(RandomStringUtils.randomAlphanumeric(15).toUpperCase());
     branch.setSez(Boolean.FALSE);
     branch.setAddress(address);
     return branch;

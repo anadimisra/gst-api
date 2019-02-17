@@ -78,14 +78,15 @@ public class InvoiceController {
 
       @Override
       public void onSuccess(Page<Invoice> result) {
-        Link self = new Link(
-            ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
-        log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
-        if (result.hasContent())
+
+        if (result.hasContent()) {
+          Link self = new Link(
+              ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
+          log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
           response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
-        else
+        } else
           response.setErrorResult(ResponseEntity.notFound().build());
-        log.debug("Returning Response with {} invoices", result.getNumber());
+        log.debug("Returning Response with {} invoices", result.getSize());
       }
 
       @Override
@@ -138,7 +139,7 @@ public class InvoiceController {
 
   @GetMapping(value = "/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoices(
-      @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault(page = 0, size = 20, sort = "dueDate", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = getInvoiceResourceDeferredResult();
@@ -149,14 +150,15 @@ public class InvoiceController {
 
       @Override
       public void onSuccess(Page<Invoice> result) {
-        Link self = new Link(
-            ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
-        log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
-        if (result.hasContent())
+
+        if (result.hasContent()) {
+          Link self = new Link(
+              ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
+          log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
           response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
-        else
+        } else
           response.setErrorResult(ResponseEntity.notFound().build());
-        log.debug("Returning Response with {} invoices", result.getNumber());
+        log.debug("Returning Response with {} invoices", result.getSize());
       }
 
       @Override
@@ -172,9 +174,9 @@ public class InvoiceController {
 
   }
 
-  @GetMapping(value = "/invoices/pending", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/invoices/due", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoices(
-      @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault(page = 0, size = 20, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request,
       @RequestParam(required = false) Date date) {
 
@@ -185,14 +187,15 @@ public class InvoiceController {
 
       @Override
       public void onSuccess(Page<Invoice> result) {
-        Link self = new Link(
-            ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
-        log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
-        if (result.hasContent())
+
+        if (result.hasContent()) {
+          Link self = new Link(
+              ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
+          log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
           response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
-        else
+        } else
           response.setErrorResult(ResponseEntity.notFound().build());
-        log.debug("Returning Response with {} invoices", result.getNumber());
+        log.debug("Returning Response with {} invoices", result.getContent().size());
       }
 
       @Override
@@ -210,7 +213,7 @@ public class InvoiceController {
 
   @GetMapping(value = "/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoices(
-      @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault(page = 0, size = 20, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request,
       @RequestParam(required = false) Date date) {
 
@@ -221,14 +224,16 @@ public class InvoiceController {
 
       @Override
       public void onSuccess(Page<Invoice> result) {
-        Link self = new Link(
-            ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
-        log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
-        if (result.hasContent())
+        
+        if (result.hasContent()) {
+          Link self = new Link(
+              ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
+          log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
           response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
+        }
         else
           response.setErrorResult(ResponseEntity.notFound().build());
-        log.debug("Returning Response with {} invoices", result.getNumber());
+        log.debug("Returning Response with {} invoices", result.getSize());
       }
 
       @Override

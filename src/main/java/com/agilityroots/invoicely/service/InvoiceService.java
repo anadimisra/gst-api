@@ -3,6 +3,7 @@ package com.agilityroots.invoicely.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
+@Async
 @Service
 public class InvoiceService {
 
@@ -36,19 +38,24 @@ public class InvoiceService {
     this.invoiceRepository = invoiceRepository;
   }
 
-  @Async
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Invoice>> getInvoices(Pageable pageable) {
     return AsyncResult.forValue(invoiceRepository.findAll(pageable));
   }
 
-  @Async
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Invoice>> getInvoice(Long id) {
-    return AsyncResult.forValue(invoiceRepository.findById(id));
+    Optional<Invoice> result = Optional.ofNullable(invoiceRepository.getOne(id));
+    try {
+      log.debug("Loading Invoice details");
+      result.get().getLineItems();
+    } catch (NoSuchElementException e) {
+      result = Optional.empty();
+      log.warn("No details fround for invoice with id {}", id);
+    }
+    return AsyncResult.forValue(result);
   }
 
-  @Async
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Invoice> asyncSave(Invoice invoice) {
     return AsyncResult.forValue(invoiceRepository.saveAndFlush(invoice));

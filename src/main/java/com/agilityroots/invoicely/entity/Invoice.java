@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.naming.directory.InvalidAttributesException;
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -19,6 +20,8 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedAttributeNode;
+import javax.persistence.NamedEntityGraph;
 import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -58,11 +61,13 @@ import lombok.extern.slf4j.Slf4j;
     @Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
     @Index(name = "due_date_index", columnList = "dueDate", unique = false),
     @Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false) })
+@NamedEntityGraph(name = "invoice_details", attributeNodes = { @NamedAttributeNode("customer"),
+    @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo") })
 public class Invoice extends AuditableEntity implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 1560474818107754225L;
 
-  @NotEmpty(message = "Cannot save invoice without Invoice Code")
+  @NotEmpty(message = "Cannot save invoice without Invoice Number")
   @NaturalId
   @Column(unique = true, length = 20)
   private String invoiceNumber;
@@ -123,13 +128,16 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   private Branch shippedTo;
 
   @PrePersist
-  public void checkInvoiceNumber() {
+  public void checkInvoiceNumber() throws InvalidAttributesException {
     String invoicePrefix = this.customer.getInvoicePrefix();
-    invoicePrefix+= "-";
+    invoicePrefix += "-";
     if (!this.invoiceNumber.startsWith(invoicePrefix)) {
       log.debug("Setting invoice prefix {} for invoice number {}", invoicePrefix, invoiceNumber);
       this.invoiceNumber = this.customer.getInvoicePrefix() + this.invoiceNumber;
     }
+
+    if (this.billedFrom.getId().equals(this.billedTo.getId()) || this.billedFrom.getId().equals(this.billedTo.getId()))
+      throw new InvalidAttributesException("One of Customer branches is same as Company branches");
   }
 
   @Override

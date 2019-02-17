@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.hateoas.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,9 @@ import org.springframework.stereotype.Component;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.Organisation;
+import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
 import com.agilityroots.invoicely.repository.BranchRepository;
 import com.agilityroots.invoicely.repository.ContactRepository;
 import com.agilityroots.invoicely.repository.CustomerRepository;
@@ -53,10 +57,11 @@ public class CustomerTestApi extends TestApi {
     ResponseEntity<Object> result = getRestTemplate().postForEntity("/customers", customer, Object.class);
     assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     String customerLocation = result.getHeaders().getLocation().toString();
-    String customerId = getIdFromLocationHeader(customerLocation);
     assertThat(customerLocation).contains("/customers");
-    this.customer = customer;
-    customer.setId(Long.valueOf(customerId));
+    Customer getEntity = getCustomer(customerLocation);
+    assertThat(getEntity).isNotNull();
+    this.customer = getEntity;
+    this.customer.setId(Long.valueOf(getIdFromLocationHeader(customerLocation)));
   }
 
   public void addContactToCustomer(Contact contact) {
@@ -125,6 +130,22 @@ public class CustomerTestApi extends TestApi {
     addBranchToCustomer(branch);
   }
 
+  public void addInvoice(Invoice invoice, Branch billedFrom) {
+    billedFrom = branchRepository.saveAndFlush(billedFrom);
+    InvoiceHttpPayload payload = new InvoiceHttpPayload();
+    payload.setInvoice(invoice);
+    payload.setBilledTo(this.customer.getBranches().get(0).getId());
+    payload.setShippedTo(this.customer.getBranches().get(0).getId());
+    payload.setBilledFrom(billedFrom.getId());
+    StringBuffer urlBuilder = new StringBuffer("/customers/");
+    urlBuilder.append(this.customer.getId());
+    urlBuilder.append("/invoices");
+    ResponseEntity<Object> result = getRestTemplate().exchange(urlBuilder.toString(), HttpMethod.PUT,
+        new HttpEntity<InvoiceHttpPayload>(payload), Object.class);
+    assertThat(result.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+    assertThat(result.getHeaders().getLocation().toString()).contains("/invoices");
+  }
+
   private Contact getBranchContact() {
     Contact result = this.customer.getBranches().get(0).getContact();
     return verifyAndGetContact(result);
@@ -145,14 +166,28 @@ public class CustomerTestApi extends TestApi {
     return result;
   }
 
+  private Customer getCustomer(String location) {
+    ResponseEntity<Resource<Customer>> resource = getRestTemplate().exchange(location, HttpMethod.GET, null,
+        new ParameterizedTypeReference<Resource<Customer>>() {
+        });
+    assertThat(resource.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(resource.getBody()).isNotNull();
+    Customer customer = resource.getBody().getContent();
+    assertThat(customer).isNotNull();
+    return customer;
+  }
+
   /**
    * @param urlBuilder
    * @return
    */
-  @SuppressWarnings("unused")
-  private Contact getContactFromApi(StringBuffer urlBuilder) {
-    Contact contact = getRestTemplate().getForObject(urlBuilder.toString(), Contact.class);
-    assertThat(contact).isNotNull();
+  private Contact getCustomerContact(String location) {
+    ResponseEntity<Resource<Contact>> resource = getRestTemplate().exchange(location.toString(), HttpMethod.GET, null,
+        new ParameterizedTypeReference<Resource<Contact>>() {
+        });
+    assertThat(resource.getStatusCode()).isEqualTo(HttpStatus.OK);
+    assertThat(resource.getBody()).isNotNull();
+    Contact contact = resource.getBody().getContent();
     return contact;
   }
 
@@ -162,7 +197,7 @@ public class CustomerTestApi extends TestApi {
     this.customer.setBranches(branches);
   }
 
-  private Long getSavedCustomerId() {
+  protected Long getSavedCustomerId() {
     return this.customer.getId();
   }
 

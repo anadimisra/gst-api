@@ -1,11 +1,13 @@
 /**
- *  20-Nov-2018 CustomerFeatureStepDefinition.java
+ *  20-Nov-2018 CustomersFeatureStepDefinitions.java
  *  data-api
  *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.feature.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -16,6 +18,7 @@ import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
 import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.feature.DataApiStepDefinition;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
@@ -30,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  *
  */
 @Slf4j
-public class CustomerFeatureStepDefinition extends DataApiStepDefinition implements En {
+public class CustomersFeatureStepDefinitions extends DataApiStepDefinition implements En {
 
   private GreenMail smtpServer;
 
@@ -38,6 +41,9 @@ public class CustomerFeatureStepDefinition extends DataApiStepDefinition impleme
 
   @Autowired
   private CustomerTestApi customerApi;
+
+  @Autowired
+  private InvoiceTestApi invoiceApi;
 
   @Before
   public void setUp() throws Exception {
@@ -52,7 +58,7 @@ public class CustomerFeatureStepDefinition extends DataApiStepDefinition impleme
     log.debug("Shutting Down SMTP Server");
   }
 
-  public CustomerFeatureStepDefinition() throws Exception {
+  public CustomersFeatureStepDefinitions() throws Exception {
 
     Given("I add new Customer {string} with relevant details", (String customerName) -> {
       Customer customer = builder.getCustomerObject();
@@ -114,6 +120,18 @@ public class CustomerFeatureStepDefinition extends DataApiStepDefinition impleme
       customerApi.updateBranchContactEmail(contactEmail);
     });
 
+    When("I raise invoice {string} to customer", (String invoiceNumber) -> {
+      Invoice invoice = builder.getInvoiceObjectWithLineItems();
+      invoice.setInvoiceNumber(invoiceNumber);
+      customerApi.addInvoice(invoice, builder.getBranchObject());
+    });
+
+    Then("due invoices listing contains invoice number {string}", (String invoiceNumber) -> {
+      List<Invoice> result = invoiceApi.getDueInvoices(customerApi.getSavedCustomerId());
+      Invoice invoice = result.stream().filter(inv -> invoiceNumber.equals(inv.getInvoiceNumber())).findAny()
+          .orElse(null);
+      assertThat(invoice).isNotNull();
+    });
   }
 
 }

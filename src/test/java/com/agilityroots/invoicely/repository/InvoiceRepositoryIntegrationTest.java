@@ -106,7 +106,7 @@ public class InvoiceRepositoryIntegrationTest {
   }
 
   @Test
-  public void testFindAllPendingInvoices() throws Exception {
+  public void testFindAllDueInvoices() throws Exception {
     invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     invoice.setPaymentTerms("NET-30");
     invoice
@@ -118,6 +118,24 @@ public class InvoiceRepositoryIntegrationTest {
         PageRequest.of(0, 10));
     assertThat(pendingInvoices).isNotEmpty();
     assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  }
+
+  @Test
+  public void testGetInvoiceWithDetails() {
+
+    invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setPaymentTerms("NET-30");
+    invoice
+        .setInvoiceDate(Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
+
+    Invoice withDetails = invoiceRepository.getOne(savedInvoice.getId());
+    assertThat(withDetails.getBilledTo()).isNotNull();
+    assertThat(withDetails.getShippedTo()).isNotNull();
+    assertThat(withDetails.getCustomer()).isNotNull();
+    assertThat(withDetails.getBilledTo()).isEqualTo(invoice.getBilledTo());
+    assertThat(withDetails.getShippedTo()).isEqualTo(invoice.getShippedTo());
+    assertThat(withDetails.getCustomer()).isEqualTo(invoice.getCustomer());
   }
 
   @Test

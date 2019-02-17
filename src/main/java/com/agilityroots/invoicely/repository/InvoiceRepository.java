@@ -14,13 +14,11 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.concurrent.ListenableFuture;
 
 import com.agilityroots.invoicely.entity.Invoice;
 
@@ -44,14 +42,13 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
   Page<Invoice> findAll(Pageable pageable);
 
   @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
   Page<Invoice> findAllByCustomer_Id(Long id, Pageable pageable);
 
   @Lock(LockModeType.OPTIMISTIC)
-  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   @Cacheable("invoices")
-  ListenableFuture<Invoice> findOneByInvoiceNumber(String invoiceNumber);
+  @EntityGraph(value = "invoice_details")
+  Invoice getOne(Long id);
 
   /**
    * All paid invoices

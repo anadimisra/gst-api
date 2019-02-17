@@ -13,9 +13,9 @@ import cucumber.api.junit.Cucumber;
  *
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(features = { "src/test/resources/features/customer.feature" }, plugin = { "pretty",
-    "html:target/reports/customer/cucumber/html", "json:target/customer-cucumber.json",
-    "usage:target/customer-usage.jsonx", "junit:target/customer-junit.xml" })
+@CucumberOptions(features = { "src/test/resources/features/customers.feature" }, plugin = { "pretty",
+    "html:target/reports/customers/cucumber/html", "json:target/customers-cucumber.json",
+    "usage:target/customers-usage.jsonx", "junit:target/customers-junit.xml" })
 public class CustomerFeatureTest {
 
 }
