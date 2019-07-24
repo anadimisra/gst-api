@@ -8,19 +8,24 @@ package com.agilityroots.invoicely.entity;
 import java.io.Serializable;
 import java.util.Objects;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * @author anadi
  */
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @Embeddable
 public class LineItem implements Serializable {
@@ -28,32 +33,45 @@ public class LineItem implements Serializable {
   private static final long serialVersionUID = -977449988990379565L;
 
   @NotNull
+  @Column(nullable = false)
   private Integer serialNumber;
 
   @NotEmpty
+  @Column(length = 100, nullable = false)
   private String item;
 
   @NotEmpty
+  @Column(nullable = false)
   private String description;
 
+  @Column(length = 5)
   private String hsn;
 
+  @Column(length = 5)
   private String sac;
 
   @NotNull
+  @Column(scale = 2)
   private Double price;
 
+  @Column(length = 3)
   private String unit;
 
+  @Column
+  @ColumnDefault("1")
   private Integer quantity;
 
   @NotNull
-  private Double discount = Double.valueOf(0.0);
+  @Column(scale = 2)
+  @ColumnDefault("0.00")
+  private Double discount;
 
   @NotNull
+  @Column(scale = 2)
   private Double amount;
 
   @NotNull
+  @Column(scale = 2)
   private Double tax;
 
   @Override
