@@ -15,8 +15,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.PrePersist;
 
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
 
@@ -24,7 +25,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author anadi
@@ -32,32 +32,25 @@ import lombok.extern.slf4j.Slf4j;
 @Entity
 @Getter
 @Setter
-@Slf4j
 @ToString
+@DynamicInsert
 @NoArgsConstructor
 @Relation(collectionRelation = "customers")
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 8101819808147191270L;
-
+  
   @Column(nullable = false, updatable = false, length = 3)
-  private String currecny;
+  @ColumnDefault("'INR'")
+  private String currency;
 
+  @Column(scale = 2)
+  @ColumnDefault("0.10")
   private Double tds;
 
   @Column(nullable = false, updatable = false, length = 3)
+  @ColumnDefault("'INV'")
   private String invoicePrefix;
-
-  @PrePersist
-  public void prePersist() {
-    log.debug("Checking for empty fields to set default values");
-    if (tds == null)
-      tds = 0.10;
-    if (currecny == null)
-      currecny = "INR";
-    if (invoicePrefix == null)
-      invoicePrefix = "INV";
-  }
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
