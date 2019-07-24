@@ -11,6 +11,7 @@ buildscript {
 }
 
 apply plugin: 'java'
+apply plugin: 'idea'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
@@ -43,38 +44,35 @@ eclipse {
 }
 
 dependencies {
+	implementation("org.projectlombok:lombok:1.18.2")
 	implementation('org.springframework.boot:spring-boot-starter')
-
-    compile("org.projectlombok:lombok:1.18.2")
-    compile("org.springframework.boot:spring-boot-starter-web")
-    compile("org.springframework.boot:spring-boot-starter-mail")
-    compile("org.springframework.boot:spring-boot-starter-thymeleaf")
-    compile("org.springframework.boot:spring-boot-starter-cache")
-    compile("org.springframework.boot:spring-boot-starter-hateoas")
-    compile("org.springframework.boot:spring-boot-starter-data-jpa")
-    //compile("org.springframework.boot:spring-boot-starter-security")
-    compile("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.0")
-    compile("org.apache.commons:commons-lang3:3.8.1")
-    compile("org.atteo:evo-inflector:1.2.2")
-    
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-hateoas")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    //implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.0")
+    implementation("org.apache.commons:commons-lang3:3.8.1")
+    implementation("org.atteo:evo-inflector:1.2.2")
     implementation('com.sendgrid:sendgrid-java:4.3.0')
     //implementation("io.reactivex.rxjava2:rxjava:2.2.4")
-    //compile("org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT")
-    //compile("io.r2dbc:r2dbc-postgresql:1.0.0.M5")
-	
-	runtime("com.h2database:h2")
-	runtime("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.7")
+    //implementation("org.springframework.data:spring-data-r2dbc:1.0.0.BUILD-SNAPSHOT")
+    //implementation("io.r2dbc:r2dbc-postgresql:1.0.0.M5")
+	runtimeOnly("com.h2database:h2")
+	runtimeOnly('org.postgresql:postgresql:42.2.6')
+	runtimeOnly("com.fasterxml.jackson.datatype:jackson-datatype-hibernate5:2.9.7")
 	
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('com.icegreen:greenmail:1.5.9')
-	
-	testCompile("com.jayway.jsonpath:json-path")
-	testCompile("org.mockito:mockito-core:2.23.0") 
-	testCompile("org.assertj:assertj-core:3.11.1")
-	testCompile("org.javalite:javalite-common:2.2")
-	testCompile("io.cucumber:cucumber-java8:4.0.0")
-    testCompile("io.cucumber:cucumber-junit:4.0.0")
-    testCompile("io.cucumber:cucumber-spring:4.0.0")
-    testCompile("io.rest-assured:rest-assured:3.2.0")
-    testCompile("com.github.javafaker:javafaker:0.16")
+	testImplementation("com.jayway.jsonpath:json-path")
+	testImplementation("org.mockito:mockito-core:2.23.0") 
+	testImplementation("org.assertj:assertj-core:3.11.1")
+	testImplementation("org.javalite:javalite-common:2.2")
+	testImplementation("io.cucumber:cucumber-java8:4.0.0")
+    testImplementation("io.cucumber:cucumber-junit:4.0.0")
+    testImplementation("io.cucumber:cucumber-spring:4.0.0")
+    testImplementation("io.rest-assured:rest-assured:3.2.0")
+    testImplementation("com.github.javafaker:javafaker:0.16")
 }
