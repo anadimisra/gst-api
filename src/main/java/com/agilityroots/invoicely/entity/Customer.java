@@ -39,12 +39,12 @@ import lombok.ToString;
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 8101819808147191270L;
-  
+
   @Column(nullable = false, updatable = false, length = 3)
   @ColumnDefault("'INR'")
   private String currency;
 
-  @Column(scale = 2)
+  @Column(nullable = false, scale = 2)
   @ColumnDefault("0.10")
   private Double tds;
 

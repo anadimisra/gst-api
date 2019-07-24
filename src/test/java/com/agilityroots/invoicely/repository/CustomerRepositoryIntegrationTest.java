@@ -7,6 +7,9 @@ package com.agilityroots.invoicely.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,6 +41,9 @@ public class CustomerRepositoryIntegrationTest {
   @Autowired
   private CustomerRepository customerRepository;
 
+  @PersistenceContext
+  private EntityManager em;
+  
   @Test
   public void testPrePersistAddsMandatoryFields() {
     log.info("This test is only for documenting default value configration done via @DynamicInsert and @ColumnDefault");
@@ -45,6 +51,7 @@ public class CustomerRepositoryIntegrationTest {
     bhau.setName("Bhau & Sons Pvt. Ltd.");
     bhau.setDomain(RandomStringUtils.randomAlphanumeric(8));
     bhau = customerRepository.saveAndFlush(bhau);
+    em.clear();
     Customer badaBhau = customerRepository.findById(bhau.getId()).get();
     assertThat(badaBhau.getTds().doubleValue()).isEqualTo(0.10);
     assertThat(badaBhau.getInvoicePrefix()).isEqualTo("INV");
