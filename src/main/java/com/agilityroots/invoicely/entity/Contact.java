@@ -11,7 +11,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.NaturalId;
 import org.springframework.hateoas.Identifiable;
 
 import lombok.Getter;
@@ -34,8 +33,8 @@ public class Contact extends AuditableEntity implements Identifiable<Long>, Seri
   @Column(nullable = false, updatable = false, length = 50)
   private String name;
 
+  //@NaturalId
   @Column(nullable = false, updatable = false, length = 50)
-  @NaturalId
   private String email;
 
   @Column(length = 10, updatable = false)

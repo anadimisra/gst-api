@@ -34,19 +34,19 @@ public class Address implements Serializable {
   private String streetAddress;
 
   @NotEmpty(message = "City area is mandatory.")
-  @Column(nullable = false, updatable = false)
+  @Column(length = 100, nullable = false, updatable = false)
   private String area;
 
   @NotEmpty(message = "City is mandatory.")
-  @Column(nullable = false, updatable = false)
+  @Column(length = 50, nullable = false, updatable = false)
   private String city;
 
   @NotEmpty(message = "State area is mandatory.")
-  @Column(nullable = false, updatable = false)
+  @Column(length = 50, nullable = false, updatable = false)
   private String state;
 
   @NotEmpty(message = "Pincode area is mandatory.")
-  @Column(nullable = false, updatable = false)
+  @Column(length = 6, nullable = false, updatable = false)
   private String pincode;
 
   @Override

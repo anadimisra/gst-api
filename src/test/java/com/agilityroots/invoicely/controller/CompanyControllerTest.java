@@ -62,7 +62,7 @@ public class CompanyControllerTest {
     // Given
     Branch branch = builder.getBranchObject();
     URI location = URI.create("http://localhost/branches/" + branch.getId().toString());
-    BDDMockito.given(companyService.addBranch(any(Long.class), any(Branch.class), any(URI.class)))
+    BDDMockito.given(companyService.addBranch(any(Long.class), any(Branch.class), any(StringBuffer.class)))
         .willReturn(AsyncResult.forValue(Optional.of(location)));
 
     // When

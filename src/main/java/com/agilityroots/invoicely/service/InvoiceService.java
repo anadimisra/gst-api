@@ -3,7 +3,6 @@ package com.agilityroots.invoicely.service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,18 +43,16 @@ public class InvoiceService {
   }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Optional<Invoice>> getInvoice(Long id) {
-    Optional<Invoice> result = Optional.ofNullable(invoiceRepository.getOne(id));
-    try {
-      log.debug("Loading Invoice details");
-      result.get().getLineItems();
-    } catch (NoSuchElementException e) {
-      result = Optional.empty();
-      log.warn("No details fround for invoice with id {}", id);
-    }
+  public ListenableFuture<Optional<Invoice>> getInvoice(String invoiceNumber) {
+    Optional<Invoice> result = invoiceRepository.findByInvoiceNumber(invoiceNumber);
     return AsyncResult.forValue(result);
   }
 
+  public ListenableFuture<Optional<Invoice>> getInvoiceWithCustomer(String invoiceNumber) {
+    Optional<Invoice> result = invoiceRepository.findCustomerDetailsByInvoiceNumber(invoiceNumber);
+    return AsyncResult.forValue(result);
+  }
+  
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Invoice> asyncSave(Invoice invoice) {
     return AsyncResult.forValue(invoiceRepository.saveAndFlush(invoice));

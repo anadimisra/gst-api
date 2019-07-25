@@ -121,7 +121,7 @@ public class InvoiceControllerTest {
   public void testGetInvoiceReturnsNotFoundWhenNotPresent() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceService.getInvoice(any(Long.class))).willReturn(AsyncResult.forValue(Optional.empty()));
+    BDDMockito.given(invoiceService.getInvoice(any(String.class))).willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/1")).andExpect(request().asyncStarted()).andDo(print())
@@ -136,7 +136,7 @@ public class InvoiceControllerTest {
   public void testGetInvoiceReturnsHALDocument() throws Exception {
 
     // Given
-    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+    BDDMockito.given(invoiceService.getInvoice(any(String.class)))
         .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObject())));
 
     // When
@@ -215,7 +215,7 @@ public class InvoiceControllerTest {
   @Test
   public void testWhenInvoiceNotFoundThenCustomerDetailsIsUnprocesseableEntity() throws Exception {
     // Given
-    BDDMockito.given(invoiceService.getInvoice(any(Long.class))).willReturn(AsyncResult.forValue(Optional.empty()));
+    BDDMockito.given(invoiceService.getInvoice(any(String.class))).willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
     MvcResult result = mockMvc.perform(get("/invoices/20/customer")).andExpect(request().asyncStarted()).andDo(print())
@@ -228,7 +228,7 @@ public class InvoiceControllerTest {
   @Test
   public void testGetCustomerDetailsForInvoice() throws Exception {
     // Given
-    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+    BDDMockito.given(invoiceService.getInvoice(any(String.class)))
         .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
 
     // When
@@ -243,7 +243,7 @@ public class InvoiceControllerTest {
   @Test
   public void testCannotAddNullPaymentsToInvoice() throws Exception {
     // Given
-    BDDMockito.given(invoiceService.getInvoice(any(Long.class)))
+    BDDMockito.given(invoiceService.getInvoice(any(String.class)))
         .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
 
     // When, Then

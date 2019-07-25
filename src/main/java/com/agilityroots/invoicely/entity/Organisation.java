@@ -18,11 +18,10 @@ import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotEmpty;
 
-import org.hibernate.annotations.NaturalId;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.NaturalId;
 
 /**
  * @author anadi
@@ -35,15 +34,14 @@ import lombok.Setter;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Organisation extends AuditableEntity {
 
-  @NotEmpty(message = "Cannot save customer without registered name")
-  @Column(unique = true, length = 50, nullable = false)
   @NaturalId
+  @Column(unique = true, length = 8, updatable = false, nullable = false)
+  private String domain;
+
+  @NotEmpty(message = "Cannot save an Organisation without registered name")
+  @Column(unique = true, length = 50, nullable = false)
   private String name;
-
-  @NotEmpty(message = "PAN is mandatory while adding a new Customer")
-  @Column(unique = true, length = 10, updatable = false, nullable = false)
-  private String pan;
-
+  
   @Column(length = 11)
   private String vatTin;
 
@@ -55,8 +53,6 @@ public abstract class Organisation extends AuditableEntity {
   public int hashCode() {
     return (Objects.hash(name) * 79);
   }
-
-  @OneToMany()
 
   @Override
   public boolean equals(Object obj) {

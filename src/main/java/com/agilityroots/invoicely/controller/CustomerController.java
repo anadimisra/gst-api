@@ -166,7 +166,7 @@ public class CustomerController {
 
       @Override
       public void onSuccess(Optional<Customer> customer) {
-        
+
         response.setResult(customer.map(customerResourceAssembler::toResource).map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build()));
         log.debug("Assembling customer resource if it was present");
@@ -258,7 +258,8 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoicesByCustomer(
-      @PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
+      @PathVariable("id") Long id,
+      @PageableDefault(page = 0, size = 10, sort = "invoiceDate", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request)
       throws InterruptedException, ExecutionException {
 
@@ -294,7 +295,8 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}/invoices/due", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoicesByCustomer(
-      @PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
+      @PathVariable("id") Long id,
+      @PageableDefault(page = 0, size = 10, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
@@ -330,7 +332,8 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoicesByCustomer(
-      @PathVariable("id") Long id, @PageableDefault(page = 0, size = 10) Pageable pageable,
+      @PathVariable("id") Long id,
+      @PageableDefault(page = 0, size = 10, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();

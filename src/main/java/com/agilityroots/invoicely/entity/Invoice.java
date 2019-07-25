@@ -22,6 +22,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedEntityGraphs;
 import javax.persistence.OrderBy;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -30,7 +31,6 @@ import javax.persistence.TemporalType;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
@@ -61,15 +61,22 @@ import lombok.extern.slf4j.Slf4j;
     @Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
     @Index(name = "due_date_index", columnList = "dueDate", unique = false),
     @Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false) })
-@NamedEntityGraph(name = "invoice_details", attributeNodes = { @NamedAttributeNode("customer"),
-    @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo") })
+@NamedEntityGraphs({
+    @NamedEntityGraph(name = "invoice_customer_details", attributeNodes = { @NamedAttributeNode("customer") }),
+    @NamedEntityGraph(name = "invoice_details", attributeNodes = { @NamedAttributeNode("customer"),
+        @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo") }),
+    @NamedEntityGraph(name = "invoice_billing_details", attributeNodes = { @NamedAttributeNode("lineItems"),
+        @NamedAttributeNode("payments") }),
+    @NamedEntityGraph(name = "invoice_all_details", attributeNodes = { @NamedAttributeNode("customer"),
+        @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo"), @NamedAttributeNode("lineItems"),
+        @NamedAttributeNode("payments") }), })
 public class Invoice extends AuditableEntity implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 1560474818107754225L;
 
   @NotEmpty(message = "Cannot save invoice without Invoice Number")
-  @NaturalId
-  @Column(unique = true, length = 20)
+  //@NaturalId
+  @Column(unique = true, length = 20, nullable = false, updatable = false)
   private String invoiceNumber;
 
   @JsonIgnore
@@ -95,7 +102,7 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   private Date dueDate;
 
   @NotNull(message = "Cannot save invoice without Payment Terms")
-  @Column(nullable = false)
+  @Column(length = 6, nullable = false)
   private String paymentTerms;
 
   @NotEmpty(message = "Cannot save invoice without Line Items")

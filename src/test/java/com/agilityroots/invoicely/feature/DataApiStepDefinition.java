@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = {"classpath:application-it.properties","classpath:application-test.properties"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ContextConfiguration
 @ActiveProfiles("feature_tests")

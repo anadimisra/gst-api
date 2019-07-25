@@ -45,7 +45,6 @@ public class EntityObjectsBuilder {
     Invoice invoice = getInvoiceObject();
     LineItem item1 = new LineItem();
     item1.setSerialNumber(1);
-    item1.setAmount(1180.00);
     item1.setDescription("That Service");
     item1.setDiscount(0.0);
     item1.setHsn("998313");
@@ -55,7 +54,6 @@ public class EntityObjectsBuilder {
     item1.setPrice(1000.00);
     LineItem item2 = new LineItem();
     item2.setSerialNumber(2);
-    item2.setAmount(1180.00);
     item2.setDescription("Another Service");
     item2.setDiscount(0.0);
     item2.setHsn("998313");
@@ -113,10 +111,8 @@ public class EntityObjectsBuilder {
     Customer minty = new Customer();
     minty.setId(Long.valueOf(10));
     minty.setName("Minty and Sons Private Limited");
-    minty.setPan("ABCDE1234Q");
     minty.setInvoicePrefix("MNT");
-    minty.setTds(0.10);
-    minty.setCurrecny("INR");
+    minty.setDomain(RandomStringUtils.randomAlphanumeric(8));
     return minty;
   }
 
@@ -154,6 +150,7 @@ public class EntityObjectsBuilder {
   public Company getCompanyObject() {
     Company company = new Company();
     company.setName("Ruchi And Sons Pvt. Ltd.");
+    company.setDomain(RandomStringUtils.randomAlphabetic(8));
     company.setCin(RandomStringUtils.randomAlphanumeric(21));
     company.setPan(RandomStringUtils.randomAlphanumeric(10));
     company.setTan(RandomStringUtils.randomAlphabetic(10));

@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
@@ -23,8 +24,7 @@ import lombok.ToString;
 /**
  * @author anadi
  */
-@Getter
-@Setter
+
 @ToString
 @NoArgsConstructor
 @Embeddable
@@ -32,47 +32,73 @@ public class LineItem implements Serializable {
 
   private static final long serialVersionUID = -977449988990379565L;
 
-  @NotNull
+  @Getter
+  @Setter
+  @NotNull(message = "Cannot add invoice line item without serinal number")
   @Column(nullable = false)
   private Integer serialNumber;
 
-  @NotEmpty
-  @Column(length = 100, nullable = false)
+  @Getter
+  @Setter
+  @NotEmpty(message = "Cannot add invoice line item without item")
+  @Column(nullable = false, length = 100)
   private String item;
 
-  @NotEmpty
-  @Column(nullable = false)
+  @Getter
+  @Setter
+  @NotEmpty(message = "Cannot add invoice line item without description")
+  @Column(nullable = false, length = 500)
   private String description;
 
-  @Column(length = 5)
+  @Getter
+  @Setter
+  @Column(length = 6)
   private String hsn;
 
-  @Column(length = 5)
+  @Getter
+  @Setter
+  @Column(length = 6)
   private String sac;
 
-  @NotNull
-  @Column(scale = 2)
+  @Getter
+  @Setter
+  @NotNull(message = "Cannot add invoice line item without price")
+  @Column(nullable = false, scale = 2)
   private Double price;
 
+  @Getter
+  @Setter
   @Column(length = 3)
   private String unit;
 
+  @Getter
+  @Setter
   @Column
-  @ColumnDefault("1")
   private Integer quantity;
 
+  @Getter
+  @Setter
   @NotNull
-  @Column(scale = 2)
+  @Column(nullable = false, scale = 2)
   @ColumnDefault("0.00")
   private Double discount;
 
-  @NotNull
-  @Column(scale = 2)
+  @Transient
   private Double amount;
 
-  @NotNull
-  @Column(scale = 2)
+  @Getter
+  @Setter
+  @NotNull(message = "Cannot add invoice line item without tax rate")
+  @Column(nullable = false, scale = 2)
+  @ColumnDefault("0.18")
   private Double tax;
+
+  public Double getAmount() {
+    if (this.unit != null)
+      return ((this.price - this.price * this.discount) * this.quantity + this.price * this.tax);
+    else
+      return (this.price - this.price * this.discount + this.price * this.tax);
+  }
 
   @Override
   public int hashCode() {

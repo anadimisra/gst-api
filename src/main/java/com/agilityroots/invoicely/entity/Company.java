@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.validation.constraints.NotEmpty;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,12 +29,16 @@ import lombok.ToString;
 public class Company extends Organisation implements Serializable {
 
   private static final long serialVersionUID = 4627788171283297107L;
-
-  @Column(unique = true, length = 21, updatable = false)
+  
+  @Column(unique = true, length = 21, updatable = false, nullable = false)
   private String cin;
 
   @Column(unique = true, length = 10, updatable = false)
   private String tan;
+
+  @NotEmpty(message = "PAN is mandatory while adding your Company")
+  @Column(unique = true, length = 10, updatable = false, nullable = false)
+  private String pan;
 
   @Override
   public int hashCode() {

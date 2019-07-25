@@ -7,7 +7,12 @@ package com.agilityroots.invoicely.feature.steps;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
@@ -22,6 +27,7 @@ import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.feature.DataApiStepDefinition;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
+import com.jayway.jsonpath.JsonPath;
 
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
@@ -127,11 +133,94 @@ public class CustomersFeatureStepDefinitions extends DataApiStepDefinition imple
     });
 
     Then("due invoices listing contains invoice number {string}", (String invoiceNumber) -> {
-      List<Invoice> result = invoiceApi.getDueInvoices(customerApi.getSavedCustomerId());
-      Invoice invoice = result.stream().filter(inv -> invoiceNumber.equals(inv.getInvoiceNumber())).findAny()
-          .orElse(null);
-      assertThat(invoice).isNotNull();
+      String invoicesJson = invoiceApi.getDueInvoicesJson(customerApi.getSavedCustomerId());
+      Map<String, Object> dueInvoice = JsonPath.parse(invoicesJson).read("$._embedded.invoices[0]");
+      assertThat(dueInvoice.keySet()).contains("invoice_number");
+      assertThat(dueInvoice.get("invoice_number")).isEqualTo(invoiceNumber);
     });
+
+    When("the customer has {int} due invoices", (Integer dueInvoices) -> {
+      Branch billedFrom = builder.getBranchObject();
+      for (int i = 0; i < dueInvoices; i++) {
+        Invoice invoice = builder.getInvoiceObjectWithLineItems();
+        invoice
+            .setInvoiceDate(Date.from(LocalDate.now().plusDays(i).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        invoice.setDueDate(
+            Date.from(LocalDate.now().plusDays((i + 30)).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        invoice.setInvoiceNumber(invoice.getInvoiceNumber() + String.valueOf(i + 1));
+        customerApi.addInvoice(invoice, billedFrom);
+      }
+    });
+
+    Then("invoice with {string} number of days till due is the {string} in list of {string} invoices",
+        (String daysTillDue, String positionInList, String invoiceType) -> {
+          int dueInvoiceAtIndex = 0;
+          int daysTillDueDate = 30;
+          if (daysTillDue.equals("most")) {
+            dueInvoiceAtIndex += 2;
+            daysTillDueDate += 2;
+          }
+          String dueInvoicesJson = customerApi.getCustomerInvoicesJson(invoiceType);
+          log.debug("Parsing JSON to Objects");
+          List<Map<String, Object>> dueInvoices = JsonPath.parse(dueInvoicesJson).read("$._embedded.invoices");
+          assertThat(dueInvoices.size()).isEqualTo(3);
+          assertThat(new SimpleDateFormat("dd-MM-yyyy")
+              .parse(String.valueOf(dueInvoices.get(dueInvoiceAtIndex).get("due_date"))))
+                  .isEqualTo(Date.from(
+                      LocalDate.now().plusDays(daysTillDueDate).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        });
+
+    When("the customer has {int} overdue invoices", (Integer overDueInvoices) -> {
+      Branch billedFrom = builder.getBranchObject();
+      for (int i = 0; i < overDueInvoices; i++) {
+        Invoice invoice = builder.getInvoiceObjectWithLineItems();
+        invoice.setInvoiceNumber(invoice.getInvoiceNumber() + String.valueOf(i + 1));
+        invoice.setInvoiceDate(Date
+            .from(LocalDate.now().minusDays(40 + i).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        invoice.setDueDate(Date
+            .from(LocalDate.now().minusDays(10 + i).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        customerApi.addInvoice(invoice, billedFrom);
+      }
+    });
+
+    Then("invoice with {string} number of days since overdue is the {string} in list of {string} invoices",
+        (String daysTillOverdue, String positionInList, String invoiceType) -> {
+          int dueInvoiceAtIndex = 0;
+          int daysSinceOverdue = 12;
+          if (daysTillOverdue.equals("least")) {
+            dueInvoiceAtIndex += 2;
+            daysSinceOverdue -= 2;
+          }
+          String dueInvoicesJson = customerApi.getCustomerInvoicesJson(invoiceType);
+          log.debug("Parsing JSON to Objects");  
+          List<Map<String, Object>> dueInvoices = JsonPath.parse(dueInvoicesJson).read("$._embedded.invoices");
+          assertThat(dueInvoices.size()).isEqualTo(3);
+          assertThat(new SimpleDateFormat("dd-MM-yyyy")
+              .parse(String.valueOf(dueInvoices.get(dueInvoiceAtIndex).get("due_date"))))
+                  .isEqualTo(Date.from(
+                      LocalDate.now().minusDays(daysSinceOverdue).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        });
+
+    Given("the customer has {int} paid invoices", (Integer paidInvoices) -> {
+      Branch billedFrom = builder.getBranchObject();
+      for (int i = 0; i < paidInvoices; i++) {
+        Invoice invoice = builder.getInvoiceObjectWithLineItems();
+        invoice.setInvoiceNumber(invoice.getInvoiceNumber() + String.valueOf(i + 1));
+        invoice.setInvoiceDate(Date
+            .from(LocalDate.now().minusDays(40 + i).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        invoice.setDueDate(Date
+            .from(LocalDate.now().minusDays(30 + i).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+        invoice.setPayments(builder.getInvoiceWithPayments().getPayments());
+        customerApi.addInvoice(invoice, billedFrom);
+      }
+    });
+
+    Then("invoice with {string} recent payment date is {string} in list of {string} invoices",
+        (String daysSincePaid, String positionInList, String invoiceType) -> {
+          // Write code here that turns the phrase above into concrete actions
+          throw new cucumber.api.PendingException();
+        });
+
   }
 
 }

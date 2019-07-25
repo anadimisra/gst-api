@@ -102,8 +102,8 @@ public class InvoiceController {
 
   }
 
-  @GetMapping(value = "invoices/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-  public DeferredResult<ResponseEntity<Resource<Invoice>>> getInvoice(@PathVariable("id") Long id,
+  @GetMapping(value = "invoices/{invoiceNumber}", produces = MediaTypes.HAL_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Resource<Invoice>>> getInvoice(@PathVariable("invoiceNumber") String invoiceNumber,
       HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resource<Invoice>>> response = new DeferredResult<>();
@@ -113,7 +113,7 @@ public class InvoiceController {
       response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
     });
 
-    ListenableFuture<Optional<Invoice>> result = invoiceService.getInvoice(id);
+    ListenableFuture<Optional<Invoice>> result = invoiceService.getInvoice(invoiceNumber);
 
     result.addCallback(new ListenableFutureCallback<Optional<Invoice>>() {
 
@@ -127,7 +127,7 @@ public class InvoiceController {
 
       @Override
       public void onFailure(Throwable ex) {
-        log.error("Cannot get invoice details for id {} due to error: {}", id, ex.getMessage(), ex);
+        log.error("Cannot get invoice details for id {} due to error: {}", invoiceNumber, ex.getMessage(), ex);
         response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Cannot get invoice details due to server error."));
 
@@ -139,7 +139,7 @@ public class InvoiceController {
 
   @GetMapping(value = "/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoices(
-      @PageableDefault(page = 0, size = 20, sort = "dueDate", direction = Direction.DESC) Pageable pageable,
+      @PageableDefault(page = 0, size = 20, sort = "invoiceDate", direction = Direction.DESC) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = getInvoiceResourceDeferredResult();
@@ -249,12 +249,12 @@ public class InvoiceController {
 
   }
 
-  @GetMapping(value = "/invoices/{id}/customer", produces = MediaTypes.HAL_JSON_VALUE)
-  public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable("id") Long id) {
+  @GetMapping(value = "/invoices/{invoiceNumber}/customer", produces = MediaTypes.HAL_JSON_VALUE)
+  public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable("invoiceNumber") String invoiceNumber) {
 
     DeferredResult<ResponseEntity<Resource<Customer>>> response = new DeferredResult<ResponseEntity<Resource<Customer>>>();
 
-    ListenableFuture<Optional<Invoice>> result = invoiceService.getInvoice(id);
+    ListenableFuture<Optional<Invoice>> result = invoiceService.getInvoiceWithCustomer(invoiceNumber);
 
     result.addCallback(new ListenableFutureCallback<Optional<Invoice>>() {
 

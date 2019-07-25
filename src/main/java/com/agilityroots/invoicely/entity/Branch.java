@@ -19,8 +19,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.validation.constraints.NotEmpty;
 
-import org.hibernate.annotations.NaturalId;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,9 +42,9 @@ public class Branch extends AuditableEntity implements Serializable {
   @Column(length = 25, nullable = false)
   private String branchName;
 
+  //@NaturalId
   @NotEmpty(message = "Cannot add a branch without GSTIN")
-  @NaturalId
-  @Column(length = 15)
+  @Column(length = 15, unique = true, nullable = false)
   private String gstin;
 
   @Column(length = 11, nullable = true)
@@ -58,7 +56,7 @@ public class Branch extends AuditableEntity implements Serializable {
   private Boolean sez = Boolean.FALSE;
 
   public Boolean isSez() {
-    return sez;
+    return this.getSez();
   }
 
   @OneToOne(fetch = FetchType.LAZY)

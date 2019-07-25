@@ -31,7 +31,13 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
-  Optional<Invoice> findById(Long id);
+  @EntityGraph(value = "invoice_all_details")
+  Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
+  
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("invoices")
+  @EntityGraph(value = "invoice_customer_details")
+  Optional<Invoice> findCustomerDetailsByInvoiceNumber(String invoiceNumber);
 
   @Lock(LockModeType.OPTIMISTIC)
   @CacheEvict("invoices")

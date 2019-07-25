@@ -7,9 +7,13 @@ import java.net.URI;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import com.agilityroots.invoicely.entity.Branch;
@@ -31,17 +35,22 @@ public class CompanyService {
   @Autowired
   private BranchRepository branchRepository;
 
-  public ListenableFuture<Optional<URI>> addBranch(Long companyId, Branch branch, URI baseURI) {
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Optional<URI>> addBranch(Long companyId, Branch branch, StringBuffer urlBuilder) {
 
     URI location = null;
     Optional<Company> result = companyRepository.findById(companyId);
     if (result.isPresent()) {
       branch.setOwner(result.get());
-      branchRepository.saveAndFlush(branch);
-      StringBuffer buffer = new StringBuffer(baseURI.toString());
-      buffer.append(branch.getId());
-      location = URI.create(buffer.toString());
+      branch = branchRepository.saveAndFlush(branch);
+      urlBuilder.append(branch.getId());
+      location = URI.create(urlBuilder.toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
+  }
+
+  @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
+  public ListenableFuture<Page<Branch>> getBranches(Long id, Pageable pageable) {
+    return AsyncResult.forValue(branchRepository.findAllByOwner_Id(id, pageable));
   }
 }

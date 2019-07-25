@@ -59,7 +59,6 @@ public class CustomerTestApi extends TestApi {
     String customerLocation = result.getHeaders().getLocation().toString();
     assertThat(customerLocation).contains("/customers");
     Customer getEntity = getCustomer(customerLocation);
-    assertThat(getEntity).isNotNull();
     this.customer = getEntity;
     this.customer.setId(Long.valueOf(getIdFromLocationHeader(customerLocation)));
   }
@@ -73,7 +72,9 @@ public class CustomerTestApi extends TestApi {
         new HttpEntity<Contact>(contact), Object.class);
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
     String contactLocation = response.getHeaders().getLocation().toString();
+    Contact getEntity = getCustomerContact(contactLocation);
     assertThat(contactLocation).endsWith("/customers/" + getSavedCustomerId().toString() + "/contact");
+    this.customer.setContact(getEntity);
   }
 
   public void addBranch(Branch branch) {
@@ -188,6 +189,7 @@ public class CustomerTestApi extends TestApi {
     assertThat(resource.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(resource.getBody()).isNotNull();
     Contact contact = resource.getBody().getContent();
+    assertThat(contact).isNotNull();
     return contact;
   }
 
@@ -199,6 +201,17 @@ public class CustomerTestApi extends TestApi {
 
   protected Long getSavedCustomerId() {
     return this.customer.getId();
+  }
+
+  public String getCustomerInvoicesJson(String invoicePathElement) {
+    StringBuffer location = new StringBuffer("/customers/");
+    location.append(this.customer.getId());
+    location.append("/invoices/");
+    location.append(invoicePathElement);
+    ResponseEntity<String> invoicesJson = getRestTemplate().exchange(location.toString(), HttpMethod.GET, null,
+        String.class);
+    assertThat(invoicesJson.getStatusCode()).isEqualTo(HttpStatus.OK);
+    return invoicesJson.getBody();
   }
 
 }
