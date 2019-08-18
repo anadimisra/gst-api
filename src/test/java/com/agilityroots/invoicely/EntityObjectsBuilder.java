@@ -1,28 +1,20 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-
+import com.agilityroots.invoicely.entity.*;
+import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
+import com.github.javafaker.Faker;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.format.datetime.DateFormatter;
 
-import com.agilityroots.invoicely.entity.Address;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Company;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.entity.LineItem;
-import com.agilityroots.invoicely.entity.Payment;
-import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
-import com.github.javafaker.Faker;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * @author anadi
@@ -60,7 +52,7 @@ public class EntityObjectsBuilder {
     item2.setItem("Another Item");
     item2.setTax(0.18);
     item2.setPrice(1000.00);
-    List<LineItem> lineItems = new ArrayList<LineItem>();
+    Set<LineItem> lineItems = new HashSet<>(2);
     lineItems.add(item1);
     lineItems.add(item2);
     invoice.setLineItems(lineItems);
@@ -87,7 +79,7 @@ public class EntityObjectsBuilder {
     payment.setAdjustmentValue(100.00);
     payment.setAmount(1080.00);
     payment.setPaymentDate(invoice.getDueDate());
-    List<Payment> payments = new ArrayList<>();
+    Set<Payment> payments = new HashSet<>(1);
     payments.add(payment);
     invoice.setPayments(payments);
     return invoice;

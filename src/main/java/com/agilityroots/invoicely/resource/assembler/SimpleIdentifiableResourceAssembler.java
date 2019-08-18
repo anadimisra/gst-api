@@ -15,19 +15,14 @@
  */
 package com.agilityroots.invoicely.resource.assembler;
 
-import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.core.GenericTypeResolver;
-import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.LinkBuilder;
-import org.springframework.hateoas.RelProvider;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
+import org.springframework.hateoas.*;
 import org.springframework.hateoas.core.EvoInflectorRelProvider;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
 
-import lombok.Getter;
-import lombok.Setter;
+import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
  * @author Greg Turnquist
@@ -65,10 +60,9 @@ public class SimpleIdentifiableResourceAssembler<T extends Identifiable<?>> exte
    * {@link RelProvider}. With this combination of information, resources can be
    * defined.
    *
-   * @see #setBasePath(String) to adjust base path to something like "/api"/
-   *
    * @param controllerClass - Spring MVC controller to base links off of
    * @param relProvider
+   * @see #setBasePath(String) to adjust base path to something like "/api"/
    */
   public SimpleIdentifiableResourceAssembler(Class<?> controllerClass, RelProvider relProvider) {
 
@@ -83,7 +77,7 @@ public class SimpleIdentifiableResourceAssembler<T extends Identifiable<?>> exte
 
   /**
    * Alternate constructor that falls back to {@link EvoInflectorRelProvider}.
-   * 
+   *
    * @param controllerClass
    */
   public SimpleIdentifiableResourceAssembler(Class<?> controllerClass) {
@@ -115,12 +109,12 @@ public class SimpleIdentifiableResourceAssembler<T extends Identifiable<?>> exte
   /**
    * Build up a URI for the collection using the Spring MVC controller followed by
    * the resource type transformed by the {@link RelProvider}.
-   *
+   * <p>
    * Assumption is that an
    * {@link org.springframework.hateoas.examples.EmployeeController} serving up
    * {@link org.springframework.hateoas.examples.Employee} objects will be serving
    * resources at {@code /employees} and {@code /employees/1}.
-   *
+   * <p>
    * If this is not the case, simply override this method in your concrete
    * instance, or simply resort to overriding {@link #addLinks(Resource)} and
    * {@link #addLinks(Resources)} where you have full control over exactly what

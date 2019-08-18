@@ -1,18 +1,16 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.event.listener;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import com.agilityroots.invoicely.event.service.ContactAddedEvent;
 import com.agilityroots.invoicely.service.NotificationService;
 import com.agilityroots.invoicely.service.TemplateProcessorService;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 /**
  * @author anadi

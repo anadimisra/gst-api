@@ -1,14 +1,18 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import java.net.URI;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.event.service.ContactAddedEvent;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
+import com.agilityroots.invoicely.repository.CustomerRepository;
+import com.agilityroots.invoicely.repository.InvoiceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -20,17 +24,11 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.event.service.ContactAddedEvent;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
-
-import lombok.extern.slf4j.Slf4j;
+import java.net.URI;
+import java.util.Date;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
 /**
  * @author anadi
@@ -41,19 +39,15 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CustomerService {
 
+  private final ApplicationEventPublisher eventPublisher;
   @Autowired
   private CustomerRepository customerRepository;
-
   @Autowired
   private InvoiceRepository invoiceRepository;
-
   @Autowired
   private BranchRepository branchRepository;
-
   @Autowired
   private ContactRepository contactRepository;
-
-  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public CustomerService(ApplicationEventPublisher eventPublisher) {
@@ -86,12 +80,12 @@ public class CustomerService {
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Invoice>> getAllInvoices(Long id, Pageable pageable) {
-    return AsyncResult.forValue(invoiceRepository.findAllByCustomer_Id(id, pageable));
+    return AsyncResult.forValue(invoiceRepository.findAllByOwner_Id(id, pageable));
   }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Invoice>> getPaidInvoices(Long id, Pageable pageable) {
-    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_Id(id, pageable));
+    return AsyncResult.forValue(invoiceRepository.findByPaymentsIsNotNullAndCustomer_Id(id, pageable));
   }
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
@@ -102,8 +96,18 @@ public class CustomerService {
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Invoice>> getOverdueInvoices(Date today, Long id, Pageable pageable) {
-    return AsyncResult.forValue(
-        invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_Id(today, id, pageable));
+
+    return AsyncResult.forValue(getPaidInvoicesSortedByPaymentDate(today, id, pageable));
+  }
+
+  private Page<Invoice> getPaidInvoicesSortedByPaymentDate(Date today, Long id, Pageable pageable) {
+    Page<Invoice> results = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_IdOrderByPayments_PaymentDateAsc(today, id,
+        pageable);
+
+//    Comparator<Invoice> compareByPaymentDate = (Invoice i1, Invoice i2) -> (new ArrayList<>(i1.getPayments())).get(0)
+//        .getPaymentDate().compareTo((new ArrayList<>(i2.getPayments())).get(0).getPaymentDate());
+//    Collections.sort(results.getContent(), compareByPaymentDate);
+    return results;
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
@@ -114,7 +118,7 @@ public class CustomerService {
       Customer customer = result.get();
       branch.setOwner(customer);
       branchRepository.saveAndFlush(branch);
-      location = URI.create(uriBuilder.append(String.valueOf(branch.getId())).toString());
+      location = URI.create(uriBuilder.append(branch.getId()).toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }
@@ -150,7 +154,7 @@ public class CustomerService {
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<URI>> addInvoice(Long customerId, Long billedFrom, Long billedTo, Long shippedTo,
-      StringBuffer locationBuilder, Invoice invoice) {
+                                                    StringBuffer locationBuilder, Invoice invoice) {
 
     URI location = null;
     Optional<Customer> result = customerRepository.findById(customerId);

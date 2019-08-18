@@ -1,15 +1,14 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.http.payload;
 
-import javax.validation.constraints.NotNull;
-
 import com.agilityroots.invoicely.entity.Invoice;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * @author anadi

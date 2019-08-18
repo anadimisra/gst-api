@@ -1,11 +1,10 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.agilityroots.invoicely.entity.Contact;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * @author anadi

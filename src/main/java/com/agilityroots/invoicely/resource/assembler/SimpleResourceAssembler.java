@@ -15,13 +15,13 @@
  */
 package com.agilityroots.invoicely.resource.assembler;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.ResourceAssembler;
 import org.springframework.hateoas.Resources;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A {@link ResourcesAssembler}/{@link ResourcesAssembler} that focuses purely
@@ -53,9 +53,9 @@ public class SimpleResourceAssembler<T>
    * Converts all given entities into resources and wraps the collection as a
    * resource as well.
    *
-   * @see #toResource(Object)
    * @param entities must not be {@literal null}.
    * @return {@link Resources} containing {@link Resource} of {@code T}.
+   * @see #toResource(Object)
    */
   public Resources<Resource<T>> toResources(Iterable<? extends T> entities) {
 
@@ -84,7 +84,7 @@ public class SimpleResourceAssembler<T>
 
   /**
    * Define links to add to the {@link Resources} collection.
-   * 
+   *
    * @param resources
    */
   protected void addLinks(Resources<Resource<T>> resources) {

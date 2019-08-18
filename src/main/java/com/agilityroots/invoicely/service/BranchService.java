@@ -1,11 +1,13 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import java.net.URI;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.event.service.ContactAddedEvent;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
@@ -15,11 +17,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.event.service.ContactAddedEvent;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
+import java.net.URI;
+import java.util.Optional;
 
 /**
  * @author anadi
@@ -29,13 +28,11 @@ import com.agilityroots.invoicely.repository.ContactRepository;
 @Service
 public class BranchService {
 
+  private final ApplicationEventPublisher eventPublisher;
   @Autowired
   private BranchRepository branchRepository;
-
   @Autowired
   private ContactRepository contactRepository;
-
-  private final ApplicationEventPublisher eventPublisher;
 
   @Autowired
   public BranchService(ApplicationEventPublisher eventPublisher) {

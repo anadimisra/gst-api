@@ -1,33 +1,22 @@
 /**
- *  19-Oct-2018 AuditableEntity.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 19-Oct-2018 AuditableEntity.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
-import java.util.Date;
-
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Version;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.hateoas.Identifiable;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import lombok.Getter;
-import lombok.Setter;
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * @author anadi
@@ -56,8 +45,9 @@ public class AuditableEntity implements Identifiable<Long> {
   @LastModifiedDate
   private Date updatedAt;
 
-  @JsonIgnore
   @Version
+  @Column
+  @JsonIgnore
   private Integer version;
 
   @Override

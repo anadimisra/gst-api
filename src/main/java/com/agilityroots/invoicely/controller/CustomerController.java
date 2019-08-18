@@ -1,46 +1,9 @@
 /**
- *  13-Nov-2018 CustomerController.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 13-Nov-2018 CustomerController.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.controller;
-
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.PagedResources;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.agilityroots.invoicely.entity.Branch;
 import com.agilityroots.invoicely.entity.Contact;
@@ -51,8 +14,32 @@ import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CustomerService;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.net.URI;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 /**
  * @author anadi
@@ -117,7 +104,7 @@ public class CustomerController {
 
   @PostMapping("/customers")
   public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request,
-      @RequestBody @Valid Customer customer) {
+                                                     @RequestBody @Valid Customer customer) {
 
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
@@ -153,7 +140,7 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable Long id,
-      HttpServletRequest request) {
+                                                                        HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resource<Customer>>> response = new DeferredResult<>();
     response.onTimeout(
@@ -185,7 +172,7 @@ public class CustomerController {
 
   @PutMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Object>> addInvoice(@PathVariable("id") Long id,
-      @RequestBody @Valid InvoiceHttpPayload payload, HttpServletRequest request) {
+                                                           @RequestBody @Valid InvoiceHttpPayload payload, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
@@ -222,8 +209,8 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getInvoicesByCustomer(@PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
-      HttpServletRequest request) {
+                                                                                            @PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
+                                                                                            HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
     response.onTimeout(
@@ -333,7 +320,7 @@ public class CustomerController {
   @GetMapping(value = "/customers/{id}/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoicesByCustomer(
       @PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 10, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault(page = 0, size = 10) Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
@@ -369,8 +356,8 @@ public class CustomerController {
 
   @GetMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> getAllBranches(@PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 20) Pageable pageable, PagedResourcesAssembler<Branch> assembler,
-      HttpServletRequest request) {
+                                                                                         @PageableDefault(page = 0, size = 20) Pageable pageable, PagedResourcesAssembler<Branch> assembler,
+                                                                                         HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> response = new DeferredResult<>();
     response.onTimeout(
@@ -409,7 +396,7 @@ public class CustomerController {
 
   @PutMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
-      @RequestBody @Valid Branch branch, HttpServletRequest request) {
+                                                          @RequestBody @Valid Branch branch, HttpServletRequest request) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -478,7 +465,7 @@ public class CustomerController {
 
   @PutMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
-      @RequestBody @Valid Contact contact) {
+                                                           @RequestBody @Valid Contact contact) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));

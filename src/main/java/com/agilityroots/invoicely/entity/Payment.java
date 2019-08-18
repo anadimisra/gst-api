@@ -1,7 +1,7 @@
-/**
- *  23-Oct-2018 Payment.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  23-Oct-2018 Payment.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
@@ -48,4 +48,5 @@ public class Payment implements Serializable {
   @NotEmpty(message = "Cannot update Payment Details without adjustment value")
   @Column(nullable = false)
   private Double adjustmentValue;
+
 }

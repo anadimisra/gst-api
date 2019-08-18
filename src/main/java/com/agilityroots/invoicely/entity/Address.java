@@ -1,21 +1,19 @@
 /**
- *  19-Oct-2018 Address.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 19-Oct-2018 Address.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
-
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.validation.constraints.NotEmpty;
-
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 /**
  * @author anadi
@@ -86,11 +84,8 @@ public class Address implements Serializable {
     } else if (!state.equals(other.getState()))
       return false;
     if (streetAddress == null) {
-      if (other.getStreetAddress() != null)
-        return false;
-    } else if (!streetAddress.equals(other.getStreetAddress()))
-      return false;
-    return true;
+      return other.getStreetAddress() == null;
+    } else return streetAddress.equals(other.getStreetAddress());
   }
 
 }

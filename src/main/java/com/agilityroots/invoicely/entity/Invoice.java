@@ -1,75 +1,56 @@
 /**
- *  23-Oct-2018 Invoice.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 23-Oct-2018 Invoice.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import javax.naming.directory.InvalidAttributesException;
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToOne;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
-import javax.persistence.NamedEntityGraphs;
-import javax.persistence.OrderBy;
-import javax.persistence.PrePersist;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Where;
-import org.springframework.hateoas.Identifiable;
-import org.springframework.hateoas.core.Relation;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.Where;
+import org.springframework.hateoas.Identifiable;
+import org.springframework.hateoas.core.Relation;
+
+import javax.naming.directory.InvalidAttributesException;
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author anadi
  */
 @Slf4j
 @Entity
-@Getter
 @Setter
+@Getter
 @ToString
 @NoArgsConstructor
 @Where(clause = "DELETED = 0")
 @Relation(collectionRelation = "invoices")
-@Table(indexes = { @Index(name = "place_of_supply_index", columnList = "placeOfSupply", unique = false),
+@Table(indexes = {@Index(name = "place_of_supply_index", columnList = "placeOfSupply", unique = false),
     @Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
     @Index(name = "due_date_index", columnList = "dueDate", unique = false),
-    @Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false) })
+    @Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false)})
 @NamedEntityGraphs({
-    @NamedEntityGraph(name = "invoice_customer_details", attributeNodes = { @NamedAttributeNode("customer") }),
-    @NamedEntityGraph(name = "invoice_details", attributeNodes = { @NamedAttributeNode("customer"),
-        @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo") }),
-    @NamedEntityGraph(name = "invoice_billing_details", attributeNodes = { @NamedAttributeNode("lineItems"),
-        @NamedAttributeNode("payments") }),
-    @NamedEntityGraph(name = "invoice_all_details", attributeNodes = { @NamedAttributeNode("customer"),
+    @NamedEntityGraph(name = "invoice_details", attributeNodes = {@NamedAttributeNode("lineItems"),
+        @NamedAttributeNode("payments")}),
+    @NamedEntityGraph(name = "invoice_billing_details", attributeNodes = {@NamedAttributeNode("billedFrom"),
+        @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo")}),
+    @NamedEntityGraph(name = "invoice_all_details", attributeNodes = {@NamedAttributeNode("billedFrom"),
         @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo"), @NamedAttributeNode("lineItems"),
-        @NamedAttributeNode("payments") }), })
+        @NamedAttributeNode("payments")})})
 public class Invoice extends AuditableEntity implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 1560474818107754225L;
@@ -80,6 +61,8 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   private String invoiceNumber;
 
   @JsonIgnore
+  @Column(nullable = false)
+  @ColumnDefault("0")
   private Integer deleted = 0;
 
   @NotEmpty(message = "Cannot save invoice without place of supply")
@@ -110,21 +93,17 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   @CollectionTable(name = "invoice_line_items", joinColumns = @JoinColumn(name = "invoice_id"))
   @JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
   @OrderBy("serialNumber ASC")
-  private List<LineItem> lineItems;
+  private Set<LineItem> lineItems;
 
   @ElementCollection(fetch = FetchType.LAZY)
   @CollectionTable(name = "invoice_payments", joinColumns = @JoinColumn(name = "invoice_id"))
   @JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
   @OrderBy("paymentDate DESC")
-  private List<Payment> payments;
+  private Set<Payment> payments;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "billed_from_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Branch billedFrom;
-
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinTable(name = "customer_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"))
-  private Customer customer;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "billed_to_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
@@ -136,14 +115,8 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
 
   @PrePersist
   public void checkInvoiceNumber() throws InvalidAttributesException {
-    String invoicePrefix = this.customer.getInvoicePrefix();
-    invoicePrefix += "-";
-    if (!this.invoiceNumber.startsWith(invoicePrefix)) {
-      log.debug("Setting invoice prefix {} for invoice number {}", invoicePrefix, invoiceNumber);
-      this.invoiceNumber = this.customer.getInvoicePrefix() + this.invoiceNumber;
-    }
 
-    if (this.billedFrom.getId().equals(this.billedTo.getId()) || this.billedFrom.getId().equals(this.billedTo.getId()))
+    if (this.billedFrom.getId().equals(this.billedTo.getId()) || this.billedFrom.getId().equals(this.shippedTo.getId()))
       throw new InvalidAttributesException("One of Customer branches is same as Company branches");
   }
 

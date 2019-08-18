@@ -1,27 +1,20 @@
 /**
- *  22-Oct-2018 Organisation.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 22-Oct-2018 Organisation.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
-
-import java.util.List;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.OneToMany;
-import javax.validation.constraints.NotEmpty;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author anadi
@@ -41,13 +34,17 @@ public abstract class Organisation extends AuditableEntity {
   @NotEmpty(message = "Cannot save an Organisation without registered name")
   @Column(unique = true, length = 50, nullable = false)
   private String name;
-  
+
   @Column(length = 11)
   private String vatTin;
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "org_branches", joinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
-  private List<Branch> branches;
+  private Set<Branch> branches;
+
+  @OneToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "org_invoices", joinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
+  private Set<Invoice> invoices;
 
   @Override
   public int hashCode() {

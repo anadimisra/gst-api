@@ -1,42 +1,9 @@
 /**
- *  15-Nov-2018 InvoiceController.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 15-Nov-2018 InvoiceController.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.controller;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.ExposesResourceFor;
-import org.springframework.hateoas.Link;
-import org.springframework.hateoas.MediaTypes;
-import org.springframework.hateoas.Resource;
-import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.request.async.DeferredResult;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
@@ -44,8 +11,29 @@ import com.agilityroots.invoicely.entity.Payment;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.InvoiceService;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.PagedResourcesAssembler;
+import org.springframework.hateoas.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author anadi
@@ -104,7 +92,7 @@ public class InvoiceController {
 
   @GetMapping(value = "invoices/{invoiceNumber}", produces = MediaTypes.HAL_JSON_VALUE)
   public DeferredResult<ResponseEntity<Resource<Invoice>>> getInvoice(@PathVariable("invoiceNumber") String invoiceNumber,
-      HttpServletRequest request) {
+                                                                      HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resource<Invoice>>> response = new DeferredResult<>();
     response.onTimeout(
@@ -224,14 +212,13 @@ public class InvoiceController {
 
       @Override
       public void onSuccess(Page<Invoice> result) {
-        
+
         if (result.hasContent()) {
           Link self = new Link(
               ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
           log.debug("Generated Self Link {} for Invoice Resource Collection", self.getHref());
           response.setResult(ResponseEntity.ok(assembler.toResource(result, invoiceResourceAssembler, self)));
-        }
-        else
+        } else
           response.setErrorResult(ResponseEntity.notFound().build());
         log.debug("Returning Response with {} invoices", result.getSize());
       }
@@ -278,7 +265,7 @@ public class InvoiceController {
 
   @PutMapping("/invoices/{id}/payments")
   public DeferredResult<ResponseEntity<Object>> recordPayments(@PathVariable Long id,
-      @RequestBody @Valid List<Payment> payments, HttpServletRequest request) {
+                                                               @RequestBody @Valid List<Payment> payments, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Object>> response = getLocationHeaderDeferredResult();
 

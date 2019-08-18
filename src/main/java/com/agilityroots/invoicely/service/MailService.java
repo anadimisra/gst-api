@@ -1,23 +1,16 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import java.io.IOException;
-
+import com.sendgrid.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import com.sendgrid.Content;
-import com.sendgrid.Email;
-import com.sendgrid.Mail;
-import com.sendgrid.Method;
-import com.sendgrid.Request;
-import com.sendgrid.SendGrid;
-
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
 
 /**
  * @author anadi

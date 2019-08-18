@@ -16,13 +16,7 @@
 
 package com.agilityroots.invoicely.resource.assembler;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-
-import java.util.Arrays;
-
+import lombok.Data;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -30,12 +24,15 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 
-import lombok.Data;
+import java.util.Arrays;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 /**
  * @author Greg Turnquist
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class SimpleResourceAssemblerTest {
 
   @Test
@@ -53,7 +50,7 @@ public class SimpleResourceAssemblerTest {
     Resources<Resource<Employee>> resources = assembler.toResources(Arrays.asList(new Employee("Frodo")));
     assertThat(resources.getContent(), hasSize(1));
     assertThat(resources.getContent(), Matchers.<Resource<Employee>>contains(new Resource(new Employee("Frodo"))));
-    MatcherAssert.assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
+    MatcherAssert.assertThat(resources.getLinks(), is(Matchers.empty()));
 
     assertThat(resources.getContent().iterator().next(), is(new Resource(new Employee("Frodo"))));
   }
@@ -76,7 +73,7 @@ public class SimpleResourceAssemblerTest {
     assertThat(resources.getContent(), hasSize(1));
     assertThat(resources.getContent(), Matchers.<Resource<Employee>>contains(
         new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));
-    assertThat(resources.getLinks(), is(Matchers.<Link>empty()));
+    assertThat(resources.getLinks(), is(Matchers.empty()));
 
     assertThat(resources.getContent().iterator().next(),
         is(new Resource(new Employee("Frodo"), new Link("/employees").withRel("employees"))));

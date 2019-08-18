@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 

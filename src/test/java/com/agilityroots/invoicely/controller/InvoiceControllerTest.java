@@ -1,29 +1,15 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.controller;
 
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
+import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
+import com.agilityroots.invoicely.service.InvoiceService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,14 +31,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
-import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
-import com.agilityroots.invoicely.service.InvoiceService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author anadi
@@ -62,17 +50,14 @@ import lombok.extern.slf4j.Slf4j;
 @RunWith(SpringRunner.class)
 @WebMvcTest(InvoiceController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({ InvoiceService.class, InvoiceResourceAssembler.class, CustomerResourceAssember.class })
+@Import({InvoiceService.class, InvoiceResourceAssembler.class, CustomerResourceAssember.class})
 public class InvoiceControllerTest {
 
+  EntityObjectsBuilder builder = new EntityObjectsBuilder();
   @Autowired
   private MockMvc mockMvc;
-
   @Autowired
   private ObjectMapper objectMapper;
-
-  EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
   @MockBean
   private InvoiceService invoiceService;
 

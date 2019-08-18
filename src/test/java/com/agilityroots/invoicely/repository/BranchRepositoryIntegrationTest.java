@@ -1,14 +1,14 @@
 /**
- *  30 Nov 2018 BranchRepositoryIntegrationTests.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 30 Nov 2018 BranchRepositoryIntegrationTests.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-
+import com.agilityroots.invoicely.DataApiJpaConfiguration;
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Customer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +22,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.DataApiJpaConfiguration;
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Customer;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anadi
@@ -33,23 +32,19 @@ import com.agilityroots.invoicely.entity.Customer;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = false)
-@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
+@ContextConfiguration(classes = {DataApiJpaConfiguration.class})
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public class BranchRepositoryIntegrationTest {
 
+  Customer customer;
   @Autowired
   private CustomerRepository customerRepository;
-
   @Autowired
   private BranchRepository branchRepository;
-
   @Autowired
   private ContactRepository contactRepository;
-
   private EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
-  Customer customer;
 
   @Before
   public void setup() {

@@ -1,18 +1,18 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
+import com.agilityroots.invoicely.repository.CustomerRepository;
+import com.agilityroots.invoicely.repository.InvoiceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,24 +28,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
+import java.net.URI;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * @author anadi
  *
  */
 @RunWith(SpringRunner.class)
-@Import({ CustomerService.class, DummyApplicationEventPublisher.class })
+@Import({CustomerService.class, DummyApplicationEventPublisher.class})
 public class CustomerServiceTest {
 
   @Autowired
@@ -160,7 +155,7 @@ public class CustomerServiceTest {
     // Given
     StringBuffer stringBuffer = new StringBuffer("http://localhost/customers/1/branches/");
     Customer mockCustomer = builder.getCustomerObject();
-    List<Branch> branches = new ArrayList<Branch>();
+    Set<Branch> branches = new HashSet<>();
     Branch branch = builder.getBranchObject();
     branches.add(branch);
     mockCustomer.setBranches(branches);
@@ -171,7 +166,7 @@ public class CustomerServiceTest {
     Optional<URI> result = customerService.addBranch(Long.valueOf(1), branch, stringBuffer).get();
 
     // Then
-    assertThat(result.get().toString()).endsWith("/branches/" + String.valueOf(branch.getId()));
+    assertThat(result.get().toString()).endsWith("/branches/" + branch.getId());
   }
 
   @Test

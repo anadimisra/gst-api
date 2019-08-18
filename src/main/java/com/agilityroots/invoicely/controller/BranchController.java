@@ -1,16 +1,15 @@
 /**
- *  3 Dec 2018 BranchController.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 3 Dec 2018 BranchController.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.controller;
 
-import java.net.URI;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.service.BranchService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
@@ -19,20 +18,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
-import com.agilityroots.invoicely.service.BranchService;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.net.URI;
+import java.util.Optional;
 
 /**
  * @author anadi
@@ -83,7 +76,7 @@ public class BranchController {
 
   @PutMapping("/branches/{id}/contact")
   public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
-      @RequestBody(required = true) @Valid Contact contact) {
+                                                           @RequestBody(required = true) @Valid Contact contact) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -113,7 +106,7 @@ public class BranchController {
 
   @GetMapping("/branches/{id}/contact")
   public DeferredResult<ResponseEntity<Resource<Contact>>> getContact(@PathVariable("id") Long id,
-      HttpServletRequest request) {
+                                                                      HttpServletRequest request) {
     DeferredResult<ResponseEntity<Resource<Contact>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));

@@ -1,32 +1,21 @@
 /**
- *  4 Dec 2018 CustomerControllerTests.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 4 Dec 2018 CustomerControllerTests.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.entity.Customer;
+import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
+import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
+import com.agilityroots.invoicely.service.CustomerService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,18 +37,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
-import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
-import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
-import com.agilityroots.invoicely.service.CustomerService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.util.*;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author anadi
@@ -69,20 +57,17 @@ import lombok.extern.slf4j.Slf4j;
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({ CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
-    CustomerService.class })
+@Import({CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
+    CustomerService.class})
 public class CustomerControllerTest {
 
-  @Autowired
-  private MockMvc mockMvc;
-
-  @Autowired
-  private ObjectMapper objectMapper;
-
   EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
   @MockBean
   CustomerService customerService;
+  @Autowired
+  private MockMvc mockMvc;
+  @Autowired
+  private ObjectMapper objectMapper;
 
   @Before
   public void setup() {

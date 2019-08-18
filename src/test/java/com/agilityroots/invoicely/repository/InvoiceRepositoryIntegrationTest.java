@@ -1,24 +1,19 @@
 /**
- *  13-Nov-2018 InvoiceRepositoryIntegrationTests.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 13-Nov-2018 InvoiceRepositoryIntegrationTests.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.DataApiJpaConfiguration;
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,13 +23,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.DataApiJpaConfiguration;
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Company;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.entity.Payment;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anadi
@@ -42,28 +37,25 @@ import com.agilityroots.invoicely.entity.Payment;
  */
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = false)
-@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
+@ContextConfiguration(classes = {DataApiJpaConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-@TestPropertySource(locations = "classpath:application-test.properties")
+@TestPropertySource(locations = {"classpath:application-it.properties", "classpath:application-test.properties"})
+@AutoConfigureTestDatabase(replace = Replace.NONE)
 public class InvoiceRepositoryIntegrationTest {
 
+  EntityObjectsBuilder builder = new EntityObjectsBuilder();
   @Autowired
   private CustomerRepository customerRepository;
-
   @Autowired
   private CompanyRepository companyRepository;
-
   @Autowired
   private BranchRepository branchRepository;
-
   @Autowired
   private ContactRepository contactRepository;
-
   @Autowired
   private InvoiceRepository invoiceRepository;
-
-  EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
+  @PersistenceContext
+  private EntityManager em;
   private Invoice invoice;
 
   @Before
@@ -72,7 +64,7 @@ public class InvoiceRepositoryIntegrationTest {
     Branch branch = builder.getBranchObject();
     branch.setContact(contactRepository.saveAndFlush(builder.getContactObject()));
     branch = branchRepository.saveAndFlush(branch);
-    List<Branch> branches = new ArrayList<Branch>();
+    Set<Branch> branches = new HashSet<>();
     branches.add(branch);
     customer.setBranches(branches);
     customer = customerRepository.saveAndFlush(customer);
@@ -84,40 +76,20 @@ public class InvoiceRepositoryIntegrationTest {
     companyBranches.add(companyBranch);
     company = companyRepository.save(company);
     invoice = builder.getInvoiceObjectWithLineItems();
-    invoice.setCustomer(customer);
-    invoice.setBilledTo(customer.getBranches().get(0));
-    invoice.setShippedTo(customer.getBranches().get(0));
+    invoice.setBilledTo(customer.getBranches().stream().findFirst().get());
+    invoice.setShippedTo(customer.getBranches().stream().findFirst().get());
     invoice.setBilledFrom(companyBranch);
   }
 
   @Test
-  public void testFindAllPaidInvoices() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    Payment payment = getPayment();
-    invoice.setPayments(Arrays.asList(payment));
-    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-
-    Page<Invoice> paidInvoices = invoiceRepository.findByPayments_PaymentDateIsNotNull(PageRequest.of(0, 10));
-    assertThat(paidInvoices).isNotEmpty();
-    assertThat(paidInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-  }
-
-  @Test
-  public void testFindAllDueInvoices() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-
-    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(today,
-        PageRequest.of(0, 10));
-    assertThat(pendingInvoices).isNotEmpty();
-    assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
+  public void testFindByInvoiceNumberLoadsAllDetails() {
+    invoiceRepository.saveAndFlush(invoice);
+    em.clear();
+    Invoice allDetails = invoiceRepository.findByInvoiceNumber(invoice.getInvoiceNumber()).get();
+    assertThat(allDetails).isNotNull();
+    assertThat(allDetails.getBilledFrom().getBranchName()).isEqualTo(invoice.getBilledFrom().getBranchName());
+    assertThat(allDetails.getBilledTo().getBranchName()).isEqualTo(invoice.getBilledTo().getBranchName());
+    assertThat(allDetails.getShippedTo().getBranchName()).isEqualTo(invoice.getShippedTo().getBranchName());
   }
 
   @Test
@@ -128,90 +100,14 @@ public class InvoiceRepositoryIntegrationTest {
     invoice
         .setInvoiceDate(Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-
+    em.clear();
     Invoice withDetails = invoiceRepository.getOne(savedInvoice.getId());
     assertThat(withDetails.getBilledTo()).isNotNull();
     assertThat(withDetails.getShippedTo()).isNotNull();
-    assertThat(withDetails.getCustomer()).isNotNull();
     assertThat(withDetails.getBilledTo()).isEqualTo(invoice.getBilledTo());
     assertThat(withDetails.getShippedTo()).isEqualTo(invoice.getShippedTo());
-    assertThat(withDetails.getCustomer()).isEqualTo(invoice.getCustomer());
-  }
-
-  @Test
-  public void testFindAllOverdueInvoices() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-
-    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(today,
-        PageRequest.of(0, 10));
-    assertThat(pendingInvoices).isNotEmpty();
-    assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-  }
-
-  @Test
-  public void testFindAllInvoicesByCustomer() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-
-    Page<Invoice> invoices = invoiceRepository.findAllByCustomer_Id(savedInvoice.getCustomer().getId(),
-        PageRequest.of(0, 10));
-    assertThat(invoices).isNotEmpty();
-    assertThat(invoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-  }
-
-  @Test
-  public void testFindAllPaidInvoicesByCustomer() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    Payment payment = getPayment();
-    invoice.setPayments(Arrays.asList(payment));
-    Invoice savedInvoice = invoiceRepository.saveAndFlush(invoice);
-    Page<Invoice> invoices = invoiceRepository
-        .findByPayments_PaymentDateIsNotNullAndCustomer_Id(savedInvoice.getCustomer().getId(), PageRequest.of(0, 10));
-    assertThat(invoices).isNotEmpty();
-    assertThat(invoices.getContent().get(0).getId()).isEqualTo(savedInvoice.getId());
-  }
-
-  @Test
-  public void testFindAllPendingInvoicesByCustomer() throws Exception {
-    invoice.setDueDate(Date.from(LocalDate.now().plusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-
-    Invoice paidInvoice = new Invoice();
-    paidInvoice.setBilledFrom(invoice.getBilledFrom());
-    paidInvoice.setBilledTo(invoice.getBilledTo());
-    paidInvoice.setShippedTo(invoice.getShippedTo());
-    paidInvoice.setInvoiceDate(invoice.getInvoiceDate());
-    paidInvoice.setDueDate(invoice.getDueDate());
-    paidInvoice.setCustomer(invoice.getCustomer());
-    paidInvoice.setPlaceOfSupply("Karnataka");
-    paidInvoice.setInvoiceNumber("OTHER-1");
-    paidInvoice.setPaymentTerms(invoice.getPaymentTerms());
-    paidInvoice.setPayments(Arrays.asList(getPayment()));
-    paidInvoice.setLineItems(invoice.getLineItems());
-
-    Invoice saved = invoiceRepository.saveAndFlush(invoice);
-
-    invoiceRepository.saveAndFlush(paidInvoice);
-
-    Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    Page<Invoice> pendingInvoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_Id(
-        today, saved.getCustomer().getId(), PageRequest.of(0, 10));
-    assertThat(pendingInvoices).isNotEmpty();
-    assertThat(pendingInvoices.getContent().size()).isEqualTo(1);
-    assertThat(pendingInvoices.getContent().get(0).getId()).isEqualTo(saved.getId());
+    assertThat(withDetails.getPayments()).isNullOrEmpty();
+    assertThat(withDetails.getLineItems()).isNullOrEmpty();
   }
 
   @Test
@@ -226,7 +122,7 @@ public class InvoiceRepositoryIntegrationTest {
     Invoice savedInvoice = invoiceRepository.getOne(invoice.getId());
     assertThat(savedInvoice.getLineItems()).isNotNull();
     assertThat(savedInvoice.getLineItems()).isNotEmpty();
-    assertThat(savedInvoice.getLineItems().get(0).getItem()).isEqualTo("That Item");
+    assertThat(savedInvoice.getLineItems().size()).isEqualTo(2);
   }
 
   @Test
@@ -238,32 +134,19 @@ public class InvoiceRepositoryIntegrationTest {
     invoiceRepository.saveAndFlush(invoice);
 
     Optional<Invoice> result = invoiceRepository.findById(invoice.getId());
-    List<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
+    Set<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new HashSet<Payment>());
     assertThat(invoicePayments).isEmpty();
 
     Payment payment = getPayment();
-    List<Payment> payments = new ArrayList<>();
+    Set<Payment> payments = new HashSet<>();
     payments.add(payment);
     invoicePayments.addAll(payments);
     result.ifPresent(it -> it.setPayments(invoicePayments));
     result.ifPresent(it -> invoiceRepository.saveAndFlush(it));
 
     Optional<Invoice> updated = invoiceRepository.findById(invoice.getId());
-    List<Payment> addedPayments = updated.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
+    Set<Payment> addedPayments = updated.map(Invoice::getPayments).orElse(new HashSet<Payment>());
     assertThat(addedPayments.size()).isEqualTo(1);
-    assertThat(addedPayments.get(0).getAmount()).isEqualTo(1000.00);
-  }
-
-  @Test
-  public void testGetInvoiceCustomerDetails() {
-    invoice.setDueDate(Date.from(LocalDate.now().minusDays(10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setPaymentTerms("NET-30");
-    invoice
-        .setInvoiceDate(Date.from(LocalDate.now().minusDays(40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice saved = invoiceRepository.getOne(invoice.getId());
-    assertThat(saved.getCustomer()).isNotNull();
-    assertThat(saved.getCustomer().getName()).isEqualTo("Minty and Sons Private Limited");
   }
 
   /**

@@ -1,16 +1,15 @@
 /**
- *  5 Dec 2018 InvoiceResourceAssembler.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 5 Dec 2018 InvoiceResourceAssembler.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.resource.assembler;
-
-import org.springframework.hateoas.Resource;
-import org.springframework.stereotype.Component;
 
 import com.agilityroots.invoicely.controller.InvoiceController;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
+import org.springframework.hateoas.Resource;
+import org.springframework.stereotype.Component;
 
 /**
  * @author anadi

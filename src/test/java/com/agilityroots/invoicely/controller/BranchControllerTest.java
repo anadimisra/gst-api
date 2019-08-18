@@ -1,24 +1,13 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.net.URI;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.entity.Contact;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.service.BranchService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,11 +25,18 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
-import com.agilityroots.invoicely.service.BranchService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URI;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author anadi
@@ -49,19 +45,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RunWith(SpringRunner.class)
 @WebMvcTest(BranchController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({ BranchService.class, BranchResourceAssembler.class })
+@Import({BranchService.class, BranchResourceAssembler.class})
 public class BranchControllerTest {
 
+  EntityObjectsBuilder builder = new EntityObjectsBuilder();
   @Autowired
   private MockMvc mockMvc;
-
   @Autowired
   private ObjectMapper objectMapper;
-
   @MockBean
   private BranchService branchService;
-
-  EntityObjectsBuilder builder = new EntityObjectsBuilder();
 
   @Before
   public void setup() {

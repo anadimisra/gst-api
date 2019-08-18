@@ -1,15 +1,11 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-
-import java.net.URI;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-
+import com.agilityroots.invoicely.EntityObjectsBuilder;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,16 +17,19 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.EntityObjectsBuilder;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
+import java.net.URI;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * @author anadi
  *
  */
 @RunWith(SpringRunner.class)
-@Import({ BranchService.class })
+@Import({BranchService.class})
 public class BranchServiceTest {
 
   @MockBean

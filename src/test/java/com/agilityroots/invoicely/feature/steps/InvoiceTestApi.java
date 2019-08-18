@@ -1,14 +1,14 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.feature.steps;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anadi

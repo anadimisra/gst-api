@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely;
 
@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  *
  */
 @Configuration
-@EntityScan(basePackages = { "com.agilityroots.invoicely.entity" })
-@EnableJpaRepositories(basePackages = { "com.agilityroots.invoicely.repository" })
+@EntityScan(basePackages = {"com.agilityroots.invoicely.entity"})
+@EnableJpaRepositories(basePackages = {"com.agilityroots.invoicely.repository"})
 @EnableJpaAuditing
 @EnableTransactionManagement
 @EnableCaching

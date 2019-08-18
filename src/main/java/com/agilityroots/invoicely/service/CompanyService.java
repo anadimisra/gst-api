@@ -1,11 +1,12 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
-import java.net.URI;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Company;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.CompanyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,8 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Company;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.CompanyRepository;
+import java.net.URI;
+import java.util.Optional;
 
 /**
  * @author anadi

@@ -1,7 +1,7 @@
 /**
- *  20-Nov-2018 DataApiStepDefinition.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 20-Nov-2018 DataApiStepDefinition.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.feature;
 
@@ -21,7 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@TestPropertySource(locations = {"classpath:application-it.properties","classpath:application-test.properties"})
+@TestPropertySource(locations = {"classpath:application-it.properties", "classpath:application-test.properties"})
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 @ContextConfiguration
 @ActiveProfiles("feature_tests")

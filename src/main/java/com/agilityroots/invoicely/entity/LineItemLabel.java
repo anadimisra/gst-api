@@ -1,23 +1,18 @@
 /**
- *  23-Oct-2018 LineItemLabel.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 23-Oct-2018 LineItemLabel.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
-
-import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.persistence.CollectionTable;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.persistence.*;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author anadi

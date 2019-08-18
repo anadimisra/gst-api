@@ -1,14 +1,13 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.service;
 
+import com.sendgrid.SendGrid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import com.sendgrid.SendGrid;
 
 /**
  * @author anadi
@@ -26,7 +25,7 @@ public class NewCustomerTemplateProcessingService implements TemplateProcessorSe
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * com.agilityroots.invoicely.service.TemplateProcessorService#processTemplate(
    * java.lang.String[])

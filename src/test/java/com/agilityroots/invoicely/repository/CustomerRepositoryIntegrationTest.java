@@ -1,15 +1,13 @@
 /**
- *  30 Nov 2018 CustomerRepositoryIntegrationTests.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 30 Nov 2018 CustomerRepositoryIntegrationTests.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-
+import com.agilityroots.invoicely.DataApiJpaConfiguration;
+import com.agilityroots.invoicely.entity.Customer;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,10 +19,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.agilityroots.invoicely.DataApiJpaConfiguration;
-import com.agilityroots.invoicely.entity.Customer;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anadi
@@ -33,8 +31,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RunWith(SpringRunner.class)
 @DataJpaTest(showSql = false)
-@ContextConfiguration(classes = { DataApiJpaConfiguration.class })
-@TestPropertySource(locations = {"classpath:application-it.properties","classpath:application-test.properties"})
+@ContextConfiguration(classes = {DataApiJpaConfiguration.class})
+@TestPropertySource(locations = {"classpath:application-it.properties", "classpath:application-test.properties"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 public class CustomerRepositoryIntegrationTest {
 
@@ -43,7 +41,7 @@ public class CustomerRepositoryIntegrationTest {
 
   @PersistenceContext
   private EntityManager em;
-  
+
   @Test
   public void testPrePersistAddsMandatoryFields() {
     log.info("This test is only for documenting default value configration done via @DynamicInsert and @ColumnDefault");

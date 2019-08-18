@@ -1,14 +1,12 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.event.service;
 
-import org.springframework.context.ApplicationEvent;
-
 import com.agilityroots.invoicely.entity.Contact;
-
 import lombok.Getter;
 import lombok.ToString;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @author anadi

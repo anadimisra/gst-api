@@ -1,13 +1,14 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.feature.steps;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.agilityroots.invoicely.entity.*;
+import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
+import com.agilityroots.invoicely.repository.BranchRepository;
+import com.agilityroots.invoicely.repository.ContactRepository;
+import com.agilityroots.invoicely.repository.CustomerRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.Resource;
@@ -17,17 +18,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.entity.Organisation;
-import com.agilityroots.invoicely.http.payload.InvoiceHttpPayload;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
+import java.util.HashSet;
+import java.util.Set;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author anadi
@@ -92,7 +86,7 @@ public class CustomerTestApi extends TestApi {
 
   public void addContactToBranch(Contact contact) {
     StringBuffer urlBuilder = new StringBuffer("/branches/");
-    urlBuilder.append(this.customer.getBranches().get(0).getId());
+    urlBuilder.append(this.customer.getBranches().stream().findFirst().get().getId());
     urlBuilder.append("/contact");
     log.debug("action: PUT | url: {} | data: {}", urlBuilder.toString(), contact);
     ResponseEntity<Object> response = getRestTemplate().exchange(urlBuilder.toString(), HttpMethod.PUT,
@@ -135,8 +129,8 @@ public class CustomerTestApi extends TestApi {
     billedFrom = branchRepository.saveAndFlush(billedFrom);
     InvoiceHttpPayload payload = new InvoiceHttpPayload();
     payload.setInvoice(invoice);
-    payload.setBilledTo(this.customer.getBranches().get(0).getId());
-    payload.setShippedTo(this.customer.getBranches().get(0).getId());
+    payload.setBilledTo(this.customer.getBranches().stream().findFirst().get().getId());
+    payload.setShippedTo(this.customer.getBranches().stream().findFirst().get().getId());
     payload.setBilledFrom(billedFrom.getId());
     StringBuffer urlBuilder = new StringBuffer("/customers/");
     urlBuilder.append(this.customer.getId());
@@ -148,7 +142,7 @@ public class CustomerTestApi extends TestApi {
   }
 
   private Contact getBranchContact() {
-    Contact result = this.customer.getBranches().get(0).getContact();
+    Contact result = this.customer.getBranches().stream().findFirst().get().getContact();
     return verifyAndGetContact(result);
   }
 
@@ -178,12 +172,8 @@ public class CustomerTestApi extends TestApi {
     return customer;
   }
 
-  /**
-   * @param urlBuilder
-   * @return
-   */
   private Contact getCustomerContact(String location) {
-    ResponseEntity<Resource<Contact>> resource = getRestTemplate().exchange(location.toString(), HttpMethod.GET, null,
+    ResponseEntity<Resource<Contact>> resource = getRestTemplate().exchange(location, HttpMethod.GET, null,
         new ParameterizedTypeReference<Resource<Contact>>() {
         });
     assertThat(resource.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -194,7 +184,7 @@ public class CustomerTestApi extends TestApi {
   }
 
   private void addBranchToCustomer(Branch branch) {
-    List<Branch> branches = new ArrayList<>();
+    Set<Branch> branches = new HashSet<>();
     branches.add(branch);
     this.customer.setBranches(branches);
   }

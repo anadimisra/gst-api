@@ -1,10 +1,9 @@
 package com.agilityroots.invoicely.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
+import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.entity.Payment;
+import com.agilityroots.invoicely.repository.InvoiceRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,15 +14,10 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.agilityroots.invoicely.entity.Invoice;
-import com.agilityroots.invoicely.entity.Payment;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
-
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
 
 /**
  * @author anadi
- *
  */
 @Slf4j
 @Async
@@ -52,7 +46,7 @@ public class InvoiceService {
     Optional<Invoice> result = invoiceRepository.findCustomerDetailsByInvoiceNumber(invoiceNumber);
     return AsyncResult.forValue(result);
   }
-  
+
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Invoice> asyncSave(Invoice invoice) {
     return AsyncResult.forValue(invoiceRepository.saveAndFlush(invoice));
@@ -82,7 +76,7 @@ public class InvoiceService {
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Optional<Invoice>> updatePayments(Long id, final List<Payment> payments) {
     Optional<Invoice> result = invoiceRepository.findById(id);
-    List<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new ArrayList<Payment>());
+    Set<Payment> invoicePayments = result.map(Invoice::getPayments).orElse(new HashSet<Payment>());
     log.debug("This invoice has {} recorded payments", invoicePayments.size());
     invoicePayments.addAll(payments);
     log.debug("Added {} payments to the invoice", payments.size());

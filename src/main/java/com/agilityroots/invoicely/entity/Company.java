@@ -1,21 +1,20 @@
 /**
- *  19-Oct-2018 Company.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 19-Oct-2018 Company.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
-
-import java.io.Serializable;
-import java.util.Objects;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.validation.constraints.NotEmpty;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author anadi
@@ -29,7 +28,7 @@ import lombok.ToString;
 public class Company extends Organisation implements Serializable {
 
   private static final long serialVersionUID = 4627788171283297107L;
-  
+
   @Column(unique = true, length = 21, updatable = false, nullable = false)
   private String cin;
 

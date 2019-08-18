@@ -1,15 +1,11 @@
 /**
- *  24-Oct-2018 BranchRepository.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 24-Oct-2018 BranchRepository.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.repository;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.persistence.LockModeType;
-
+import com.agilityroots.invoicely.entity.Branch;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -18,7 +14,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 
-import com.agilityroots.invoicely.entity.Branch;
+import javax.persistence.LockModeType;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * @author anadi

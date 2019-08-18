@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.feature.steps;
 
@@ -16,7 +16,7 @@ public class TestApi {
   private TestRestTemplate restTemplate;
 
   /**
-   * 
+   *
    * @return test Rest Template
    */
   protected TestRestTemplate getRestTemplate() {

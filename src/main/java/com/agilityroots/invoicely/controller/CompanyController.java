@@ -1,14 +1,13 @@
 /**
- * 
+ *
  */
 package com.agilityroots.invoicely.controller;
 
-import java.net.URI;
-import java.util.Optional;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-
+import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.entity.Company;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.service.CompanyService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,12 +29,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Company;
-import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
-import com.agilityroots.invoicely.service.CompanyService;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.net.URI;
+import java.util.Optional;
 
 /**
  * @author anadi
@@ -54,7 +51,7 @@ public class CompanyController {
 
   @PutMapping("/companies/{id}/branches")
   public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
-      @RequestBody(required = true) @Valid Branch branch, HttpServletRequest request) {
+                                                          @RequestBody(required = true) @Valid Branch branch, HttpServletRequest request) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
@@ -87,8 +84,8 @@ public class CompanyController {
   }
 
   public DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> getBranches(@PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
-      PagedResourcesAssembler<Branch> assembler, HttpServletRequest request) {
+                                                                                 @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+                                                                                 PagedResourcesAssembler<Branch> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Branch>>>> response = new DeferredResult<>();
     response.onTimeout(

@@ -1,20 +1,19 @@
 /**
- *  23-Oct-2018 Item.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 23-Oct-2018 Item.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
-import java.io.Serializable;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import java.io.Serializable;
 
 /**
  * @author anadi
@@ -23,9 +22,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(indexes = { @Index(name = "item_names_index", columnList = "name", unique = false),
+@Table(indexes = {@Index(name = "item_names_index", columnList = "name", unique = false),
     @Index(name = "item_hsn_index", columnList = "hsn", unique = false),
-    @Index(name = "item_sac_index", columnList = "sac", unique = false) })
+    @Index(name = "item_sac_index", columnList = "sac", unique = false)})
 public class Item extends AuditableEntity implements Serializable {
 
   private static final long serialVersionUID = -4121755316741852665L;

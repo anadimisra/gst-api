@@ -1,30 +1,29 @@
 /**
- *  23-Oct-2018 LineItem.java
- *  data-api
- *  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+ * 23-Oct-2018 LineItem.java
+ * data-api
+ * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
-import java.io.Serializable;
-import java.util.Objects;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.ColumnDefault;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author anadi
  */
 
+@Setter
 @ToString
 @NoArgsConstructor
 @Embeddable
@@ -33,66 +32,56 @@ public class LineItem implements Serializable {
   private static final long serialVersionUID = -977449988990379565L;
 
   @Getter
-  @Setter
   @NotNull(message = "Cannot add invoice line item without serinal number")
   @Column(nullable = false)
   private Integer serialNumber;
 
   @Getter
-  @Setter
   @NotEmpty(message = "Cannot add invoice line item without item")
   @Column(nullable = false, length = 100)
   private String item;
 
   @Getter
-  @Setter
   @NotEmpty(message = "Cannot add invoice line item without description")
   @Column(nullable = false, length = 500)
   private String description;
 
   @Getter
-  @Setter
   @Column(length = 6)
   private String hsn;
 
   @Getter
-  @Setter
   @Column(length = 6)
   private String sac;
 
   @Getter
-  @Setter
   @NotNull(message = "Cannot add invoice line item without price")
   @Column(nullable = false, scale = 2)
   private Double price;
 
   @Getter
-  @Setter
   @Column(length = 3)
   private String unit;
 
   @Getter
-  @Setter
   @Column
   private Integer quantity;
 
   @Getter
-  @Setter
   @NotNull
   @Column(nullable = false, scale = 2)
   @ColumnDefault("0.00")
   private Double discount;
 
-  @Transient
   private Double amount;
 
   @Getter
-  @Setter
   @NotNull(message = "Cannot add invoice line item without tax rate")
   @Column(nullable = false, scale = 2)
   @ColumnDefault("0.18")
   private Double tax;
 
+  @Transient
   public Double getAmount() {
     if (this.unit != null)
       return ((this.price - this.price * this.discount) * this.quantity + this.price * this.tax);

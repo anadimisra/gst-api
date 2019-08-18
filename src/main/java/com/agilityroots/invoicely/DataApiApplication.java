@@ -1,5 +1,8 @@
 package com.agilityroots.invoicely;
 
+import com.fasterxml.jackson.databind.Module;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.sendgrid.SendGrid;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,14 +14,17 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.filter.ForwardedHeaderFilter;
 
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
-import com.sendgrid.SendGrid;
-
 @SpringBootApplication
 @EnableAsync
 @EnableSpringDataWebSupport
 public class DataApiApplication {
+
+  @Value("${sendgrid.api.key}")
+  String sendGridAPIKey;
+
+  public static void main(String[] args) {
+    SpringApplication.run(DataApiApplication.class, args);
+  }
 
   @Bean
   public Module hibernate5Module() {
@@ -56,15 +62,8 @@ public class DataApiApplication {
     return bean;
   }
 
-  @Value("${sendgrid.api.key}")
-  String sendGridAPIKey;
-
   @Bean
   public SendGrid sendGrid() {
     return new SendGrid(sendGridAPIKey);
-  }
-
-  public static void main(String[] args) {
-    SpringApplication.run(DataApiApplication.class, args);
   }
 }
