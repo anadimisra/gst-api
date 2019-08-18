@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -33,7 +34,7 @@ public class Branch extends AuditableEntity implements Serializable {
   @Column(length = 25, nullable = false)
   private String branchName;
 
-  //@NaturalId
+  @NaturalId
   @NotEmpty(message = "Cannot add a branch without GSTIN")
   @Column(length = 15, unique = true, nullable = false)
   private String gstin;
