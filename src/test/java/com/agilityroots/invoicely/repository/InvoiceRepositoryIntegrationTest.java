@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @Slf4j
 @RunWith(SpringRunner.class)
-@DataJpaTest(showSql = true)
+@DataJpaTest
 @ContextConfiguration(classes = {DataApiJpaConfiguration.class})
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(locations = {"classpath:application-it.properties", "classpath:application-test.properties"})
