@@ -27,40 +27,21 @@ import java.util.Set;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Organisation extends AuditableEntity {
 
-  @NaturalId
-  @Column(unique = true, length = 8, updatable = false, nullable = false)
-  private String domain;
-
   @NotEmpty(message = "Cannot save an Organisation without registered name")
-  @Column(unique = true, length = 50, nullable = false)
+  @Column(length = 100, nullable = false)
   private String name;
 
-  @Column(length = 11)
-  private String vatTin;
+  @NaturalId
+  @Column(nullable = false, updatable = false, length = 8, unique = true)
+  private String organisationId;
 
   @OneToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "org_branches", joinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
   private Set<Branch> branches;
 
-  @OneToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "org_invoices", joinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"))
-  private Set<Invoice> invoices;
-
   @Override
   public int hashCode() {
     return (Objects.hash(name) * 79);
-  }
-
-  @Override
-  public boolean equals(Object obj) {
-    if (this == obj)
-      return true;
-    if (obj == null)
-      return false;
-    if (getClass() != obj.getClass())
-      return false;
-    Organisation other = (Organisation) obj;
-    return Objects.equals(name, other.getName());
   }
 
 }
