@@ -47,7 +47,7 @@ public class CustomerRepositoryIntegrationTest {
     log.info("This test is only for documenting default value configration done via @DynamicInsert and @ColumnDefault");
     Customer bhau = new Customer();
     bhau.setName("Bhau & Sons Pvt. Ltd.");
-    bhau.setDomain(RandomStringUtils.randomAlphanumeric(8));
+    bhau.setOrganisationId(RandomStringUtils.randomAlphanumeric(8));
     bhau = customerRepository.saveAndFlush(bhau);
     em.clear();
     Customer badaBhau = customerRepository.findById(bhau.getId()).get();
