@@ -1,6 +1,5 @@
 package com.agilityroots.invoicely.controller;
 
-import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.Payment;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
@@ -9,12 +8,10 @@ import com.agilityroots.invoicely.service.InvoiceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort.Direction;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.PagedResourcesAssembler;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.ExposesResourceFor;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.Resource;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -33,7 +30,6 @@ import java.util.Optional;
 
 /**
  * @author anadi
- *
  */
 @Slf4j
 @RestController
