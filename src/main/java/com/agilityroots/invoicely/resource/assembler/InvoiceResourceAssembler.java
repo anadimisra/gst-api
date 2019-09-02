@@ -5,11 +5,11 @@
  */
 package com.agilityroots.invoicely.resource.assembler;
 
-import com.agilityroots.invoicely.controller.InvoiceController;
 import com.agilityroots.invoicely.entity.Customer;
 import com.agilityroots.invoicely.entity.Invoice;
 import org.springframework.hateoas.Resource;
 import org.springframework.stereotype.Component;
+import com.agilityroots.invoicely.controller.InvoiceController;
 
 /**
  * @author anadi
