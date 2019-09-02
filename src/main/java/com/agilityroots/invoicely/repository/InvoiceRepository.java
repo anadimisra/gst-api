@@ -39,10 +39,86 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long>, SoftDel
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("invoices")
-  Page<Invoice> findAll(Pageable pageable);
-
-  @Lock(LockModeType.OPTIMISTIC)
-  @Cacheable("invoices")
   @EntityGraph(value = "invoice_all_details")
   Invoice getOne(Long id);
+
+  /**
+   * All invoices
+   * @param id
+   * @param pageable
+   * @return All invoices for the company, ordered by latest invoice date first
+   */
+  Page<Invoice> findAllByCompany_IdOrderByInvoiceDateDesc(Long id, Pageable pageable);
+
+  /**
+   * All paid invoices
+   * @param id
+   * @param pageable
+   * @return All paid invoices for the company, ordered by latest payment first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNotNullAndCompany_IdOrderByPayments_PaymentDateDesc(Long id, Pageable pageable);
+
+  /**
+   * All due invoices
+   * @param today
+   * @param pageable
+   * @return All due invoices for the company, ordered by oldest due invoice first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfterAndCompany_IdOrderByDueDateAsc(Date today, Long id, Pageable pageable);
+
+  /**
+   * All Overdue invoices
+   * @param today
+   * @param pageable
+   * @return All overdue invoices for the company, ordered by oldest overdue invoice first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCompany_IdOrderByDueDateAsc(Date today, Long id, Pageable pageable);
+
+  /**
+   * All invoices for a customer
+   * @param id
+   * @param pageable
+   * @return All invoices for a customer, ordered by latest invoice first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByCustomer_IdOrderByInvoiceDateDesc(Long id, Pageable pageable);
+
+  /**
+   * Paid invoices by Customer
+   * @param id
+   * @param pageable
+   * @return All paid invoices by customer, ordered by latest payment first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNotNullAndCustomer_IdOrderByPayments_PaymentDateDesc(Long id, Pageable pageable);
+
+  /**
+   * Due invoices by Customer
+   * @param today
+   * @param id
+   * @param pageable
+   * @return All due invoices by customer, ordered by earliest due date first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_IdOrderByDueDateAsc(Date today, Long id, Pageable pageable);
+
+  /**
+   * Overdue Invoices by Customer
+   * @param today
+   * @param id
+   * @param pageable
+   * @return All overdue invoices by customer, ordered by overdue since longest period first
+   */
+  @Cacheable("invoices")
+  @Lock(LockModeType.OPTIMISTIC)
+  Page<Invoice> findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_IdOrderByDueDateAsc(Date today, Long id, Pageable pageable);
 }

@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
@@ -50,14 +51,14 @@ import java.util.Set;
         @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo")}),
     @NamedEntityGraph(name = "invoice_all_details", attributeNodes = {@NamedAttributeNode("billedFrom"),
         @NamedAttributeNode("billedTo"), @NamedAttributeNode("shippedTo"), @NamedAttributeNode("lineItems"),
-        @NamedAttributeNode("payments")})})
+        @NamedAttributeNode("payments"), @NamedAttributeNode("company"), @NamedAttributeNode("customer")})})
 public class Invoice extends AuditableEntity implements Identifiable<Long>, Serializable {
 
   private static final long serialVersionUID = 1560474818107754225L;
 
+  @NaturalId
   @NotEmpty(message = "Cannot save invoice without Invoice Number")
-  //@NaturalId
-  @Column(unique = true, length = 20, nullable = false, updatable = false)
+  @Column(unique = true, length = 12, nullable = false, updatable = false)
   private String invoiceNumber;
 
   @JsonIgnore
@@ -100,6 +101,14 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   @JsonInclude(value = Include.NON_EMPTY, content = Include.NON_NULL)
   @OrderBy("paymentDate DESC")
   private Set<Payment> payments;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "invoice_company", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
+  private Company company;
+
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinTable(name = "invoice_customer", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
+  private Customer customer;
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "billed_from_invoices", joinColumns = @JoinColumn(name = "invoice_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"))
