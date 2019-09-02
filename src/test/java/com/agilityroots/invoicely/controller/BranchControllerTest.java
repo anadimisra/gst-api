@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.agilityroots.invoicely.controller;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
@@ -48,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({BranchService.class, BranchResourceAssembler.class})
 public class BranchControllerTest {
 
-  EntityObjectsBuilder builder = new EntityObjectsBuilder();
+  private final EntityObjectsBuilder builder = new EntityObjectsBuilder();
   @Autowired
   private MockMvc mockMvc;
   @Autowired
