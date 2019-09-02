@@ -1,8 +1,10 @@
-/**
- * 4 Dec 2018 CustomerControllerTests.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
- */
+/*
+
+ 4 Dec 2018 CustomerControllerTests.java
+ data-api
+ Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+
+*/
 package com.agilityroots.invoicely.controller;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
@@ -51,17 +53,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 /**
  * @author anadi
- *
  */
 @Slf4j
 @RunWith(SpringRunner.class)
 @WebMvcTest(CustomerController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class,
-    CustomerService.class})
+@Import({CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class, CustomerService.class})
 public class CustomerControllerTest {
 
-  EntityObjectsBuilder builder = new EntityObjectsBuilder();
+  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
+
   @MockBean
   CustomerService customerService;
   @Autowired
