@@ -139,65 +139,6 @@ public class InvoiceControllerTest {
   }
 
   @Test
-  public void testGetPaidInvoicesReturnsHALDocument() throws Exception {
-    // Given
-    Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceService.getPaidInvoices(any(Pageable.class))).willReturn(AsyncResult.forValue(page));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/invoices/paid")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
-        .andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
-        .andExpect(jsonPath("$._links.self.href", containsString("/invoices/paid")));
-  }
-
-  @Test
-  public void testGetPendingInvoicesReturnsHALDocument() throws Exception {
-    // Given
-    Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceService.getDueInvoices(any(Date.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(page));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/invoices/pending")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
-        .andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
-        .andExpect(jsonPath("$._links.self.href", containsString("/invoices/pending")));
-  }
-
-  @Test
-  public void testGetOverdueInvoicesReturnsHALDocument() throws Exception {
-    // Given
-    Page<Invoice> page = new PageImpl<>(Arrays.asList(builder.getInvoiceObjectWithLineItems()));
-    BDDMockito.given(invoiceService.getOverdueInvoices(any(Date.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(page));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/invoices/overdue")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$._embedded.invoices", hasSize(1)))
-        .andExpect(jsonPath("$._embedded.invoices[0].invoice_number", is(equalTo("INV-20180918"))))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items", hasSize(2)))
-        .andExpect(jsonPath("$._embedded.invoices[0].line_items[0].item", is(equalTo("That Item"))))
-        .andExpect(jsonPath("$._links.self.href", containsString("/invoices/overdue")));
-  }
-
-  @Test
   public void testWhenInvoiceNotFoundThenCustomerDetailsIsUnprocesseableEntity() throws Exception {
     // Given
     BDDMockito.given(invoiceService.getInvoice(any(String.class))).willReturn(AsyncResult.forValue(Optional.empty()));
@@ -211,25 +152,10 @@ public class InvoiceControllerTest {
   }
 
   @Test
-  public void testGetCustomerDetailsForInvoice() throws Exception {
-    // Given
-    BDDMockito.given(invoiceService.getInvoice(any(String.class)))
-        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/invoices/20/customer")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$.pan", is(equalTo("ABCDE1234Q"))));
-  }
-
-  @Test
   public void testCannotAddNullPaymentsToInvoice() throws Exception {
     // Given
     BDDMockito.given(invoiceService.getInvoice(any(String.class)))
-        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObjectWithCustomer())));
+        .willReturn(AsyncResult.forValue(Optional.of(builder.getInvoiceObject())));
 
     // When, Then
     mockMvc

@@ -3,6 +3,7 @@ package com.agilityroots.invoicely.service;
 import com.agilityroots.invoicely.entity.Invoice;
 import com.agilityroots.invoicely.entity.Payment;
 import com.agilityroots.invoicely.repository.InvoiceRepository;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,14 +23,10 @@ import java.util.*;
 @Slf4j
 @Async
 @Service
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class InvoiceService {
 
-  private InvoiceRepository invoiceRepository;
-
-  @Autowired
-  public InvoiceService(InvoiceRepository invoiceRepository) {
-    this.invoiceRepository = invoiceRepository;
-  }
+  private final InvoiceRepository invoiceRepository;
 
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Page<Invoice>> getInvoices(Pageable pageable) {
@@ -42,11 +39,6 @@ public class InvoiceService {
     return AsyncResult.forValue(result);
   }
 
-  public ListenableFuture<Optional<Invoice>> getInvoiceWithCustomer(String invoiceNumber) {
-    Optional<Invoice> result = invoiceRepository.findCustomerDetailsByInvoiceNumber(invoiceNumber);
-    return AsyncResult.forValue(result);
-  }
-
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
   public ListenableFuture<Invoice> asyncSave(Invoice invoice) {
     return AsyncResult.forValue(invoiceRepository.saveAndFlush(invoice));
@@ -56,21 +48,6 @@ public class InvoiceService {
   public Invoice save(Invoice invoice) {
     log.debug("Saving invoice number: {}", invoice.getInvoiceNumber());
     return invoiceRepository.saveAndFlush(invoice);
-  }
-
-  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Page<Invoice>> getPaidInvoices(Pageable pageable) {
-    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNotNull(pageable));
-  }
-
-  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Page<Invoice>> getDueInvoices(Date today, Pageable pageable) {
-    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfter(today, pageable));
-  }
-
-  @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Page<Invoice>> getOverdueInvoices(Date today, Pageable pageable) {
-    return AsyncResult.forValue(invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBefore(today, pageable));
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)

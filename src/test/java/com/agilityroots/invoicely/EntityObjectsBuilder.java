@@ -56,7 +56,7 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
-  private Invoice getInvoiceObject() {
+  public Invoice getInvoiceObject() {
     Invoice invoice = new Invoice();
     invoice.setId(20L);
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
