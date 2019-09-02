@@ -22,6 +22,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *
  */
 @RunWith(SpringRunner.class)
-@DataJpaTest(showSql = false)
+@DataJpaTest
 @ContextConfiguration(classes = {DataApiJpaConfiguration.class})
 @TestPropertySource(locations = "classpath:application-test.properties")
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
@@ -67,7 +68,7 @@ public class BranchRepositoryIntegrationTest {
 
   public void testFindAllBranchesByOwnerId() {
 
-    List<Branch> result = branchRepository.findAllByOwner_Id(customer.getId());
+    List<Branch> result = new ArrayList<>(branchRepository.findAllByOwner_Id(customer.getId()));
     assertThat(result.size()).isEqualTo(1);
   }
 }

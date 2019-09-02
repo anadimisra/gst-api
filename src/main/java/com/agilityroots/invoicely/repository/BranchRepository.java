@@ -1,7 +1,7 @@
-/**
- * 24-Oct-2018 BranchRepository.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  24-Oct-2018 BranchRepository.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.repository;
 
@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.LockModeType;
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -38,6 +38,6 @@ public interface BranchRepository extends JpaRepository<Branch, Long> {
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("branches")
-  List<Branch> findAllByOwner_Id(Long id);
+  Collection<Branch> findAllByOwner_Id(Long id);
 
 }
