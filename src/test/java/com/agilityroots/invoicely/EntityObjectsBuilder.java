@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.agilityroots.invoicely;
 
 import com.agilityroots.invoicely.entity.*;
@@ -27,9 +24,9 @@ public class EntityObjectsBuilder {
   public InvoiceHttpPayload getValidInvoicePayloadObject() {
     InvoiceHttpPayload payload = new InvoiceHttpPayload();
     payload.setInvoice(getInvoiceObjectWithLineItems());
-    payload.setBilledFrom(Long.valueOf(1));
-    payload.setBilledTo(Long.valueOf(2));
-    payload.setShippedTo(Long.valueOf(2));
+    payload.setBilledFrom(1L);
+    payload.setBilledTo(2L);
+    payload.setShippedTo(2L);
     return payload;
   }
 
@@ -59,9 +56,9 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
-  public Invoice getInvoiceObject() {
+  private Invoice getInvoiceObject() {
     Invoice invoice = new Invoice();
-    invoice.setId(Long.valueOf(20));
+    invoice.setId(20L);
     Date today = Date.from(LocalDate.now().atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
     invoice.setInvoiceDate(today);
     invoice.setPaymentTerms("NET-30");
@@ -73,7 +70,7 @@ public class EntityObjectsBuilder {
   }
 
   public Invoice getInvoiceWithPayments() {
-    Invoice invoice = getInvoiceObjectWithCustomer();
+    Invoice invoice = getInvoiceObjectWithLineItems();
     Payment payment = new Payment();
     payment.setAdjustmentName("TDS");
     payment.setAdjustmentValue(100.00);
@@ -85,14 +82,8 @@ public class EntityObjectsBuilder {
     return invoice;
   }
 
-  public Invoice getInvoiceObjectWithCustomer() {
-    Invoice invoice = getInvoiceObjectWithLineItems();
-    invoice.setCustomer(getCustomerObject());
-    return invoice;
-  }
-
   public Invoice getSavedInvoiceObject() {
-    Invoice invoice = getInvoiceObjectWithCustomer();
+    Invoice invoice = getInvoiceObjectWithLineItems();
     invoice.setBilledFrom(getBranchWithContactObject());
     invoice.setShippedTo(getBranchWithContactObject());
     invoice.setBilledTo(getBranchWithContactObject());
@@ -101,10 +92,10 @@ public class EntityObjectsBuilder {
 
   public Customer getCustomerObject() {
     Customer minty = new Customer();
-    minty.setId(Long.valueOf(10));
+    minty.setOrganisationId(RandomStringUtils.randomAlphanumeric(8));
     minty.setName("Minty and Sons Private Limited");
+    minty.setId(10L);
     minty.setInvoicePrefix("MNT");
-    minty.setDomain(RandomStringUtils.randomAlphanumeric(8));
     return minty;
   }
 
@@ -122,7 +113,7 @@ public class EntityObjectsBuilder {
     address.setState(faker.address().state());
     address.setPincode(faker.address().zipCode());
     Branch branch = new Branch();
-    branch.setId(Long.valueOf(20));
+    branch.setId(10L);
     branch.setBranchName(RandomStringUtils.randomAlphabetic(5) + " Branch");
     branch.setGstin(RandomStringUtils.randomAlphanumeric(15).toUpperCase());
     branch.setSez(Boolean.FALSE);
@@ -132,7 +123,7 @@ public class EntityObjectsBuilder {
 
   public Contact getContactObject() {
     Contact contact = new Contact();
-    contact.setId(Long.valueOf(30));
+    contact.setId(30L);
     contact.setName(faker.name().fullName());
     contact.setEmail(faker.internet().emailAddress());
     contact.setPhone("8067601867");
@@ -142,7 +133,7 @@ public class EntityObjectsBuilder {
   public Company getCompanyObject() {
     Company company = new Company();
     company.setName("Ruchi And Sons Pvt. Ltd.");
-    company.setDomain(RandomStringUtils.randomAlphabetic(8));
+    company.setOrganisationId(RandomStringUtils.randomAlphanumeric(8));
     company.setCin(RandomStringUtils.randomAlphanumeric(21));
     company.setPan(RandomStringUtils.randomAlphanumeric(10));
     company.setTan(RandomStringUtils.randomAlphabetic(10));
