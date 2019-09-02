@@ -185,13 +185,12 @@ public class CompanyController {
 
   @PutMapping("/companies/{id}/branches")
   public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
-                                                          @RequestBody(required = true) @Valid Branch branch, HttpServletRequest request) {
+                                                          @RequestBody @Valid Branch branch, HttpServletRequest request) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
 
     StringBuffer urlBuilder = new StringBuffer();
     urlBuilder.append(request.getScheme()).append("://").append(request.getHeader("Host"))
@@ -248,17 +247,12 @@ public class CompanyController {
     return response;
   }
 
-  private URI getCurrentLocation(HttpServletRequest request) {
-    return ServletUriComponentsBuilder.fromRequestUri(request).build().toUri();
-  }
-
   private <T extends AuditableEntity> DeferredResult<ResponseEntity<Resources<Resource<T>>>> getAuditableEntitySubTypeResourceDeferredResult() {
     DeferredResult<ResponseEntity<Resources<Resource<T>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
     return response;
   }
 

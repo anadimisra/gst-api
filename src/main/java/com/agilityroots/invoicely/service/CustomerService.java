@@ -151,6 +151,5 @@ public class CustomerService {
       location = URI.create(locationBuilder.append(invoice.getId()).toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
-
   }
 }

@@ -15,7 +15,6 @@ import java.util.Set;
 
 /**
  * @author anadi
- *
  */
 public class EntityObjectsBuilder {
 
@@ -64,7 +63,7 @@ public class EntityObjectsBuilder {
     invoice.setPaymentTerms("NET-30");
     invoice.setDueDate(Date.from(LocalDate.now().plusDays(30).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     DateFormatter formatter = new DateFormatter("yyyyMMdd");
-    invoice.setInvoiceNumber(formatter.print(today, new Locale("en", "IN")));
+    invoice.setInvoiceNumber("20190902");
     invoice.setPlaceOfSupply("Karnataka");
     return invoice;
   }

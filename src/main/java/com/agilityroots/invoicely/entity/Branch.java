@@ -1,7 +1,7 @@
-/**
- * 19-Oct-2018 Branch.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  19-Oct-2018 Branch.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
@@ -18,7 +18,6 @@ import java.util.Objects;
 
 /**
  * @author anadi
- *
  */
 @Entity
 @Getter
@@ -46,6 +45,7 @@ public class Branch extends AuditableEntity implements Serializable {
 
   @Column(nullable = false, updatable = false)
   private Boolean sez = Boolean.FALSE;
+
   @OneToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "branch_contact", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
   private Contact contact;

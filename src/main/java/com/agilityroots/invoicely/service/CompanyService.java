@@ -1,6 +1,3 @@
-/**
- *
- */
 package com.agilityroots.invoicely.service;
 
 import com.agilityroots.invoicely.entity.Branch;
@@ -12,7 +9,6 @@ import com.agilityroots.invoicely.repository.InvoiceRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -22,8 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.net.URI;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
+import java.util.Optional;
 
 /*
  * @author anadi
