@@ -5,13 +5,19 @@ package com.agilityroots.invoicely.controller;
 
 import com.agilityroots.invoicely.EntityObjectsBuilder;
 import com.agilityroots.invoicely.entity.Branch;
+import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CompanyService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
+import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
@@ -39,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @RunWith(SpringRunner.class)
 @WebMvcTest(CompanyController.class)
 @TestPropertySource(locations = "classpath:application-test.properties")
-@Import({CompanyController.class})
+@Import({CompanyService.class, CompanyController.class, InvoiceResourceAssembler.class, BranchResourceAssembler.class})
 public class CompanyControllerTest {
 
   @Autowired
@@ -51,7 +57,13 @@ public class CompanyControllerTest {
   @MockBean
   private CompanyService companyService;
 
-  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
+  private final EntityObjectsBuilder builder = new EntityObjectsBuilder();
+
+  @Before
+  public void setUp() {
+    MockitoAnnotations.initMocks(this);
+    JacksonTester.initFields(this, objectMapper);
+  }
 
   @Test
   public void testSavingBranchReturnsLocationHeader() throws Exception {
