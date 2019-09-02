@@ -16,7 +16,7 @@ import org.springframework.hateoas.core.Relation;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * @author anadi
@@ -48,4 +48,15 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
   @JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
   private Contact contact;
 
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    Customer other = (Customer) obj;
+    return Objects.equals(this.getOrganisationId(), other.getOrganisationId());
+  }
 }
