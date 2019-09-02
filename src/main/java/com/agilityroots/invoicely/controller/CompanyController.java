@@ -35,9 +35,9 @@ import java.util.Optional;
  * @author anadi
  */
 @Slf4j
-@AllArgsConstructor(onConstructor = @__(@Autowired))
 @RestController
 @ExposesResourceFor(Company.class)
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class CompanyController {
 
   private final CompanyService companyService;

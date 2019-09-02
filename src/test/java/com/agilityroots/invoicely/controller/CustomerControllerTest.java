@@ -61,12 +61,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({CustomerResourceAssember.class, BranchResourceAssembler.class, InvoiceResourceAssembler.class, CustomerService.class})
 public class CustomerControllerTest {
 
-  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
-
   @MockBean
   CustomerService customerService;
+  private EntityObjectsBuilder builder = new EntityObjectsBuilder();
   @Autowired
   private MockMvc mockMvc;
+
   @Autowired
   private ObjectMapper objectMapper;
 
@@ -80,7 +80,7 @@ public class CustomerControllerTest {
   public void testReturnsNotFoundForEmptyGetAllCustomersResult() throws Exception {
 
     // Given
-    Page<Customer> emptyPage = new PageImpl<Customer>(Collections.emptyList());
+    Page<Customer> emptyPage = new PageImpl<>(Collections.emptyList());
     BDDMockito.given(customerService.getCustomers(any(Pageable.class))).willReturn(AsyncResult.forValue(emptyPage));
 
     // When
@@ -97,7 +97,7 @@ public class CustomerControllerTest {
     // Given
     List<Customer> mintys = new ArrayList<>();
     mintys.add(builder.getCustomerObject());
-    Page<Customer> page = new PageImpl<>(mintys, PageRequest.of(0, 20), Long.valueOf(1));
+    Page<Customer> page = new PageImpl<>(mintys, PageRequest.of(0, 20), 1L);
     BDDMockito.given(customerService.getCustomers(any(Pageable.class))).willReturn(AsyncResult.forValue(page));
 
     // When
@@ -170,7 +170,7 @@ public class CustomerControllerTest {
 
     // Given
     BDDMockito.given(customerService.getAllInvoices(any(Long.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
+        .willReturn(AsyncResult.forValue(new PageImpl<>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/customers/1/invoices")).andExpect(request().asyncStarted()).andDo(print())
@@ -187,7 +187,7 @@ public class CustomerControllerTest {
 
     // Given
     BDDMockito.given(customerService.getPaidInvoices(any(Long.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
+        .willReturn(AsyncResult.forValue(new PageImpl<>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/customers/1/invoices/paid")).andExpect(request().asyncStarted())
@@ -204,7 +204,7 @@ public class CustomerControllerTest {
 
     // Given
     BDDMockito.given(customerService.getOverdueInvoices(any(Date.class), any(Long.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
+        .willReturn(AsyncResult.forValue(new PageImpl<>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/customers/1/invoices/overdue")).andExpect(request().asyncStarted())
@@ -221,7 +221,7 @@ public class CustomerControllerTest {
 
     // Given
     BDDMockito.given(customerService.getDueInvoices(any(Date.class), any(Long.class), any(Pageable.class)))
-        .willReturn(AsyncResult.forValue(new PageImpl<Invoice>(Collections.emptyList())));
+        .willReturn(AsyncResult.forValue(new PageImpl<>(Collections.emptyList())));
 
     // When
     MvcResult result = mockMvc.perform(get("/customers/1/invoices/due")).andExpect(request().asyncStarted())
@@ -288,11 +288,10 @@ public class CustomerControllerTest {
   public void testAddInvoicesToNonExisitingCustomerGivesBadRequest() throws Exception {
 
     // Given
-    URI location = null;
     BDDMockito
         .given(customerService.addInvoice(any(Long.class), any(Long.class), any(Long.class), any(Long.class),
             any(StringBuffer.class), any(Invoice.class)))
-        .willReturn(AsyncResult.forValue(Optional.ofNullable(location)));
+        .willReturn(AsyncResult.forValue(Optional.empty()));
 
     // When
     String invoiceJson = objectMapper.writeValueAsString(builder.getValidInvoicePayloadObject());

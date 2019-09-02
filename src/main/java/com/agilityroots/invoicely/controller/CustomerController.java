@@ -1,7 +1,7 @@
-/**
- * 13-Nov-2018 CustomerController.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  13-Nov-2018 CustomerController.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.controller;
 
@@ -14,6 +14,7 @@ import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
 import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CustomerService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -47,35 +48,31 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @RestController
 @ExposesResourceFor(Customer.class)
+@AllArgsConstructor(onConstructor = @__(@Autowired))
 public class CustomerController {
 
-  @Autowired
-  private Environment environment;
+  private final Environment environment;
 
-  @Autowired
-  private CustomerResourceAssember customerResourceAssembler;
+  private final CustomerResourceAssember customerResourceAssembler;
 
-  @Autowired
-  private BranchResourceAssembler branchResourceAssembler;
+  private final BranchResourceAssembler branchResourceAssembler;
 
-  @Autowired
-  private InvoiceResourceAssembler invoiceReourceAssembler;
+  private final InvoiceResourceAssembler invoiceReourceAssembler;
 
-  @Autowired
-  private CustomerService customerService;
+  private final CustomerService customerService;
 
-  @GetMapping(value = "/customers", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers")
   public DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> getAllCustomers(
-      @PageableDefault(page = 0, size = 20, sort = "name", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault(sort = "name", direction = Direction.ASC) Pageable pageable,
       PagedResourcesAssembler<Customer> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> response = new DeferredResult<>(
-        Long.valueOf(1000000));
+        1000000L);
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     ListenableFuture<Page<Customer>> future = customerService.getCustomers(pageable);
     future.addCallback(new ListenableFutureCallback<Page<Customer>>() {
 
@@ -98,7 +95,6 @@ public class CustomerController {
       }
 
     });
-
     return response;
   }
 
@@ -109,9 +105,9 @@ public class CustomerController {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     ListenableFuture<Customer> future = customerService.save(customer);
     future.addCallback(new ListenableFutureCallback<Customer>() {
 
@@ -134,20 +130,19 @@ public class CustomerController {
       }
 
     });
-
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}", produces = MediaTypes.HAL_JSON_VALUE)
-  public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable Long id,
-                                                                        HttpServletRequest request) {
+  @GetMapping(value = "/customers/{id}")
+  public DeferredResult<ResponseEntity<Resource<Customer>>> getCustomer(@PathVariable Long id) {
 
     DeferredResult<ResponseEntity<Resource<Customer>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) ->
+            response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     ListenableFuture<Optional<Customer>> future = customerService.getCustomer(id);
     future.addCallback(new ListenableFutureCallback<Optional<Customer>>() {
 
@@ -170,16 +165,16 @@ public class CustomerController {
     return response;
   }
 
-  @PutMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
+  @PutMapping(value = "/customers/{id}/invoices")
   public DeferredResult<ResponseEntity<Object>> addInvoice(@PathVariable("id") Long id,
                                                            @RequestBody @Valid InvoiceHttpPayload payload, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     StringBuffer builder = new StringBuffer();
     builder.append(request.getScheme()).append("://").append(request.getHeader("Host")).append(request.getContextPath())
         .append("/invoices/");
@@ -207,17 +202,17 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/invoices", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/invoices")
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getInvoicesByCustomer(@PathVariable("id") Long id,
-                                                                                            @PageableDefault(page = 0, size = 10) Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
+                                                                                            @PageableDefault Pageable pageable, PagedResourcesAssembler<Invoice> assembler,
                                                                                             HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.")));
+
     log.debug("Getting invoices for customer id {}", id);
     ListenableFuture<Page<Invoice>> future = customerService.getAllInvoices(id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
@@ -243,19 +238,19 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/invoices/paid", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/invoices/paid")
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPaidInvoicesByCustomer(
       @PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 10, sort = "invoiceDate", direction = Direction.DESC) Pageable pageable,
+      @PageableDefault Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request)
       throws InterruptedException, ExecutionException {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.")));
+
     log.debug("Getting paid invoices for customer id {}", id);
     ListenableFuture<Page<Invoice>> future = customerService.getPaidInvoices(id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
@@ -280,18 +275,18 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/invoices/due", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/invoices/due")
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getPendingInvoicesByCustomer(
       @PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 10, sort = "dueDate", direction = Direction.ASC) Pageable pageable,
+      @PageableDefault Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.")));
+
     log.debug("Getting unpaid invoices for customer id {}", id);
     ListenableFuture<Page<Invoice>> future = customerService.getDueInvoices(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
@@ -317,18 +312,18 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/invoices/overdue", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/invoices/overdue")
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getOverdueInvoicesByCustomer(
       @PathVariable("id") Long id,
-      @PageableDefault(page = 0, size = 10) Pageable pageable,
+      @PageableDefault Pageable pageable,
       PagedResourcesAssembler<Invoice> assembler, HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.")));
+
     log.debug("Getting overdue invoices for customer id {}", id);
     ListenableFuture<Page<Invoice>> future = customerService.getOverdueInvoices(getTodaysDate(), id, pageable);
     future.addCallback(new ListenableFutureCallback<Page<Invoice>>() {
@@ -354,17 +349,17 @@ public class CustomerController {
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/branches")
   public DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> getAllBranches(@PathVariable("id") Long id,
-                                                                                         @PageableDefault(page = 0, size = 20) Pageable pageable, PagedResourcesAssembler<Branch> assembler,
+                                                                                         @PageableDefault Pageable pageable, PagedResourcesAssembler<Branch> assembler,
                                                                                          HttpServletRequest request) {
 
     DeferredResult<ResponseEntity<PagedResources<Resource<Branch>>>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred.")));
+
     log.debug("Getting banches for customer {}", id);
     ListenableFuture<Page<Branch>> future = customerService.getAllBranches(id, pageable);
 
@@ -390,19 +385,18 @@ public class CustomerController {
       }
 
     });
-
     return response;
   }
 
-  @PutMapping(value = "/customers/{id}/branches", produces = MediaTypes.HAL_JSON_VALUE)
+  @PutMapping(value = "/customers/{id}/branches")
   public DeferredResult<ResponseEntity<Object>> addBranch(@PathVariable("id") Long id,
                                                           @RequestBody @Valid Branch branch, HttpServletRequest request) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     log.debug("Adding branch {} to customer with id {}", branch, id);
 
     StringBuffer builder = new StringBuffer();
@@ -428,18 +422,17 @@ public class CustomerController {
             .body("Cannot update branch for this customer due to error."));
       }
     });
-
     return response;
   }
 
-  @GetMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
+  @GetMapping(value = "/customers/{id}/contact")
   public DeferredResult<ResponseEntity<?>> getContact(@PathVariable("id") Long id, HttpServletRequest request) {
     DeferredResult<ResponseEntity<?>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
     ListenableFuture<Optional<Contact>> future = customerService.getContact(id);
     future.addCallback(new ListenableFutureCallback<Optional<Contact>>() {
 
@@ -463,15 +456,14 @@ public class CustomerController {
     return response;
   }
 
-  @PutMapping(value = "/customers/{id}/contact", produces = MediaTypes.HAL_JSON_VALUE)
+  @PutMapping(value = "/customers/{id}/contact")
   public DeferredResult<ResponseEntity<Object>> addContact(@PathVariable("id") Long id, HttpServletRequest request,
                                                            @RequestBody @Valid Contact contact) {
     DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
     response.onTimeout(
         () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
-    response.onError((Throwable t) -> {
-      response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured."));
-    });
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
 
     StringBuffer builder = new StringBuffer();
     builder.append(ServletUriComponentsBuilder.fromRequestUri(request).build().toUri().toString());
@@ -497,7 +489,6 @@ public class CustomerController {
       }
 
     });
-
     return response;
   }
 
