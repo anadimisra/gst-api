@@ -92,8 +92,7 @@ public class InvoiceRepositoryIntegrationTest {
 
   @Test
   public void testFindByInvoiceNumberLoadsAllDetails() {
-    invoiceRepository.saveAndFlush(invoice);
-    em.clear();
+    saveAndClearEntityManager(invoice);
     Invoice allDetails = invoiceRepository.findByInvoiceNumber(invoice.getInvoiceNumber()).get();
     assertThat(allDetails).isNotNull();
     assertThat(allDetails.getBilledFrom().getBranchName()).isEqualTo(invoice.getBilledFrom().getBranchName());
@@ -116,19 +115,11 @@ public class InvoiceRepositoryIntegrationTest {
 
   @Test
   public void testFindAllInvoicesForCompanyResultsAreSortedByDescendingInvoiceDate() {
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    Date tomorrow = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    otherInvoice.setInvoiceDate(tomorrow);
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(31).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 1, 31);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     List<Invoice> invoices = invoiceRepository.findAllByCompany_IdOrderByInvoiceDateDesc(invoice.getCompany().getId(), PageRequest.of(0, 5)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo("INV-12345678");
   }
@@ -136,17 +127,9 @@ public class InvoiceRepositoryIntegrationTest {
   @Test
   public void testPaidInvoicesForCompanyAreSortedByDescendingPaymentDate() {
     invoice.setPayments(Stream.of(getPayment()).collect(Collectors.toSet()));
-    invoiceRepository.saveAndFlush(invoice);
-    em.clear();
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    Date tomorrow = Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
-    otherInvoice.setInvoiceDate(tomorrow);
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(31).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 1, 31);
     otherInvoice.setInvoiceNumber("INV-12345678");
     Set<Payment> payments = new HashSet<>();
     Payment partOne = getPayment();
@@ -156,8 +139,7 @@ public class InvoiceRepositoryIntegrationTest {
     partTwo.setPaymentDate(Date.from(LocalDate.now().plusDays(30).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     payments.add(partTwo);
     otherInvoice.setPayments(payments);
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNotNullAndCompany_IdOrderByPayments_PaymentDateDesc(invoice.getCompany().getId()
         , PageRequest.of(0, 2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo("INV-12345678");
@@ -165,19 +147,11 @@ public class InvoiceRepositoryIntegrationTest {
 
   @Test
   public void testDueInvoicesForCompanyAreSortedByAscendingDueDate() {
-    invoiceRepository.saveAndFlush(invoice);
-    em.clear();
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(5).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(35).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 5, 35);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     Date today = Date.from(LocalDate.now().plusDays(0).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCompany_IdOrderByDueDateAsc(today, invoice.getCompany().getId(), PageRequest.of(0, 5)).getContent();
     assertThat(invoices.get(1).getInvoiceNumber()).isEqualTo("INV-12345678");
@@ -185,20 +159,12 @@ public class InvoiceRepositoryIntegrationTest {
 
   @Test
   public void testOverDueInvoicesForCompanyAreSortedByAscendingDueDate() {
-    invoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(-35).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoice.setDueDate(Date.from(LocalDate.now().plusDays(-5).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(-40).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(-10).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    updateDates(invoice, -35, -5);
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, -40, -10);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     Date today = Date.from(LocalDate.now().plusDays(0).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCompany_IdOrderByDueDateAsc(today, invoice.getCompany().getId(), PageRequest.of(0, 2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo("INV-12345678");
@@ -206,17 +172,11 @@ public class InvoiceRepositoryIntegrationTest {
 
   @Test
   public void testCustomerInvoicesAreOrderedByAscendingInvoiceDate() {
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 35, 0);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(35).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     List<Invoice> invoices = invoiceRepository.findByCustomer_IdOrderByInvoiceDateDesc(invoice.getCustomer().getId(), PageRequest.of(0, 2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo("INV-12345678");
   }
@@ -224,16 +184,9 @@ public class InvoiceRepositoryIntegrationTest {
   @Test
   public void testPaidInvoicesByCustomerAreOrderedByDescendingPaymentDates() {
     invoice.setPayments(Stream.of(getPayment()).collect(Collectors.toSet()));
-    invoiceRepository.saveAndFlush(invoice);
-    em.clear();
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(31).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 1, 31);
     otherInvoice.setInvoiceNumber("INV-12345678");
     Set<Payment> payments = new HashSet<>();
     Payment partOne = getPayment();
@@ -243,26 +196,18 @@ public class InvoiceRepositoryIntegrationTest {
     partTwo.setPaymentDate(Date.from(LocalDate.now().plusDays(30).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     payments.add(partTwo);
     otherInvoice.setPayments(payments);
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNotNullAndCustomer_IdOrderByPayments_PaymentDateDesc(invoice.getCustomer().getId(), PageRequest.of(0,2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo("INV-12345678");
   }
 
   @Test
   public void testDueInvoicesByCustomerAreOrderedByAscendingDueDate() {
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(31).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, 1, 31);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     Date today = Date.from(LocalDate.now().plusDays(0).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateAfterAndCustomer_IdOrderByDueDateAsc(today, invoice.getCustomer().getId(), PageRequest.of(0,2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo(invoice.getInvoiceNumber());
@@ -272,27 +217,16 @@ public class InvoiceRepositoryIntegrationTest {
   public void testOverdueInvoicesByCustomerAreOrderedByAscendingDueDate() {
     invoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(-30).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     invoice.setDueDate(Date.from(LocalDate.now().plusDays(-5).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    invoiceRepository.saveAndFlush(invoice);
-    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
-    otherInvoice.setCompany(invoice.getCompany());
-    otherInvoice.setCustomer(invoice.getCustomer());
-    otherInvoice.setBilledTo(invoice.getBilledTo());
-    otherInvoice.setShippedTo(invoice.getShippedTo());
-    otherInvoice.setBilledFrom(invoice.getBilledFrom());
-    otherInvoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(-20).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
-    otherInvoice.setDueDate(Date.from(LocalDate.now().plusDays(-2).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    saveAndClearEntityManager(invoice);
+    Invoice otherInvoice = getOtherInvoice();
+    updateDates(otherInvoice, -20, -2);
     otherInvoice.setInvoiceNumber("INV-12345678");
-    invoiceRepository.saveAndFlush(otherInvoice);
-    em.clear();
+    saveAndClearEntityManager(otherInvoice);
     Date today = Date.from(LocalDate.now().plusDays(0).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant());
     List<Invoice> invoices = invoiceRepository.findByPayments_PaymentDateIsNullAndDueDateBeforeAndCustomer_IdOrderByDueDateAsc(today, invoice.getCustomer().getId(), PageRequest.of(0,2)).getContent();
     assertThat(invoices.get(0).getInvoiceNumber()).isEqualTo(invoice.getInvoiceNumber());
   }
 
-
-  /**
-   * @return {@link Payment}
-   */
   private Payment getPayment() {
     Payment payment = new Payment();
     payment.setAmount(1000.00);
@@ -300,5 +234,25 @@ public class InvoiceRepositoryIntegrationTest {
     payment.setAdjustmentValue(100.00);
     payment.setPaymentDate(Date.from(LocalDate.now().plusDays(25).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
     return payment;
+  }
+
+  private Invoice getOtherInvoice() {
+    Invoice otherInvoice = builder.getInvoiceObjectWithLineItems();
+    otherInvoice.setCompany(invoice.getCompany());
+    otherInvoice.setCustomer(invoice.getCustomer());
+    otherInvoice.setBilledTo(invoice.getBilledTo());
+    otherInvoice.setShippedTo(invoice.getShippedTo());
+    otherInvoice.setBilledFrom(invoice.getBilledFrom());
+    return otherInvoice;
+  }
+
+  private void updateDates(Invoice invoice, int daysOnInvoiceDate, int daysOnDueDate) {
+    invoice.setInvoiceDate(Date.from(LocalDate.now().plusDays(daysOnInvoiceDate).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+    invoice.setDueDate(Date.from(LocalDate.now().plusDays(daysOnDueDate).atStartOfDay(ZoneId.of("Asia/Kolkata")).toInstant()));
+  }
+
+  private void saveAndClearEntityManager(Invoice invoice) {
+    invoiceRepository.saveAndFlush(invoice);
+    em.clear();
   }
 }
