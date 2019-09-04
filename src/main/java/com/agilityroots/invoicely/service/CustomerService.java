@@ -148,7 +148,7 @@ public class CustomerService {
       log.debug("Added branches: billed to: {} | shipped to: {} | billed from: {}", invoice.getBilledTo(),
           invoice.getShippedTo(), invoice.getBilledFrom());
       invoiceRepository.saveAndFlush(invoice);
-      location = URI.create(locationBuilder.append(invoice.getId()).toString());
+      location = URI.create(locationBuilder.append(invoice.getInvoiceNumber()).toString());
     }
     return AsyncResult.forValue(Optional.ofNullable(location));
   }
