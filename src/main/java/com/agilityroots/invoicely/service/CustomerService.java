@@ -1,14 +1,8 @@
 package com.agilityroots.invoicely.service;
 
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Contact;
-import com.agilityroots.invoicely.entity.Customer;
-import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.entity.*;
 import com.agilityroots.invoicely.event.service.ContactAddedEvent;
-import com.agilityroots.invoicely.repository.BranchRepository;
-import com.agilityroots.invoicely.repository.ContactRepository;
-import com.agilityroots.invoicely.repository.CustomerRepository;
-import com.agilityroots.invoicely.repository.InvoiceRepository;
+import com.agilityroots.invoicely.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,15 +39,19 @@ public class CustomerService {
 
   private final ContactRepository contactRepository;
 
+  private final CompanyRepository companyRepository;
+
   @Transactional(readOnly = true, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Page<Customer>> getCustomers(Pageable pageable) {
+  public ListenableFuture<Page<Customer>> getCompanyCustomers(Pageable pageable, Long companyId) {
     log.debug("Returning page {} of size {}", pageable.getPageNumber(), pageable.getPageSize());
-    return AsyncResult.forValue(customerRepository.findAll(pageable));
+    return AsyncResult.forValue(customerRepository.findByCompany_Id(companyId, pageable));
   }
 
   @Transactional(readOnly = false, isolation = Isolation.SERIALIZABLE)
-  public ListenableFuture<Customer> save(Customer customer) {
+  public ListenableFuture<Customer> save(Customer customer, Long companyId) {
     log.debug("Saving customer {}", customer.toString());
+    Company company = companyRepository.findById(companyId).get();
+    customer.setCompany(company);
     return AsyncResult.forValue(customerRepository.saveAndFlush(customer));
   }
 

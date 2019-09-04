@@ -1,17 +1,17 @@
 package com.agilityroots.invoicely.controller;
 
-import com.agilityroots.invoicely.entity.AuditableEntity;
-import com.agilityroots.invoicely.entity.Branch;
-import com.agilityroots.invoicely.entity.Company;
-import com.agilityroots.invoicely.entity.Invoice;
+import com.agilityroots.invoicely.entity.*;
 import com.agilityroots.invoicely.resource.assembler.BranchResourceAssembler;
+import com.agilityroots.invoicely.resource.assembler.CustomerResourceAssember;
 import com.agilityroots.invoicely.resource.assembler.InvoiceResourceAssembler;
 import com.agilityroots.invoicely.service.CompanyService;
+import com.agilityroots.invoicely.service.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.PagedResourcesAssembler;
 import org.springframework.hateoas.*;
@@ -45,6 +45,82 @@ public class CompanyController {
   private final InvoiceResourceAssembler invoiceResourceAssembler;
 
   private final BranchResourceAssembler branchResourceAssembler;
+
+  private final CustomerService customerService;
+
+  private final CustomerResourceAssember customerResourceAssembler;
+
+  @GetMapping(value = "/companies/{id}/customers")
+  public DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> getAllCustomers(
+      @PageableDefault(sort = "name", direction = Sort.Direction.ASC) Pageable pageable,
+      PagedResourcesAssembler<Customer> assembler, HttpServletRequest request, @PathVariable Long id) {
+
+    DeferredResult<ResponseEntity<Resources<Resource<Customer>>>> response = new DeferredResult<>(
+        1000000L);
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
+    ListenableFuture<Page<Customer>> future = customerService.getCompanyCustomers(pageable, id);
+    future.addCallback(new ListenableFutureCallback<Page<Customer>>() {
+
+      @Override
+      public void onSuccess(Page<Customer> result) {
+        Link self = new Link(
+            ServletUriComponentsBuilder.fromRequestUri(request).buildAndExpand(pageable).toUri().toString(), "self");
+        log.debug("Generated Self Link {} for Customer Resource Collection", self.getHref());
+        if (result.hasContent())
+          response.setResult(ResponseEntity.ok(assembler.toResource(result, customerResourceAssembler, self)));
+        else
+          response.setErrorResult(ResponseEntity.notFound().build());
+      }
+
+      @Override
+      public void onFailure(Throwable ex) {
+        log.error("Cannot retrieve customers due to error: {}", ex.getMessage(), ex);
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Cannot save customers list due to server error."));
+      }
+
+    });
+    return response;
+  }
+
+  @PutMapping("/companies/{id}/customers")
+  public DeferredResult<ResponseEntity<Object>> save(HttpServletRequest request,
+                                                     @RequestBody @Valid Customer customer, @PathVariable Long id) {
+
+    DeferredResult<ResponseEntity<Object>> response = new DeferredResult<>();
+    response.onTimeout(
+        () -> response.setErrorResult(ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT).body("Request timed out.")));
+    response.onError(
+        (Throwable t) -> response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occured.")));
+
+    ListenableFuture<Customer> future = customerService.save(customer, id);
+    future.addCallback(new ListenableFutureCallback<Customer>() {
+
+      @Override
+      public void onSuccess(Customer result) {
+        URI location = ServletUriComponentsBuilder.fromRequestUri(request).path("/{id}").buildAndExpand(result.getId())
+            .toUri();
+        ResponseEntity<Object> responseEntity = ResponseEntity.created(location).build();
+        log.debug("Sending response status {} with location {}", responseEntity.getStatusCodeValue(),
+            responseEntity.getHeaders().getLocation());
+        response.setResult(responseEntity);
+      }
+
+      @Override
+      public void onFailure(Throwable ex) {
+        log.error("Cannot save customer {} due to error: {}", customer.toString(), ex.getMessage(), ex);
+        response.setErrorResult(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body("Cannot save customer details due to server error."));
+
+      }
+
+    });
+    return response;
+  }
 
   @GetMapping("/companies/{id}/invoices")
   public DeferredResult<ResponseEntity<Resources<Resource<Invoice>>>> getAllInvoices(@PathVariable("id") Long id

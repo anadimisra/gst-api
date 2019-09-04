@@ -28,9 +28,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -40,11 +38,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.net.URI;
-import java.util.*;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -74,57 +75,6 @@ public class CustomerControllerTest {
   public void setup() {
     MockitoAnnotations.initMocks(this);
     JacksonTester.initFields(this, objectMapper);
-  }
-
-  @Test
-  public void testReturnsNotFoundForEmptyGetAllCustomersResult() throws Exception {
-
-    // Given
-    Page<Customer> emptyPage = new PageImpl<>(Collections.emptyList());
-    BDDMockito.given(customerService.getCustomers(any(Pageable.class))).willReturn(AsyncResult.forValue(emptyPage));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isNotFound());
-  }
-
-  @Test
-  public void testReturnsHALJsonReponseForGetAllCustomers() throws Exception {
-
-    // Given
-    List<Customer> mintys = new ArrayList<>();
-    mintys.add(builder.getCustomerObject());
-    Page<Customer> page = new PageImpl<>(mintys, PageRequest.of(0, 20), 1L);
-    BDDMockito.given(customerService.getCustomers(any(Pageable.class))).willReturn(AsyncResult.forValue(page));
-
-    // When
-    MvcResult result = mockMvc.perform(get("/customers")).andExpect(request().asyncStarted()).andDo(print())
-        .andReturn();
-
-    // Then return a PagedResource with One Customer
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isOk())
-        .andExpect(jsonPath("$._embedded.customers", hasSize(1)));
-  }
-
-  @Test
-  public void testSavingCustomerReturnsLocationHeader() throws Exception {
-
-    // Given
-    BDDMockito.given(customerService.save(any(Customer.class)))
-        .willReturn(AsyncResult.forValue(builder.getCustomerObject()));
-
-    // When
-    MvcResult result = mockMvc
-        .perform(post("/customers").contentType(MediaType.APPLICATION_JSON_VALUE)
-            .content(objectMapper.writeValueAsString(builder.getCustomerObject())))
-        .andExpect(request().asyncStarted()).andDo(print()).andReturn();
-
-    // Then
-    mockMvc.perform(asyncDispatch(result)).andDo(print()).andExpect(status().isCreated());
-    assertThat(result.getResponse().getHeader("Location")).contains("customers/10");
   }
 
   @Test
