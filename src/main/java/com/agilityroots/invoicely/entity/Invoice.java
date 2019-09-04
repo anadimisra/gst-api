@@ -1,7 +1,7 @@
-/**
- * 23-Oct-2018 Invoice.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  23-Oct-2018 Invoice.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.NaturalId;
 import org.hibernate.annotations.Where;
 import org.springframework.hateoas.Identifiable;
@@ -37,13 +38,14 @@ import java.util.Set;
 @Setter
 @Getter
 @ToString
+@DynamicInsert
 @NoArgsConstructor
 @Where(clause = "DELETED = 0")
 @Relation(collectionRelation = "invoices")
-@Table(indexes = {@Index(name = "place_of_supply_index", columnList = "placeOfSupply", unique = false),
-    @Index(name = "invoice_date_index", columnList = "invoiceDate", unique = false),
-    @Index(name = "due_date_index", columnList = "dueDate", unique = false),
-    @Index(name = "payment_terms_index", columnList = "paymentTerms", unique = false)})
+@Table(indexes = {@Index(name = "place_of_supply_index", columnList = "placeOfSupply"),
+    @Index(name = "invoice_date_index", columnList = "invoiceDate"),
+    @Index(name = "due_date_index", columnList = "dueDate"),
+    @Index(name = "payment_terms_index", columnList = "paymentTerms")})
 @NamedEntityGraphs({
     @NamedEntityGraph(name = "invoice_details", attributeNodes = {@NamedAttributeNode("lineItems"),
         @NamedAttributeNode("payments")}),
@@ -64,7 +66,7 @@ public class Invoice extends AuditableEntity implements Identifiable<Long>, Seri
   @JsonIgnore
   @Column(nullable = false)
   @ColumnDefault("0")
-  private Integer deleted = 0;
+  private Integer deleted;
 
   @NotEmpty(message = "Cannot save invoice without place of supply")
   @Column(nullable = false, length = 25)

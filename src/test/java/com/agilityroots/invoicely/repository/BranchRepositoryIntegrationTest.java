@@ -22,6 +22,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,10 +48,11 @@ public class BranchRepositoryIntegrationTest {
   @Autowired
   private ContactRepository contactRepository;
   private EntityObjectsBuilder builder = new EntityObjectsBuilder();
+  @PersistenceContext
+  private EntityManager em;
 
   @Before
   public void setup() {
-
     customer = builder.getCustomerWithContact();
     contactRepository.save(customer.getContact());
     customerRepository.saveAndFlush(customer);
@@ -57,6 +60,7 @@ public class BranchRepositoryIntegrationTest {
     branch.setOwner(customer);
     contactRepository.save(branch.getContact());
     branchRepository.saveAndFlush(branch);
+    em.clear();
   }
 
   @Test

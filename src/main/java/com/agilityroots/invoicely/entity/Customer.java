@@ -5,12 +5,14 @@
  */
 package com.agilityroots.invoicely.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.Where;
 import org.springframework.hateoas.Identifiable;
 import org.springframework.hateoas.core.Relation;
 
@@ -27,6 +29,7 @@ import java.util.Objects;
 @ToString
 @DynamicInsert
 @NoArgsConstructor
+@Where(clause = "DELETED = 0")
 @Relation(collectionRelation = "customers")
 public class Customer extends Organisation implements Identifiable<Long>, Serializable {
 
@@ -47,6 +50,11 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
   @OneToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
   private Contact contact;
+
+  @JsonIgnore
+  @Column(nullable = false)
+  @ColumnDefault("0")
+  private Integer deleted;
 
   @Override
   public boolean equals(Object obj) {

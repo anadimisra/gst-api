@@ -9,13 +9,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.NaturalId;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.validation.constraints.NotEmpty;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @author anadi
@@ -36,10 +35,10 @@ public class Company extends Organisation implements Serializable {
   @Column(unique = true, length = 10, updatable = false)
   private String tan;
 
-  @Column(length = 11)
+  @Column(length = 11, updatable = false)
   private String vat;
 
-  @Column(length = 11)
+  @Column(length = 11, updatable = false)
   private String tin;
 
   @NotEmpty(message = "PAN is mandatory while adding your Company")

@@ -1,7 +1,7 @@
-/**
- * 19-Oct-2018 Address.java
- * data-api
- * Copyright 2018 Agility Roots Private Limited. All Rights Reserved
+/*
+  19-Oct-2018 Address.java
+  data-api
+  Copyright 2018 Agility Roots Private Limited. All Rights Reserved
  */
 package com.agilityroots.invoicely.entity;
 
@@ -39,11 +39,11 @@ public class Address implements Serializable {
   @Column(length = 50, nullable = false, updatable = false)
   private String city;
 
-  @NotEmpty(message = "State area is mandatory.")
+  @NotEmpty(message = "State is mandatory.")
   @Column(length = 50, nullable = false, updatable = false)
   private String state;
 
-  @NotEmpty(message = "Pincode area is mandatory.")
+  @NotEmpty(message = "Pincode is mandatory.")
   @Column(length = 6, nullable = false, updatable = false)
   private String pincode;
 

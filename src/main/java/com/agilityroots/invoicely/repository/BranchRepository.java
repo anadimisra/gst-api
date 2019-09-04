@@ -22,7 +22,7 @@ import java.util.Optional;
  * @author anadi
  */
 @Repository
-public interface BranchRepository extends JpaRepository<Branch, Long> {
+public interface BranchRepository extends JpaRepository<Branch, Long>, SoftDelete<Branch> {
 
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("branches")

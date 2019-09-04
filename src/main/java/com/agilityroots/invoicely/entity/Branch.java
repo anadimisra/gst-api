@@ -5,11 +5,16 @@
  */
 package com.agilityroots.invoicely.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.NaturalId;
+import org.hibernate.annotations.Where;
+import org.springframework.hateoas.core.Relation;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -23,8 +28,12 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
+@DynamicInsert
 @NoArgsConstructor
-@Table(indexes = {@Index(name = "branch_name_index", columnList = "branchName", unique = false)})
+@Where(clause = "DELETED = 0")
+@Relation(collectionRelation = "branches")
+@Table(indexes = {@Index(name = "branch_name_index", columnList = "branchName"),
+    @Index(name = "branch_pincode_index", columnList = "pincode")})
 public class Branch extends AuditableEntity implements Serializable {
 
   private static final long serialVersionUID = -8841725432779534218L;
@@ -38,13 +47,17 @@ public class Branch extends AuditableEntity implements Serializable {
   @Column(length = 15, unique = true, nullable = false)
   private String gstin;
 
-  @Column(length = 11, nullable = true)
-  private String vatTin;
+  @Column(length = 11)
+  private String vat;
+
+  @Column(length = 11)
+  private String tin;
 
   private Address address;
 
   @Column(nullable = false, updatable = false)
-  private Boolean sez = Boolean.FALSE;
+  @ColumnDefault("false")
+  private Boolean sez;
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinTable(name = "branch_contact", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
@@ -53,6 +66,11 @@ public class Branch extends AuditableEntity implements Serializable {
   @ManyToOne
   @JoinTable(name = "org_branches", joinColumns = @JoinColumn(name = "branch_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "owner_id", referencedColumnName = "id"))
   private Organisation owner;
+
+  @JsonIgnore
+  @Column(nullable = false)
+  @ColumnDefault("0")
+  private Integer deleted;
 
   @Transient
   public Boolean isSez() {
