@@ -95,6 +95,7 @@ public class EntityObjectsBuilder {
     minty.setName("Minty and Sons Private Limited");
     minty.setId(10L);
     minty.setInvoicePrefix("MNT");
+    minty.setCompany(getCompanyObject());
     return minty;
   }
 

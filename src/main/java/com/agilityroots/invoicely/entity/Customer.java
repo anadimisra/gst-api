@@ -51,6 +51,10 @@ public class Customer extends Organisation implements Identifiable<Long>, Serial
   @JoinTable(name = "customer_contact", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "contact_id", referencedColumnName = "id"))
   private Contact contact;
 
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinTable(name = "customer_of_company", joinColumns = @JoinColumn(name = "customer_id", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "company_id", referencedColumnName = "id"))
+  private Company company;
+
   @JsonIgnore
   @Column(nullable = false)
   @ColumnDefault("0")

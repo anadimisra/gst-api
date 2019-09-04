@@ -38,4 +38,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long>, SoftD
   @Lock(LockModeType.OPTIMISTIC)
   @Cacheable("customers")
   Optional<Customer> findOneByOrganisationId(String customerId);
+
+  @Lock(LockModeType.OPTIMISTIC)
+  @Cacheable("customers")
+  Page<Customer> findByCompany_Id(Long id, Pageable pageable);
 }
